@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Male Fashion</title>
+
+    <!-- CSS Files -->
+    <link href="~/Content/css_admin/bootstrap/bootstrap-grid.css" rel="stylesheet" />
+    <link href="~/Content/css_admin/bootstrap/bootstrap-reboot.css" rel="stylesheet" />
+    <link href="~/Content/css_admin/bootstrap/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/css_admin/backend-plugin.min.css" rel="stylesheet" />
+    <link href="~/Content/css_admin/backend.css" rel="stylesheet" />
+    <link href="~/Content/css_admin/intro.css" rel="stylesheet" />
+    <!-- Google Font -->
+
+</head>
+<body>
+    <!-- side bar -->
+    @Html.Partial("_Side_bar")
+
+    <!-- Nav bar -->
+    @Html.Partial("_Nav_bar")
+
+    <!-- Main Content -->
+    @RenderBody()
+
+    <!-- JS Files -->
+    <script src="~/Scripts/js_admin/animated.js"></script>
+    <script src="~/Scripts/js_admin/apexcharts.js"></script>
+    <script src="~/Scripts/js_admin/app.js"></script>
+    <script src="~/Scripts/js_admin/backend-bundle.min.js"></script>
+    <script src="~/Scripts/js_admin/bstreeview.js"></script>
+    <script src="~/Scripts/js_admin/chart-custom.js"></script>
+    <script src="~/Scripts/js_admin/charts.js"></script>
+    <script src="~/Scripts/js_admin/core.js"></script>
+    <script src="~/Scripts/js_admin/countdown.js"></script>
+    <script src="~/Scripts/js_admin/country2.js"></script>
+    <script src="~/Scripts/js_admin/croppy.js"></script>
+    <script src="~/Scripts/js_admin/customizer.js"></script>
+    <script src="~/Scripts/js_admin/flex-tree.min.js"></script>
+    <script src="~/Scripts/js_admin/highcharts-3d.js"></script>
+    <script src="~/Scripts/js_admin/highcharts-more.js"></script>
+    <script src="~/Scripts/js_admin/highcharts.js"></script>
+    <script src="~/Scripts/js_admin/imagesloaded.pkgd.min.js"></script>
+    <script src="~/Scripts/js_admin/intro.js"></script>
+    <script src="~/Scripts/js_admin/jquery.appear.js"></script>
+    <script src="~/Scripts/js_admin/jquery.barrating.min.js"></script>
+    <script src="~/Scripts/js_admin/kelly.js"></script>
+    <script src="~/Scripts/js_admin/maps.js"></script>
+    <script src="~/Scripts/js_admin/masonry.pkgd.min.js"></script>
+    <script src="~/Scripts/js_admin/material.js"></script>
+    <script src="~/Scripts/js_admin/morris.js"></script>
+    <script src="~/Scripts/js_admin/morris.min.js"></script>
+    <script src="~/Scripts/js_admin/popper.min.js"></script>
+    <script src="~/Scripts/js_admin/quill.js"></script>
+    <script src="~/Scripts/js_admin/raphael-min.js"></script>
+    <script src="~/Scripts/js_admin/rating.min.js"></script>
+    <script src="~/Scripts/js_admin/sweetalert.js"></script>
+    <script src="~/Scripts/js_admin/table-treeview.js"></script>
+    <script src="~/Scripts/js_admin/tilt.jquery.min.js"></script>
+    <script src="~/Scripts/js_admin/tree.js"></script>
+    <script src="~/Scripts/js_admin/usaLow.js"></script>
+    <script src="~/Scripts/js_admin/validator.min.js"></script>
+    <script src="~/Scripts/js_admin/worldLow.js"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
