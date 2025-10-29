@@ -4638,6 +4638,8 @@
     <Content Include="Views\Shared\_Side_bar.cshtml" />
     <Content Include="Views\Home\ListSale.cshtml" />
     <Content Include="Views\Home\AddSale.cshtml" />
+    <Content Include="Views\Home\ListCategory.cshtml" />
+    <Content Include="Views\Home\AddCategory.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Content\vendor_admin\fullcalendar\bootstrap\main.d.ts" />

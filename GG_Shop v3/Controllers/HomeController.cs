@@ -80,5 +80,17 @@ namespace GG_Shop_v3.Controllers
 
             return View();
         }
+        public ActionResult ListCategory()
+        {
+            ViewBag.Message = "Your contact page.";
+
+            return View();
+        }
+        public ActionResult AddCategory()
+        {
+            ViewBag.Message = "Your contact page.";
+
+            return View();
+        }
     }
 }
