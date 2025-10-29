@@ -68,5 +68,17 @@ namespace GG_Shop_v3.Controllers
 
             return View();
         }
+        public ActionResult ListSale()
+        {
+            ViewBag.Message = "ListSale";
+
+            return View();
+        }
+        public ActionResult AddSale()
+        {
+            ViewBag.Message = "AddSale";
+
+            return View();
+        }
     }
 }
