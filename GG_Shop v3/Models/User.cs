@@ -23,10 +23,10 @@ namespace GG_Shop_v3.Models
         public string Password { get; set; }
 
         [Required, MaxLength(100)]
-        public string FullName { get; set; }
+        public string Full_Name { get; set; }
 
         [MaxLength(20)]
-        public string PhoneNumber { get; set; }
+        public string Phone_Number { get; set; }
 
         [MaxLength(100)]
         public string Country { get; set; }
@@ -36,7 +36,7 @@ namespace GG_Shop_v3.Models
         [MaxLength(100)]
         public string Rank { get; set; }
 
-        public double TotalSpent { get; set; }
+        public double Total_Spent { get; set; }
 
         [Required, MaxLength(20)]
         public string Role { get; set; }
