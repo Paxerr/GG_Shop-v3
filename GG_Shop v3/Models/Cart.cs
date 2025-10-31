@@ -14,15 +14,11 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [ForeignKey("User")]
-        public int UserId { get; set; } // Khóa ngoại
+        public int UserId { get; set; }
 
-        [ForeignKey("Sku")]
-        public int SkuId { get; set; } // Khóa ngoại
+        public DateTime CreatedAt { get; set; }
 
-        public int Quantity { get; set; }
-
-        // Navigation Properties
         public virtual User User { get; set; }
-        public virtual ProductSku Sku { get; set; }
+        public virtual ICollection<CartItem> CartItems { get; set; }
     }
 }

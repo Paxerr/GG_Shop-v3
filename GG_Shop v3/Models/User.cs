@@ -31,18 +31,17 @@ namespace GG_Shop_v3.Models
         [MaxLength(100)]
         public string Country { get; set; }
 
-        public int? Orders { get; set; } // int SQL
+        public int Orders { get; set; }
 
         [MaxLength(100)]
         public string Rank { get; set; }
 
-        public double? TotalSpent { get; set; } // float SQL
+        public double TotalSpent { get; set; }
 
         [Required, MaxLength(20)]
         public string Role { get; set; }
 
-        // Navigation Properties
-        public virtual ICollection<Order> OrdersCollection { get; set; }
+        public virtual ICollection<Order> OrdersList { get; set; }
         public virtual ICollection<Cart> Carts { get; set; }
     }
 }

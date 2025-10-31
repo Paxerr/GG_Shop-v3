@@ -14,14 +14,13 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [ForeignKey("Product")]
-        public int ProductId { get; set; } // Khóa ngoại
+        public int ProductId { get; set; }
 
         [Required, MaxLength(255)]
         public string ImageUrl { get; set; }
 
-        public bool IsMain { get; set; } // BIT maps to bool
+        public bool IsMain { get; set; }
 
-        // Navigation Property
         public virtual Product Product { get; set; }
     }
 }

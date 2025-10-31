@@ -14,7 +14,7 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [ForeignKey("Product")]
-        public int ProductId { get; set; } // Khóa ngoại
+        public int ProductId { get; set; }
 
         [Required, MaxLength(50)]
         public string Sku { get; set; }
@@ -27,12 +27,11 @@ namespace GG_Shop_v3.Models
 
         public int Quantity { get; set; }
 
-        [Required, Column(TypeName = "decimal(10, 2)")]
         public decimal Price { get; set; }
 
-        // Navigation Properties
         public virtual Product Product { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }
-        public virtual ICollection<Cart> Carts { get; set; }
+        public virtual ICollection<CartItem> CartItems { get; set; }
     }
+
 }

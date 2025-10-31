@@ -17,14 +17,12 @@ namespace GG_Shop_v3.Models
         public string Title { get; set; }
 
         [ForeignKey("Category")]
-        public int CategoryId { get; set; } // Khóa ngoại
+        public int CategoryId { get; set; }
 
         public string Description { get; set; }
 
         [MaxLength(20)]
         public string Status { get; set; }
-
-        // Navigation Properties
         public virtual Category Category { get; set; }
         public virtual ICollection<ProductSku> ProductSkus { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; }

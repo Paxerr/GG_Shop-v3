@@ -21,8 +21,8 @@ namespace GG_Shop_v3.Models
         public virtual DbSet<ProductSku> product_skus { get; set; }
         public virtual DbSet<Product> products { get; set; }
         public virtual DbSet<Promotion> promotions { get; set; }
-        public virtual DbSet<User> users { get; set; }
-
+        public virtual DbSet<User> users { get; set; }     
         
+
     }
 }

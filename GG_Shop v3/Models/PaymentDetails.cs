@@ -14,9 +14,8 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [ForeignKey("Order")]
-        public int OrderId { get; set; } // Khóa ngoại
+        public int OrderId { get; set; }
 
-        [Required, Column(TypeName = "decimal(10, 2)")]
         public decimal Amount { get; set; }
 
         [MaxLength(30)]
@@ -27,7 +26,6 @@ namespace GG_Shop_v3.Models
 
         public DateTime CreatedAt { get; set; }
 
-        // Navigation Property
         public virtual Order Order { get; set; }
     }
 }
