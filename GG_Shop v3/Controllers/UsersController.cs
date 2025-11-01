@@ -46,7 +46,7 @@ namespace GG_Shop_v3.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Username,Email,Password,FullName,PhoneNumber,Country,Orders,Rank,TotalSpent,Role")] User user)
+        public ActionResult Create([Bind(Include = "Id,Username,Email,Password,Full_Name,Phone_Number,Country,Orders,Rank,Total_Spent,Role")] User user)
         {
             if (ModelState.IsValid)
             {

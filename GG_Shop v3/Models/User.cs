@@ -22,7 +22,7 @@ namespace GG_Shop_v3.Models
         [Required, MaxLength(255)]
         public string Password { get; set; }
 
-        [Required, MaxLength(100)]
+        [MaxLength(100)]
         public string Full_Name { get; set; }
 
         [MaxLength(20)]
