@@ -48,34 +48,22 @@
 
                                     <td>
                                         @if (item.Category != null)
-                                        {
-                                        @Html.DisplayFor(modelItem => item.Category.Name)
-                                        }
+                                        { @Html.DisplayFor(modelItem => item.Category.Name) }
                                         else
-                                        {
-                                        <span class="text-muted">—</span>
-                                        }
+                                        { <span class="text-muted">—</span> }
                                     </td>
                                     <td>@Html.DisplayFor(modelItem => item.Title)</td>
                                     <td>
                                         @if (!String.IsNullOrEmpty(item.Description))
-                                        {
-                                        @Html.Raw(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)
-                                        }
+                                        { @Html.Raw(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description) }
                                         else
-                                        {
-                                        <span class="text-muted">Không có mô tả</span>
-                                        }
+                                        { <span class="text-muted">Không có mô tả</span> }
                                     </td>
                                     <td>
                                         @if (!String.IsNullOrEmpty(item.Status))
-                                        {
-                                        @Html.DisplayFor(modelItem => item.Status)
-                                        }
+                                        { @Html.DisplayFor(modelItem => item.Status) }
                                         else
-                                        {
-                                        <span class="text-muted">—</span>
-                                        }
+                                        { <span class="text-muted">—</span> }
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center list-action">
