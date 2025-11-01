@@ -14,25 +14,25 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public int User_Id { get; set; }
 
-        public decimal TotalAmount { get; set; }
+        public decimal Total_Amount { get; set; }
 
         [MaxLength(30)]
         public string Status { get; set; }
 
         [MaxLength(255)]
-        public string ShippingAddress { get; set; }
+        public string Shipping_Address { get; set; }
 
         [ForeignKey("Promotion")]
-        public int? PromoId { get; set; }
+        public int? Promo_Id { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime Create_At { get; set; }
 
         public virtual User User { get; set; }
         public virtual Promotion Promotion { get; set; }
 
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-        public virtual ICollection<PaymentDetail> PaymentDetails { get; set; }
+        public virtual ICollection<Order_Item> Order_Items { get; set; }
+        public virtual ICollection<Payment_Detail> Payment_Details { get; set; }
     }
 }

@@ -138,15 +138,15 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Cart.cs" />
-    <Compile Include="Models\CartItem.cs" />
+    <Compile Include="Models\Cart_Item.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\DataContext.cs" />
-    <Compile Include="Models\OrderItem.cs" />
+    <Compile Include="Models\Order_Item.cs" />
     <Compile Include="Models\Order.cs" />
-    <Compile Include="Models\PaymentDetails.cs" />
+    <Compile Include="Models\Payment_Details.cs" />
     <Compile Include="Models\Product.cs" />
-    <Compile Include="Models\ProductImage.cs" />
-    <Compile Include="Models\ProductSku.cs" />
+    <Compile Include="Models\Product_Image.cs" />
+    <Compile Include="Models\Product_Sku.cs" />
     <Compile Include="Models\Promotion.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -4643,6 +4643,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Controllers\Admin\" />
+    <Folder Include="Views\Admin\Categories\" />
+    <Folder Include="Views\Admin\Orders\" />
+    <Folder Include="Views\Admin\Products\" />
+    <Folder Include="Views\Admin\Reports\" />
+    <Folder Include="Views\Admin\Users\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

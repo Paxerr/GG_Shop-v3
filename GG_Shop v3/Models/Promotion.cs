@@ -19,17 +19,17 @@ namespace GG_Shop_v3.Models
         [MaxLength(255)]
         public string Description { get; set; }
 
-        public decimal? DiscountPercentage { get; set; }
+        public decimal? Discount_Percentage { get; set; }
 
-        public decimal? DiscountAmount { get; set; }
+        public decimal? Discount_Amount { get; set; }
 
-        public DateTime StartDate { get; set; }
+        public DateTime Start_Date { get; set; }
 
-        public DateTime EndDate { get; set; }
+        public DateTime End_Date { get; set; }
 
-        public decimal? MinOrderValue { get; set; }
+        public decimal? Min_Order_Value { get; set; }
 
-        public int UsesCount { get; set; }
+        public int Uses_Count { get; set; }
 
         [MaxLength(20)]
         public string Status { get; set; }

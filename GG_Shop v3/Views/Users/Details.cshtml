@@ -4,96 +4,89 @@
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                    <h4 class="mb-3">Chi tiết Người dùng: @Model.Username</h4>
+                    <a href="@Url.Action("Index", "Users")" class="btn btn-primary add-list">
+                        <i class="las la-angle-left mr-2"></i>Quay lại Danh sách
+                    </a>
+                </div>
+            </div>
 
-<h2>Details</h2>
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h5 class="card-title mb-0">Thông tin Tài khoản</h5>
+                        </div>
+                        <div class="list-action">
+                            <a class="badge bg-success mr-2" data-toggle="tooltip" data-placement="top" title="Edit"
+                               href="@Url.Action("Edit", "Users", new { id = Model.Id })">
+                                <i class="ri-pencil-line mr-0"></i> Chỉnh sửa
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
 
-<div>
-    <h4>User</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Username)
-        </dt>
+                            <div class="col-md-6">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Username):</span>
+                                        <strong>@Html.DisplayFor(model => model.Username)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Password):</span>
+                                        <strong>@Html.DisplayFor(model => model.Password)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Email):</span>
+                                        <strong>@Html.DisplayFor(model => model.Email)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Full_Name):</span>
+                                        <strong>@Html.DisplayFor(model => model.Full_Name)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Phone_Number):</span>
+                                        <strong>@Html.DisplayFor(model => model.Phone_Number)</strong>
+                                    </li>
+                                </ul>
+                            </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.Username)
-        </dd>
+                            <div class="col-md-6">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Country):</span>
+                                        <strong>@Html.DisplayFor(model => model.Country)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Role):</span>
+                                        <span class="badge badge-secondary">@Html.DisplayFor(model => model.Role)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Orders):</span>
+                                        <strong>@Html.DisplayFor(model => model.Orders)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Total_Spent):</span>
+                                        <strong>@Html.DisplayFor(model => model.Total_Spent)</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">@Html.DisplayNameFor(model => model.Rank):</span>
+                                        <strong>@Html.DisplayFor(model => model.Rank)</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Password)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Password)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.FullName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.FullName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.PhoneNumber)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.PhoneNumber)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Country)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Country)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Orders)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Orders)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Rank)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Rank)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.TotalSpent)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.TotalSpent)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Role)
-        </dd>
-
-    </dl>
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+

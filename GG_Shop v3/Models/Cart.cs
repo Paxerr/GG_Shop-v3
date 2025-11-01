@@ -14,11 +14,11 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public int User_Id { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime Created_At { get; set; }
 
         public virtual User User { get; set; }
-        public virtual ICollection<CartItem> CartItems { get; set; }
+        public virtual ICollection<Cart_Item> Cart_Items { get; set; }
     }
 }

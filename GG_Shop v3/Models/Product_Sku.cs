@@ -8,13 +8,13 @@ using System.Web;
 namespace GG_Shop_v3.Models
 {
     [Table("product_skus")]
-    public class ProductSku
+    public class Product_Sku
     {
         [Key]
         public int Id { get; set; }
 
         [ForeignKey("Product")]
-        public int ProductId { get; set; }
+        public int Product_Id { get; set; }
 
         [Required, MaxLength(50)]
         public string Sku { get; set; }
@@ -30,8 +30,8 @@ namespace GG_Shop_v3.Models
         public decimal Price { get; set; }
 
         public virtual Product Product { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-        public virtual ICollection<CartItem> CartItems { get; set; }
+        public virtual ICollection<Order_Item> Order_Items { get; set; }
+        public virtual ICollection<Cart_Item> Cart_Items { get; set; }
     }
 
 }
