@@ -27,7 +27,7 @@ namespace GG_Shop_v3.Models
         [ForeignKey("Promotion")]
         public int? Promo_Id { get; set; }
 
-        public DateTime Create_At { get; set; }
+        public DateTime Created_At { get; set; }
 
         public virtual User User { get; set; }
         public virtual Promotion Promotion { get; set; }
