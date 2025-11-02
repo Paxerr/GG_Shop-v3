@@ -168,6 +168,7 @@
     <Content Include="Content\css_admin\bootstrap\bootstrap-grid.css" />
     <Content Include="Content\css_admin\bootstrap\bootstrap-reboot.css" />
     <Content Include="Content\css_admin\bootstrap\bootstrap.css" />
+    <Content Include="Content\css_admin\CreateProduct_css.css" />
     <Content Include="Content\css_admin\intro.css" />
     <Content Include="Content\fonts\ElegantIcons.svg" />
     <Content Include="Content\fonts\fontawesome-webfont.svg" />
@@ -4602,6 +4603,7 @@
     <Content Include="Scripts\js_admin\core.js" />
     <Content Include="Scripts\js_admin\countdown.js" />
     <Content Include="Scripts\js_admin\country2.js" />
+    <Content Include="Scripts\js_admin\CreateProduct_js.js" />
     <Content Include="Scripts\js_admin\croppy.js" />
     <Content Include="Scripts\js_admin\customizer.js" />
     <Content Include="Scripts\js_admin\flex-tree.min.js" />

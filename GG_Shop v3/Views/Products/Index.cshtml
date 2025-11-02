@@ -1,92 +1,140 @@
 ﻿@model IEnumerable<GG_Shop_v3.Models.Product>
+@using GG_Shop_v3.Models
+@using System.Linq
 
-    @{
-    ViewBag.Title = "Index";
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
-    }
+}
 
-    <div class="content-page">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
-                        <div>
-                            <h4 class="mb-0">Danh sách sản phẩm</h4>
-                            <p class="mb-0">The product list effectively dictates product presentation and provides space<br> to list your products and offering in the most appealing way.</p>
-                        </div>
-                        <a href="@Url.Action("Create","Products")" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Thêm sản phẩm</a>
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-0">Danh sách sản phẩm</h4>
+                        <p class="mb-0">
+                            Quản lý danh sách sản phẩm, bao gồm loại, mô tả, trạng thái, ảnh đại diện và tồn kho.
+                        </p>
                     </div>
+                    <a href="@Url.Action("Create", "Products")" class="btn btn-primary add-list">
+                        <i class="las la-plus mr-3"></i>Thêm sản phẩm
+                    </a>
                 </div>
+            </div>
 
-                <div class="col-lg-12">
-                    <div class="table-responsive rounded mb-3">
-                        <table id="datatable" class="data-tables table mb-0 tbl-server-info">
-                            <thead class="bg-white text-uppercase">
-                                <tr class="ligth ligth-data">
-                                    <th>
-                                        <div class="checkbox d-inline-block">
-
-                                        </div>
-                                    </th>
-                                    <th>@Html.DisplayNameFor(model => model.Category.Name)</th>
-                                    <th>@Html.DisplayNameFor(model => model.Title)</th>
-                                    <th>@Html.DisplayNameFor(model => model.Description)</th>
-                                    <th>@Html.DisplayNameFor(model => model.Status)</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="ligth-body">
-                                @foreach (var item in Model)
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table id="datatable" class="data-tables table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data text-center">
+                                <th>Ảnh</th>
+                                <th>Danh mục</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Mô tả</th>
+                                <th>Tồn kho</th>
+                                <th>Giá (VNĐ)</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+                            @foreach (var item in Model)
                             {
-                                <tr>
-                                    <td>
-                                        <div class="checkbox d-inline-block">
-                                            <input type="checkbox" id="select_all" class="checkbox-input" />
-                                            <label for="select_all" class="mb-0"></label>
-                                        </div>
+                                var mainImg = item.Product_Images?.FirstOrDefault(i => i.Is_Main) ?? item.Product_Images?.FirstOrDefault();
+                                var totalQty = item.Product_Skus?.Sum(s => s.Quantity) ?? 0;
+                                var minPrice = item.Product_Skus?.Min(s => (decimal?)s.Price) ?? 0;
+                                var maxPrice = item.Product_Skus?.Max(s => (decimal?)s.Price) ?? 0;
+
+                                <tr class="text-center align-middle">
+                                    <td style="width: 100px;">
+                                        @if (mainImg != null)
+                                        {
+                                            <img src="@Url.Content(mainImg.Image_Url)" alt="Ảnh sản phẩm"
+                                                 class="img-thumbnail" style="width:80px; height:80px; object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Không có ảnh</span>
+                                        }
                                     </td>
 
                                     <td>
                                         @if (item.Category != null)
-                                        { @Html.DisplayFor(modelItem => item.Category.Name) }
-                                        else
-                                        { <span class="text-muted">—</span> }
+                                        {@Html.DisplayFor(modelItem => item.Category.Name) }
+                                    else
+                                    { <span class="text-muted">—</span>}
                                     </td>
-                                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+
                                     <td>
-                                        @if (!String.IsNullOrEmpty(item.Description))
-                                        { @Html.Raw(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description) }
-                                        else
-                                        { <span class="text-muted">Không có mô tả</span> }
+                                        <strong>@Html.DisplayFor(modelItem => item.Title)</strong>
                                     </td>
+
+                                    <td class="text-left">
+                                        @if (!String.IsNullOrEmpty(item.Description))
+                                        {
+                                            @Html.Raw(item.Description.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Không có mô tả</span>
+                                        }
+                                    </td>
+
+                                    <td>@totalQty</td>
+
+                                    <td>
+                                        @if (minPrice == maxPrice)
+                                        {
+                                            @String.Format("{0:N0}", minPrice)
+                                        }
+                                        else
+                                        {
+                                            @($"{String.Format("{0:N0}", minPrice)} - {String.Format("{0:N0}", maxPrice)}")
+                                        }
+                                    </td>
+
                                     <td>
                                         @if (!String.IsNullOrEmpty(item.Status))
-                                        { @Html.DisplayFor(modelItem => item.Status) }
+                                        {
+                                            if (item.Status.ToLower() == "active" || item.Status.ToLower() == "đang bán")
+                                            {
+                                                <span class="badge badge-success">Đang bán</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary">@item.Status</span>
+                                            }
+                                        }
                                         else
-                                        { <span class="text-muted">—</span> }
+                                        {
+                                            <span class="badge badge-light">Không rõ</span>
+                                        }
                                     </td>
+
                                     <td>
-                                        <div class="d-flex align-items-center list-action">
-                                            <a class="badge badge-info mr-2" data-toggle="tooltip" data-placement="top" title="View"
+                                        <div class="d-flex align-items-center justify-content-center list-action">
+                                            <a class="badge badge-info mr-2" data-toggle="tooltip" title="Xem chi tiết"
                                                href="@Url.Action("Details", "Products", new { id = item.Id })">
-                                                <i class="ri-eye-line mr-0"></i>
+                                                <i class="ri-eye-line"></i>
                                             </a>
-                                            <a class="badge bg-success mr-2" data-toggle="tooltip" data-placement="top" title="Edit"
+                                            <a class="badge bg-success mr-2" data-toggle="tooltip" title="Sửa"
                                                href="@Url.Action("Edit", "Products", new { id = item.Id })">
-                                                <i class="ri-pencil-line mr-0"></i>
+                                                <i class="ri-pencil-line"></i>
                                             </a>
-                                            <a class="badge bg-warning mr-2 btn-delete-product" data-toggle="tooltip" data-placement="top" title="Delete"
-                                               href="@Url.Action("Delete", "Products", new { id = item.Id })" href="javascript:void(0);">
-                                                <i class="ri-delete-bin-line mr-0"></i>
+                                            <a class="badge bg-warning btn-delete-product" data-toggle="tooltip" title="Xóa"
+                                               href="@Url.Action("Delete", "Products", new { id = item.Id })">
+                                                <i class="ri-delete-bin-line"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
                             }
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+</div>

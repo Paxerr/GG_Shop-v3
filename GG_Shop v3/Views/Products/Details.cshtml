@@ -1,54 +1,204 @@
 ﻿@model GG_Shop_v3.Models.Product
+@using System.Collections.Generic
+@using System.Linq
 
 @{
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
+
+    var skus = Model.Product_Skus?.ToList() ?? new List<GG_Shop_v3.Models.Product_Sku>();
+    var images = Model.Product_Images?.ToList() ?? new List<GG_Shop_v3.Models.Product_Image>();
+    var main = images.FirstOrDefault(i => i.Is_Main) ?? images.FirstOrDefault();
 }
+
 <div class="content-page">
     <div class="container-fluid">
         <h2>Details</h2>
 
-        <div>
-            <h4>Product</h4>
-            <hr />
-            <dl class="dl-horizontal">
-                <dt>
-                    @Html.DisplayNameFor(model => model.Category.Name)
-                </dt>
+        <div class="row">
+            <div class="col-md-8">
+                <h4>Product Information</h4>
+                <hr />
+                <dl class="dl-horizontal">
+                    <dt>Category</dt>
+                    <dd>@(Model.Category != null ? Model.Category.Name : "-")</dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Category.Name)
-                </dd>
+                    <dt>Title</dt>
+                    <dd>@Html.DisplayFor(m => m.Title)</dd>
 
-                <dt>
-                    @Html.DisplayNameFor(model => model.Title)
-                </dt>
+                    <dt>Description</dt>
+                    <dd>@Html.DisplayFor(m => m.Description)</dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Title)
-                </dd>
+                    <dt>Status</dt>
+                    <dd>@Html.DisplayFor(m => m.Status)</dd>
+                </dl>
 
-                <dt>
-                    @Html.DisplayNameFor(model => model.Description)
-                </dt>
+                <p>
+                    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary" })
+                    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary ml-2" })
+                </p>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Description)
-                </dd>
+                <!-- SKU TABLE -->
+                <h4 class="mt-4">Product SKUs</h4>
+                <hr />
+                @if (!skus.Any())
+                {
+                    <p><em>Không có SKU nào.</em></p>
+                }
+                else
+                {
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Color</th>
+                                <th>Size</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in skus)
+                            {
+                                <tr>
+                                    <td>@s.Sku</td>
+                                    <td>@(string.IsNullOrEmpty(s.Color) ? "-" : s.Color)</td>
+                                    <td>@(string.IsNullOrEmpty(s.Size) ? "-" : s.Size)</td>
+                                    <td class="text-right">@s.Quantity</td>
+                                    <td class="text-right">@String.Format("{0:N0}", s.Price)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
 
-                <dt>
-                    @Html.DisplayNameFor(model => model.Status)
-                </dt>
+            <!-- IMAGE GALLERY -->
+            <div class="col-md-4">
+                <h4>Product Images</h4>
+                <hr />
+                @if (!images.Any())
+                {
+                    <p><em>Không có ảnh.</em></p>
+                }
+                else
+                {
+                    <div class="mb-3 text-center">
+                        <a href="#" class="open-lightbox" data-index="0" onclick="return false;">
+                            <img id="mainPreview" src="@Url.Content(main.Image_Url)" class="img-fluid img-thumbnail" style="max-height:320px; width:100%; object-fit:contain;" />
+                        </a>
+                    </div>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Status)
-                </dd>
-
-            </dl>
+                    <div class="d-flex flex-wrap">
+                        @{
+                            var idx = 0;
+                            foreach (var img in images)
+                            {
+                                <div style="margin:4px; cursor:pointer;">
+                                    <img src="@Url.Content(img.Image_Url)" class="img-thumbnail thumb-img" style="width:120px; height:90px; object-fit:cover;" data-index="@idx" />
+                                </div>;
+                                idx++;
+                            }
+                        }
+                    </div>
+                }
+            </div>
         </div>
-        <p>
-            @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-            @Html.ActionLink("Back to List", "Index")
-        </p>
     </div>
 </div>
+
+<!-- MODAL LIGHTBOX -->
+<div class="modal fade" id="productLightbox" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0 position-relative">
+                <button type="button" class="close position-absolute text-white" style="right:12px; top:6px; z-index:1051" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:28px;">&times;</span>
+                </button>
+
+                <div id="lightboxInner" class="text-center" style="background:#000; padding:12px; border-radius:6px;">
+                    <img id="lightboxImage" src="" style="max-width:100%; max-height:75vh; object-fit:contain;" />
+                    <div id="lightboxCaption" class="mt-2 text-white small"></div>
+
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <button id="lightPrev" class="btn btn-sm btn-light">‹ Prev</button>
+                        <div><span id="lightIndex" class="text-white small"></span></div>
+                        <button id="lightNext" class="btn btn-sm btn-light">Next ›</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+    (function(){
+        var images = [];
+        @for (int i = 0; i < images.Count; i++)
+        {
+            <text>images.push({ url: '@Url.Content(images[i].Image_Url)', id: @images[i].Id, caption: 'Ảnh #@images[i].Id' });</text>
+        }
+
+        var currentIndex = 0;
+
+        function openLightbox(index){
+            if (!images || images.length === 0) return;
+            currentIndex = index || 0;
+            var item = images[currentIndex];
+            document.getElementById('lightboxImage').src = item.url;
+            document.getElementById('lightboxCaption').textContent = item.caption || '';
+            document.getElementById('lightIndex').textContent = (currentIndex + 1) + ' / ' + images.length;
+            $('#productLightbox').modal('show');
+        }
+
+        function showNext(){
+            if (images.length === 0) return;
+            currentIndex = (currentIndex + 1) % images.length;
+            openLightbox(currentIndex);
+        }
+        function showPrev(){
+            if (images.length === 0) return;
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            openLightbox(currentIndex);
+        }
+
+        // click thumbnails
+        document.querySelectorAll('.thumb-img').forEach(function(el){
+            el.addEventListener('click', function(){
+                var idx = parseInt(this.getAttribute('data-index') || '0');
+                openLightbox(idx);
+            });
+        });
+
+        // click main preview
+        var mainAnchor = document.querySelector('.open-lightbox');
+        if (mainAnchor){
+            mainAnchor.addEventListener('click', function(e){
+                e.preventDefault();
+                openLightbox(0);
+            });
+        }
+
+        // modal controls
+        document.getElementById('lightNext').addEventListener('click', function(e){ e.preventDefault(); showNext(); });
+        document.getElementById('lightPrev').addEventListener('click', function(e){ e.preventDefault(); showPrev(); });
+
+        // keyboard navigation
+        $(document).on('keydown', function(e){
+            if (!$('#productLightbox').hasClass('show')) return;
+            if (e.key === 'ArrowRight') showNext();
+            if (e.key === 'ArrowLeft') showPrev();
+            if (e.key === 'Escape') $('#productLightbox').modal('hide');
+        });
+
+        // update main preview when modal closed
+        $('#productLightbox').on('hidden.bs.modal', function(){
+            if (images.length > 0){
+                document.getElementById('mainPreview').src = images[currentIndex].url;
+            }
+        });
+
+    })();
+    </script>
+}

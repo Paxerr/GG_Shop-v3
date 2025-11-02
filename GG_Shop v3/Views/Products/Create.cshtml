@@ -1,63 +1,101 @@
 ﻿@model GG_Shop_v3.Models.Product
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Create Product";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
+
+<link href="@Url.Content("~/Content/css_admin/CreateProduct_css.css")" rel="stylesheet" />
+
 <div class="content-page">
-    <div class="container-fluid">
-        <h2>Create</h2>
+    <div class="container-fluid add-form-list">
+        <div class="row">
+            <div class="col-12 col-lg-10">
+                @using (Html.BeginForm("Create", "Products", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
 
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            @Html.LabelFor(m => m.Title, "Tên sản phẩm *")
+                            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Nhập tên", required = "required" })
+                        </div>
 
-            <div class="form-horizontal">
-                <h4>Product</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                        <div class="form-group col-md-6">
+                            @Html.LabelFor(m => m.Category_Id, "Danh mục sản phẩm *")
+                            @Html.DropDownList("Category_Id", (SelectList)ViewBag.Category_Id, "Chọn danh mục", new { @class = "form-control" })
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            @Html.LabelFor(m => m.Description, "Description")
+                            @Html.TextAreaFor(m => m.Description, 4, 80, new { @class = "form-control" })
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <label>Images (multiple)</label>
+                            <input type="file" name="images" accept="image/*" multiple class="form-control" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Category_Id, "Category_Id", htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.DropDownList("Category_Id", null, htmlAttributes: new { @class = "form-control" })
-                        @Html.ValidationMessageFor(model => model.Category_Id, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                    <hr />
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                    <!-- Tag inputs for Colors and Sizes -->
+                    <div class="form-row">
+                        <div class="form-group col-md-6" style="position:relative;">
+                            <label>Colors (enter then press Enter)</label>
+                            <div id="colorsInput" class="tag-input" tabindex="0">
+                                <input id="colorsText" placeholder="Add color (e.g. Black)" />
+                            </div>
+                            <div id="colorsSuggestions" class="suggestions" style="display:none;"></div>
+                            <small class="form-text text-muted">Type a color and press Enter or choose suggestion. You can add many.</small>
+                        </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Status, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+                        <div class="form-group col-md-6" style="position:relative;">
+                            <label>Sizes (enter then press Enter)</label>
+                            <div id="sizesInput" class="tag-input" tabindex="0">
+                                <input id="sizesText" placeholder="Add size (e.g. M / 128GB)" />
+                            </div>
+                            <div id="sizesSuggestions" class="suggestions" style="display:none;"></div>
+                            <small class="form-text text-muted">Type a size and press Enter or choose suggestion. You can add many.</small>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Create" class="btn btn-default" />
+                    <!-- variants (cartesian product area) -->
+                    <div class="form-group">
+                        <h5>Variants (Color × Size)</h5>
+                        <p class="text-muted small">Variants are generated automatically from selected colors × sizes. Edit SKU/Qty/Price per variant if needed.</p>
+
+                        <div id="variantsWrapper">
+                            <table id="variantsTable" class="table table-sm table-bordered variant-table">
+                                <thead>
+                                    <tr>
+                                        <th>Color</th>
+                                        <th>Size</th>
+                                        <th>SKU</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- rows generated by JS -->
+                                </tbody>
+                            </table>
+                            <div id="noVariantsNote" class="text-muted">Add at least one color and one size to generate variants.</div>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="form-group mt-3">
+                        <input type="submit" value="Create Product" class="btn btn-primary" />
+                        <a class="btn btn-secondary" href="@Url.Action("Index", "Products")">Back</a>
+                    </div>
+                }
             </div>
-        }
-
-        <div>
-            @Html.ActionLink("Back to List", "Index")
         </div>
     </div>
 </div>
+
+@* Layout của bạn dùng @RenderSection("scripts", required:false) — dùng chính xác tên 'scripts' (viết thường) *@
+@section scripts {
+    <script src="@Url.Content("~/Scripts/js_admin/CreateProduct_js.js")"></script>
+}

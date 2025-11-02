@@ -1,65 +1,240 @@
 ﻿@model GG_Shop_v3.Models.Product
+@using GG_Shop_v3.Models
+@using System.Linq
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Title = "Edit Product";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
+
+    var mainImage = Model.Product_Images?.FirstOrDefault(i => i.Is_Main) ?? Model.Product_Images?.FirstOrDefault();
+    var skus = Model.Product_Skus?.ToList() ?? new List<Product_Sku>();
+    var images = Model.Product_Images?.ToList() ?? new List<Product_Image>();
 }
+
 <div class="content-page">
     <div class="container-fluid">
-        <h2>Edit</h2>
-
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
-
-            <div class="form-horizontal">
-                <h4>Product</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                @Html.HiddenFor(model => model.Id)
-
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+        <div class="row">
+            <!-- LEFT: Thông tin sản phẩm -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">Chỉnh sửa sản phẩm</h4>
                     </div>
-                </div>
+                    <div class="card-body">
+                        @using (Html.BeginForm("Edit", "Products", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(m => m.Id)
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Category_Id, "Category_Id", htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.DropDownList("Category_Id", null, htmlAttributes: new { @class = "form-control" })
-                        @Html.ValidationMessageFor(model => model.Category_Id, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label>Tên sản phẩm</label>
+                                @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Nhập tên sản phẩm" })
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label>Danh mục</label>
+                                @Html.DropDownList("Category_Id", null, "Chọn danh mục", new { @class = "form-control" })
+                            </div>
 
-                <div class="form-group">
-                    @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
-                    <div class="col-md-10">
-                        @Html.EditorFor(model => model.Status, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
-                    </div>
-                </div>
+                            <div class="form-group">
+                                <label>Mô tả</label>
+                                @Html.TextAreaFor(m => m.Description, 4, 50, new { @class = "form-control", placeholder = "Nhập mô tả sản phẩm" })
+                            </div>
 
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Save" class="btn btn-default" />
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                @Html.TextBoxFor(m => m.Status, new { @class = "form-control", placeholder = "active / hidden / deleted" })
+                            </div>
+
+                            <!-- IMAGE GALLERY: show all images + radio main + checkbox delete -->
+                            <div class="form-group">
+                                <label>Ảnh sản phẩm</label>
+                                <div class="row">
+                                    @if (images.Count == 0)
+                                    {
+                                        <div class="col-12 text-muted">Chưa có ảnh.</div>
+                                    }
+                                    else
+                                    {
+                                        foreach (var img in images)
+                                        {
+                                            <div class="col-3 mb-3">
+                                                <div class="card">
+                                                    <img src="@Url.Content(img.Image_Url)" class="card-img-top" style="height:120px; object-fit:cover;" />
+                                                    <div class="card-body p-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input main-radio" type="radio" name="mainImageId" id="main_@img.Id" value="@img.Id" @(img.Is_Main ? "checked" : "") />
+                                                            <label class="form-check-label" for="main_@img.Id">Ảnh đại diện</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input delete-checkbox" type="checkbox" name="deleteImages" id="del_@img.Id" value="@img.Id" />
+                                                            <label class="form-check-label text-danger" for="del_@img.Id">Xóa</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                                <hr />
+
+                                <label>Upload ảnh mới</label>
+                                <input type="file" name="newImages" id="newImages" accept="image/*" multiple class="form-control" />
+                                <small class="form-text text-muted">Bạn có thể chọn nhiều ảnh. Ảnh đầu upload sẽ không tự động thành main trừ khi bạn chọn.</small>
+
+                                <div id="previewNewImages" class="mt-2 d-flex flex-wrap"></div>
+                            </div>
+
+                            <hr />
+                            <h5 class="mt-4">Biến thể (SKU)</h5>
+                            <table class="table table-sm table-bordered" id="skuTable">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Màu</th>
+                                        <th>Size</th>
+                                        <th>Số lượng</th>
+                                        <th>Giá (VNĐ)</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < skus.Count; i++)
+                                    {
+                                        <tr>
+                                            @Html.Hidden($"skus[{i}].Id", skus[i].Id)
+                                            @Html.Hidden($"skus[{i}].Product_Id", Model.Id)
+                                            <td><input type="text" name="skus[@i].Sku" value="@skus[i].Sku" class="form-control" /></td>
+                                            <td><input type="text" name="skus[@i].Color" value="@skus[i].Color" class="form-control" /></td>
+                                            <td><input type="text" name="skus[@i].Size" value="@skus[i].Size" class="form-control" /></td>
+                                            <td><input type="number" name="skus[@i].Quantity" value="@skus[i].Quantity" class="form-control" /></td>
+                                            <td><input type="number" name="skus[@i].Price" value="@skus[i].Price" class="form-control" /></td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger remove-row">×</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="addSku">+ Thêm SKU</button>
+
+                            <div class="mt-4">
+                                <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+                                @Html.ActionLink("Quay lại danh sách", "Index", null, new { @class = "btn btn-secondary ml-2" })
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
-        }
-
-        <div>
-            @Html.ActionLink("Back to List", "Index")
         </div>
     </div>
 </div>
+
+    @section scripts {
+        <script>
+            // add SKU row
+            document.getElementById('addSku').addEventListener('click', function () {
+                var tbody = document.querySelector('#skuTable tbody');
+                var index = tbody.rows.length;
+                var row = document.createElement('tr');
+                row.innerHTML = `
+                        <td><input type="text" name="skus[${index}].Sku" class="form-control" /></td>
+                        <td><input type="text" name="skus[${index}].Color" class="form-control" /></td>
+                        <td><input type="text" name="skus[${index}].Size" class="form-control" /></td>
+                        <td><input type="number" name="skus[${index}].Quantity" class="form-control" /></td>
+                        <td><input type="number" name="skus[${index}].Price" class="form-control" /></td>
+                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger remove-row">×</button></td>`;
+                tbody.appendChild(row);
+            });
+
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-row')) {
+                    e.target.closest('tr').remove();
+                }
+            });
+
+            // preview new images
+            var newImagesInput = document.getElementById('newImages');
+            if (newImagesInput) {
+                newImagesInput.addEventListener('change', function (e) {
+                    var preview = document.getElementById('previewNewImages');
+                    preview.innerHTML = '';
+                    Array.from(this.files).forEach(function (file) {
+                        var fr = new FileReader();
+                        fr.onload = function (evt) {
+                            var div = document.createElement('div');
+                            div.style.margin = '6px';
+                            div.innerHTML = '<img src="' + evt.target.result + '" style="width:120px;height:90px;object-fit:cover;border:1px solid #ddd;padding:2px;" />';
+                            preview.appendChild(div);
+                        };
+                        fr.readAsDataURL(file);
+                    });
+                });
+            }
+
+            // Utility
+            function toArray(nodeList) {
+                return Array.prototype.slice.call(nodeList || []);
+            }
+
+            // find all current cards (dynamic if any)
+            function wireUpImageControls() {
+                // radio inputs .main-radio
+                var radios = toArray(document.querySelectorAll('.main-radio'));
+                var deletes = toArray(document.querySelectorAll('.delete-checkbox'));
+
+                // when delete checkbox changes
+                deletes.forEach(function (chk) {
+                    // ensure we only attach once: remove existing handlers (safe)
+                    chk.onchange = function () {
+                        var imgId = this.value;
+                        if (this.checked) {
+                            // if checking delete, uncheck its radio (if exists)
+                            var r = document.querySelector('.main-radio[value="' + imgId + '"]');
+                            if (r) r.checked = false;
+                        }
+                        // no auto-check of other radios here; server will ensure a main exists on save
+                    };
+                });
+
+                // when radio changes
+                radios.forEach(function (r) {
+                    r.onchange = function () {
+                        if (this.checked) {
+                            var imgId = this.value;
+                            // uncheck any delete checkbox for same image
+                            var chk = document.querySelector('.delete-checkbox[value="' + imgId + '"]');
+                            if (chk) chk.checked = false;
+
+                            // Optional UX: visually mark this one as main (handled by styles)
+                        }
+                    };
+                });
+            }
+
+            // initial wire-up
+            wireUpImageControls();
+
+            // Extra safeguard before submit: prevent submitting mainImageId that is also marked for delete
+            (function ensureMainNotDeletedOnSubmit() {
+                var form = document.querySelector('form');
+                if (!form) return;
+                form.addEventListener('submit', function (ev) {
+                    // find chosen main
+                    var main = document.querySelector('.main-radio:checked');
+                    if (main) {
+                        var val = main.value;
+                        var delChk = document.querySelector('.delete-checkbox[value="' + val + '"]');
+                        if (delChk && delChk.checked) {
+                            // uncheck the main (so server won't see it) — server will pick another main if needed
+                            main.checked = false;
+                        }
+                    }
+                    // no need to prevent submit; server-side will enforce invariants
+                });
+            })();
+        </script>
+    }
+
+}
