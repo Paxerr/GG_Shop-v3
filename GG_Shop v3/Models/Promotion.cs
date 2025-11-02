@@ -14,7 +14,7 @@ namespace GG_Shop_v3.Models
         public int Id { get; set; }
 
         [Required, MaxLength(50)]
-        public string PromoCode { get; set; }
+        public string Promo_Code { get; set; }
 
         [MaxLength(255)]
         public string Description { get; set; }
