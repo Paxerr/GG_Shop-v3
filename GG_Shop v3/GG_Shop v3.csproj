@@ -4650,6 +4650,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Content\img_products\" />
     <Folder Include="Controllers\Admin\" />
+    <Folder Include="uploads\products\" />
     <Folder Include="Views\Admin\Orders\" />
     <Folder Include="Views\Admin\Products\" />
     <Folder Include="Views\Admin\Reports\" />

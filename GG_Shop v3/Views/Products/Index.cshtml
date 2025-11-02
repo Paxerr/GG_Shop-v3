@@ -71,7 +71,7 @@
                                         <strong>@Html.DisplayFor(modelItem => item.Title)</strong>
                                     </td>
 
-                                    <td class="text-left">
+                                    <td class="text-muted">
                                         @if (!String.IsNullOrEmpty(item.Description))
                                         {
                                             @Html.Raw(item.Description.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
