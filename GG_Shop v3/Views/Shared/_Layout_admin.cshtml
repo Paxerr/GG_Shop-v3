@@ -21,21 +21,28 @@
     <!-- Google Font -->
 
 </head>
-<body>
-    <!-- side bar -->
-    @Html.Partial("_Side_bar")
+<body class>
+    <div class="wrapper">
+        <!-- side bar -->
+        @Html.Partial("_Side_bar")
 
-    <!-- Nav bar -->
-    @Html.Partial("_Nav_bar")
+        <!-- Nav bar -->
+        @Html.Partial("_Nav_bar")
 
-    <!-- Main Content -->
-    @RenderBody()
+        <!-- Main Content -->
+        @RenderBody()
+    </div>
+
 
     <!-- JS Files -->
+    <script src="~/Scripts/js_admin/popper.min.js"></script>
+    <script src="~/Scripts/js_admin/backend-bundle.min.js"></script>
+    <script src="~/Scripts/js_admin/raphael-min.js"></script>
+
     <script src="~/Scripts/js_admin/animated.js"></script>
     <script src="~/Scripts/js_admin/apexcharts.js"></script>
     <script src="~/Scripts/js_admin/app.js"></script>
-    <script src="~/Scripts/js_admin/backend-bundle.min.js"></script>
+
     <script src="~/Scripts/js_admin/bstreeview.js"></script>
     <script src="~/Scripts/js_admin/chart-custom.js"></script>
     <script src="~/Scripts/js_admin/charts.js"></script>
@@ -58,9 +65,9 @@
     <script src="~/Scripts/js_admin/material.js"></script>
     <script src="~/Scripts/js_admin/morris.js"></script>
     <script src="~/Scripts/js_admin/morris.min.js"></script>
-    <script src="~/Scripts/js_admin/popper.min.js"></script>
+
     <script src="~/Scripts/js_admin/quill.js"></script>
-    <script src="~/Scripts/js_admin/raphael-min.js"></script>
+
     <script src="~/Scripts/js_admin/rating.min.js"></script>
     <script src="~/Scripts/js_admin/sweetalert.js"></script>
     <script src="~/Scripts/js_admin/table-treeview.js"></script>
@@ -69,6 +76,7 @@
     <script src="~/Scripts/js_admin/usaLow.js"></script>
     <script src="~/Scripts/js_admin/validator.min.js"></script>
     <script src="~/Scripts/js_admin/worldLow.js"></script>
+
 
     @RenderSection("scripts", required: false)
 </body>
