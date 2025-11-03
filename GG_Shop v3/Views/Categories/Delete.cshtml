@@ -6,28 +6,20 @@
 }
 <div class="content-page">
     <div class="container-fluid">
-        <h2>Delete</h2>
+        <h2>Bạn muốn xóa danh mục này?</h2>
 
-        <h3>Are you sure you want to delete this?</h3>
+       
         <div>
-            <h4>Category</h4>
+            
             <hr />
             <dl class="dl-horizontal">
-                <dt>
-                    @Html.DisplayNameFor(model => model.Name)
-                </dt>
+                <dl class="dl-horizontal">
+                    <dt>Tên danh mục</dt>
+                    <dd>@Html.DisplayFor(model => model.Name)</dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Name)
-                </dd>
-
-                <dt>
-                    @Html.DisplayNameFor(model => model.Description)
-                </dt>
-
-                <dd>
-                    @Html.DisplayFor(model => model.Description)
-                </dd>
+                    <dt>Mô tả danh mục</dt>
+                    <dd>@Html.DisplayFor(model => model.Description)</dd>
+                </dl>
 
             </dl>
 
@@ -35,10 +27,10 @@
             {
                 @Html.AntiForgeryToken()
 
-                <div class="form-actions no-color">
-                    <input type="submit" value="Delete" class="btn btn-default" /> |
-                    @Html.ActionLink("Back to List", "Index")
-                </div>
+        <div class="form-actions no-color">
+            <input type="submit" value="Xóa" class="btn btn-danger mr-2" /> |
+            @Html.ActionLink("Quay về danh sách", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
             }
         </div>
     </div>

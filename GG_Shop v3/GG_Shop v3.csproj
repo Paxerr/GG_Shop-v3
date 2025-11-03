@@ -4631,6 +4631,11 @@
     <Content Include="Scripts\js_admin\usaLow.js" />
     <Content Include="Scripts\js_admin\validator.min.js" />
     <Content Include="Scripts\js_admin\worldLow.js" />
+    <Content Include="uploads\products\01.png" />
+    <Content Include="uploads\products\02.png" />
+    <Content Include="uploads\products\03.png" />
+    <Content Include="uploads\products\04.png" />
+    <Content Include="uploads\products\05.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -4650,7 +4655,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="Content\img_products\" />
     <Folder Include="Controllers\Admin\" />
-    <Folder Include="uploads\products\" />
     <Folder Include="Views\Admin\Orders\" />
     <Folder Include="Views\Admin\Products\" />
     <Folder Include="Views\Admin\Reports\" />
