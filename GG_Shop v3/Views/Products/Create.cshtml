@@ -26,6 +26,22 @@
                             @Html.DropDownList("Category_Id", (SelectList)ViewBag.Category_Id, "Chọn danh mục", new { @class = "form-control" })
                         </div>
 
+                        <!-- ===== status selector ===== -->
+                        <div class="form-group col-md-6">
+                            @Html.LabelFor(m => m.Status, "Trạng thái")
+                            @Html.DropDownListFor(
+                                m => m.Status,
+                                new SelectList(new[]
+                                {
+                                    new { Value = "Đang bán", Text = "Đang bán" },
+                                    new { Value = "Chưa bán", Text = "Chưa bán" }
+                                }, "Value", "Text", Model?.Status),
+                                "Chọn trạng thái",
+                                new { @class = "form-control" }
+                            )
+                        </div>
+                        <!-- ============================ -->
+
                         <div class="form-group col-md-12">
                             @Html.LabelFor(m => m.Description, "Mô tả")
                             @Html.TextAreaFor(m => m.Description, 4, 80, new { @class = "form-control" })

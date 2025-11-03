@@ -207,3 +207,4 @@
         window._variantHelpers = { addTag: addTag, generateVariants: generateVariants, colors: colors, sizes: sizes };
     }); // ready
 })(); // IIFE
+
