@@ -1,64 +1,102 @@
 ﻿@model IEnumerable<GG_Shop_v3.Models.Order>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Order List";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
 
-<h2>Index</h2>
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-3">Order List</h4>
+                        <p class="mb-0">
+                            Orders allow you to monitor order KPIs, track statuses,<br>
+                            and manage order performance seamlessly across your organization.
+                        </p>
+                    </div>
+                    <a href="@Url.Action("Create", "Orders")" class="btn btn-primary add-list">
+                        <i class="las la-plus mr-2"></i>Add Order
+                    </a>
+                </div>
+            </div>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Promotion.Promo_Code)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.User.Username)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Total_Amount)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Status)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Shipping_Address)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Created_At)
-        </th>
-        <th></th>
-    </tr>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+                    <table class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+                                <th>
+                                    <div class="checkbox d-inline-block">
+                                        <input type="checkbox" class="checkbox-input" id="checkbox1">
+                                        <label for="checkbox1" class="mb-0"></label>
+                                    </div>
+                                </th>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Promo Code</th>
+                                <th>Status</th>
+                                <th>Ship Address</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="checkbox d-inline-block">
+                                            <input type="checkbox" class="checkbox-input" id="check_@item.Id">
+                                            <label for="check_@item.Id" class="mb-0"></label>
+                                        </div>
+                                    </td>
+                                    <td>@item.Id</td>
+                                    <td>@item.User.Username</td>
+                                    <td>@String.Format("{0:N0} ₫", item.Total_Amount)</td>
+                                    <td>@(item.Promotion != null ? item.Promotion.Promo_Code : "—")</td>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Promotion.Promo_Code)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.User.Username)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Total_Amount)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Status)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Shipping_Address)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Created_At)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
-
-</table>
+                                    <td>
+                                        @if (item.Status == "Paid")
+                                        {
+                                            <div class="badge badge-success">Paid</div>
+                                        }
+                                        else if (item.Status == "Pending")
+                                        {
+                                            <div class="badge badge-warning">Pending</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="badge badge-danger">@item.Status</div>
+                                        }
+                                    </td>
+                                    <td>@item.Shipping_Address</td>
+                                    <td>@item.Created_At.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <div class="d-flex align-items-center list-action">
+                                            <a class="badge badge-info mr-2" data-toggle="tooltip" title="View"
+                                               href="@Url.Action("Details", "Orders", new { id = item.Id })">
+                                                <i class="ri-eye-line mr-0"></i>
+                                            </a>
+                                            <a class="badge bg-success mr-2" data-toggle="tooltip" title="Edit"
+                                               href="@Url.Action("Edit", "Orders", new { id = item.Id })">
+                                                <i class="ri-pencil-line mr-0"></i>
+                                            </a>
+                                            <a class="badge bg-warning mr-2" data-toggle="tooltip" title="Delete"
+                                               href="@Url.Action("Delete", "Orders", new { id = item.Id })">
+                                                <i class="ri-delete-bin-line mr-0"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
