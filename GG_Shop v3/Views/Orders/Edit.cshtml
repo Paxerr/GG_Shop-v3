@@ -26,14 +26,14 @@
                             <!-- User -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>User *</label>
+                                    <label>Người Đặt *</label>
                                     @Html.DropDownList("User_Id", null, htmlAttributes: new { @class = "form-control" })
                                     @Html.ValidationMessageFor(model => model.User_Id, "", new { @class = "text-danger" })
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label>Total Amount *</label>
+                                <label>Tổng Tiền *</label>
                                 @Html.EditorFor(model => model.Total_Amount, new { htmlAttributes = new { @class = "form-control" } })
                                 @Html.ValidationMessageFor(model => model.Total_Amount, "", new { @class = "text-danger" })
                             </div>
@@ -41,12 +41,13 @@
                             <!-- Status -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Status *</label>
+                                    <label>Trạng Thái *</label>
                                     @Html.DropDownListFor(model => model.Status,
                                         new SelectList(new[]
                                         {
                                             new { Value = "Pending", Text = "Pending" },
                                             new { Value = "Paid", Text = "Paid" },
+                                            new { Value = "Completed", Text = "Completed" },
                                             new { Value = "Cancelled", Text = "Cancelled" }
                                         }, "Value", "Text", Model.Status),
                                         "-- Select Status --",
@@ -58,7 +59,7 @@
                             <!-- Promo Code -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Promo Code</label>
+                                    <label>Mã Khuyến Mãi</label>
                                     @Html.DropDownList("Promo_Id", null, "-- No Promo --", htmlAttributes: new { @class = "form-control" })
                                     @Html.ValidationMessageFor(model => model.Promo_Id, "", new { @class = "text-danger" })
                                 </div>
@@ -67,7 +68,7 @@
                             <!-- Shipping Address -->
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Shipping Address *</label>
+                                    <label>Địa Chỉ Giao Hàng *</label>
                                     @Html.EditorFor(model => model.Shipping_Address, new { htmlAttributes = new { @class = "form-control" } })
                                     @Html.ValidationMessageFor(model => model.Shipping_Address, "", new { @class = "text-danger" })
                                 </div>
@@ -76,7 +77,7 @@
                             <!-- Created At -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Created At *</label>
+                                    <label>Ngày Tạo *</label>
                                     @Html.TextBoxFor(model => model.Created_At, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
                                     @Html.ValidationMessageFor(model => model.Created_At, "", new { @class = "text-danger" })
                                 </div>
@@ -84,8 +85,8 @@
                         </div>
 
                             <div class="mt-3">
-                                <button type="submit" class="btn btn-primary mr-2">💾 Save</button>
-                                <a href="@Url.Action("Index")" class="btn btn-danger">Cancel</a>
+                                <button type="submit" class="btn btn-primary mr-2">💾 Lưu</button>
+                                <a href="@Url.Action("Index")" class="btn btn-danger">Hủy</a>
                             </div>
                         }
                     </div>

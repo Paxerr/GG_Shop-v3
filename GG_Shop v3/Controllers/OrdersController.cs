@@ -89,11 +89,11 @@ namespace GG_Shop_v3.Controllers
             ViewBag.SkuList = new SelectList(db.product_skus.Include(p => p.Product), "Id", "Sku");
             ViewBag.StatusList = new SelectList(new[]
             {
-        new { Value = "Pending", Text = "Pending" },
-        new { Value = "Shipped", Text = "Shipped" },
-        new { Value = "Completed", Text = "Completed" },
-        new { Value = "Cancelled", Text = "Cancelled" }
-    }, "Value", "Text", order.Status);
+            new { Value = "Pending", Text = "Pending" },
+            new { Value = "Shipped", Text = "Shipped" },
+            new { Value = "Completed", Text = "Completed" },
+            new { Value = "Cancelled", Text = "Cancelled" }
+            }, "Value", "Text", order.Status);
 
             var tempItems = Session["TempOrderItems"] as List<Order_Item> ?? new List<Order_Item>();
 
