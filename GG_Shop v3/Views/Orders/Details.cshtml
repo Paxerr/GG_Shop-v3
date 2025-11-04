@@ -41,6 +41,12 @@
                                     <dd class="col-sm-8">
                                         @(Model.Promotion != null ? Model.Promotion.Promo_Code : "Không có")
                                     </dd>
+                                    <dt class="col-sm-4">Số tiền giảm:</dt>
+                                    <dd class="col-sm-8">
+                                        @(ViewBag.Discount > 0
+                                            ? String.Format("{0:N0} ₫", ViewBag.Discount)
+                                            : "Không có")
+                                    </dd>
                                 </dl>
                             </div>
                         </div>

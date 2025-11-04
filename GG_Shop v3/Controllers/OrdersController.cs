@@ -34,8 +34,30 @@ namespace GG_Shop_v3.Controllers
             if (order == null)
                 return HttpNotFound();
 
+            // 🟢 Tính số tiền giảm (discount) mà KHÔNG thêm thuộc tính vào model
+            decimal discount = 0;
+
+            if (order.Promo_Id.HasValue && order.Promotion != null)
+            {
+                var promo = order.Promotion;
+                bool validDate = order.Created_At >= promo.Start_Date && order.Created_At <= promo.End_Date;
+                bool validMinValue = promo.Min_Order_Value == null || order.Total_Amount >= promo.Min_Order_Value;
+                bool validStatus = promo.Status != null && promo.Status.ToLower() == "active";
+
+                if (validDate && validMinValue && validStatus)
+                {
+                    if (promo.Discount_Percentage.HasValue)
+                        discount = order.Total_Amount * (promo.Discount_Percentage.Value / 100);
+                    else if (promo.Discount_Amount.HasValue)
+                        discount = promo.Discount_Amount.Value;
+                }
+            }
+
+            ViewBag.Discount = discount;
+
             return View(order);
         }
+
 
         // ✅ GET: Orders/Create
         public ActionResult Create()
