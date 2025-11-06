@@ -71,11 +71,11 @@ namespace GG_Shop_v3.Controllers
             // Danh sách trạng thái đơn hàng
             ViewBag.StatusList = new SelectList(new[]
             {
-                new { Value = "Pending", Text = "Đang xử lí" },
-                new { Value = "Shipped", Text = "Đã giao" },
-                new { Value = "Completed", Text = "Hoàn thành" },
-                new { Value = "Paid", Text = "Đã trả" },
-                new { Value = "Cancelled", Text = "Đã hủy" }
+                new { Value = "Đang xử lí", Text = "Đang xử lí" },
+                new { Value = "Đã giao", Text = "Đã giao" },
+                new { Value = "Hoàn thành", Text = "Hoàn thành" },
+                new { Value = "Đã trả", Text = "Đã trả" },
+                new { Value = "Đã hủy", Text = "Đã hủy" }
             }, "Value", "Text");
 
             Session["TempOrderItems"] = new List<Order_Item>();
@@ -92,12 +92,12 @@ namespace GG_Shop_v3.Controllers
             ViewBag.SkuList = new SelectList(db.product_skus.Include(p => p.Product), "Id", "Sku");
             ViewBag.StatusList = new SelectList(new[]
             {
-                new { Value = "Pending", Text = "Đang xử lí" },
-                new { Value = "Shipped", Text = "Đã giao" },
-                new { Value = "Completed", Text = "Hoàn thành" },
-                new { Value = "Paid", Text = "Đã trả" },
-                new { Value = "Cancelled", Text = "Đã hủy" }
-            }, "Value", "Text", order.Status);
+                new { Value = "Đang xử lí", Text = "Đang xử lí" },
+                new { Value = "Đã giao", Text = "Đã giao" },
+                new { Value = "Hoàn thành", Text = "Hoàn thành" },
+                new { Value = "Đã trả", Text = "Đã trả" },
+                new { Value = "Đã hủy", Text = "Đã hủy" }
+            }, "Value", "Text");
 
             var tempItems = Session["TempOrderItems"] as List<Order_Item> ?? new List<Order_Item>();
 

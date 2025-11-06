@@ -38,23 +38,23 @@
 
                                     <dt class="col-sm-4">Trạng thái:</dt>
                                     <dd class="col-sm-8">
-                                        @if (@Model.Status == "Paid")
+                                        @if (@Model.Status == "Đã đặ")
                                         {
                                             <div>Đã đặt</div>
                                         }
-                                        else if (@Model.Status == "Pending")
+                                        else if (@Model.Status == "Đang xử lí")
                                         {
                                             <div>Đang xử lí</div>
                                         }
-                                        else if (@Model.Status == "Cancelled")
+                                        else if (@Model.Status == "Đã hủy")
                                         {
                                             <div>Đã hủy</div>
                                         }
-                                        else if (@Model.Status == "Completed")
+                                        else if (@Model.Status == "Hoàn thành")
                                         {
                                             <div>Hoàn thành</div>
                                         }
-                                        else if (@Model.Status == "Shipped")
+                                        else if (@Model.Status == "Đã giao")
                                         {
                                             <div>Đã giao</div>
                                         }

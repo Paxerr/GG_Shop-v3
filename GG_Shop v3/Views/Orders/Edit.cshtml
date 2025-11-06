@@ -45,11 +45,11 @@
                                         @Html.DropDownListFor(model => model.Status,
                                             new SelectList(new[]
                                             {
-                                                new { Value = "Pending", Text = "Đang xử lí" },
-                                                new { Value = "Shipped", Text = "Đã giao" },
-                                                new { Value = "Completed", Text = "Hoàn thành" },
-                                                new { Value = "Paid", Text = "Đã trả" },
-                                                new { Value = "Cancelled", Text = "Đã hủy" }
+                                                new { Value = "Đang xử lí", Text = "Đang xử lí" },
+                                                new { Value = "Đã giao", Text = "Đã giao" },
+                                                new { Value = "Hoàn thành", Text = "Hoàn thành" },
+                                                new { Value = "Đã trả", Text = "Đã trả" },
+                                                new { Value = "Đã hủy", Text = "Đã hủy" }
                                             }, "Value", "Text", Model.Status),
                                             "-- Chọn trạng thái --",
                                             new { @class = "form-control" })
