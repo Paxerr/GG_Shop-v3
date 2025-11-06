@@ -4647,8 +4647,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -4662,24 +4660,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <Content Include="Views\Home\addCustomer.cshtml" />
-    <Content Include="Views\Home\AddProduct.cshtml" />
-    <Content Include="Views\Home\addUsers.cshtml" />
-    <Content Include="Views\Home\Hello.cshtml" />
     <Content Include="Views\Home\index_admin.cshtml" />
-    <Content Include="Views\Home\listCustomer.cshtml" />
-    <Content Include="Views\Home\ListProduct.cshtml" />
-    <Content Include="Views\Home\listUsers.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Views\Shared\_Header.cshtml" />
     <Content Include="Views\Shared\_Layout_admin.cshtml" />
     <Content Include="Views\Shared\_Nav_bar.cshtml" />
     <Content Include="Views\Shared\_Side_bar.cshtml" />
-    <Content Include="Views\Home\ListSale.cshtml" />
-    <Content Include="Views\Home\AddSale.cshtml" />
-    <Content Include="Views\Home\ListCategory.cshtml" />
-    <Content Include="Views\Home\AddCategory.cshtml" />
-    <Content Include="Views\Home\View.cshtml" />
     <Content Include="Views\Users\Create.cshtml" />
     <Content Include="Views\Users\Delete.cshtml" />
     <Content Include="Views\Users\Details.cshtml" />
