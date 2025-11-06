@@ -11,7 +11,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title">Add New Order</h4>
+                            <h4 class="card-title">Thêm đơn hàng</h4>
                         </div>
                     </div>
 
@@ -55,26 +55,27 @@
                             <h5 class="mb-3 mt-4">Thêm sản phẩm vào đơn</h5>
 
                             <div class="row align-items-end">
-                                <div class="col-md-5">
-                                    <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-0">
                                         <label>Chọn sản phẩm (SKU)</label>
                                         @Html.DropDownList("SelectedSkuId", (SelectList)ViewBag.SkuList, "Chọn SKU", new { @class = "form-control" })
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-0">
                                         <label>Số lượng</label>
                                         <input type="number" name="SelectedQuantity" class="form-control" value="1" min="1" />
                                     </div>
                                 </div>
 
-                                <div class="col-md-2">
+                                <div class="col-md-4">
                                     <button type="submit" name="action" value="AddItem" class="btn btn-success w-100">
                                         + Thêm sản phẩm
                                     </button>
                                 </div>
                             </div>
+
 
                             if (ViewBag.TempItems != null && ((List<GG_Shop_v3.Models.Order_Item>)ViewBag.TempItems).Any())
                             {

@@ -39,7 +39,9 @@ namespace GG_Shop_v3.Controllers
 
             if (order.Promo_Id.HasValue && order.Promotion != null)
             {
+                var item = order.Order_Items;
                 var promo = order.Promotion;
+                var total = item.Sum(i => i.Price * i.Quantity);
                 bool validDate = order.Created_At >= promo.Start_Date && order.Created_At <= promo.End_Date;
                 bool validMinValue = promo.Min_Order_Value == null || order.Total_Amount >= promo.Min_Order_Value;
                 bool validStatus = promo.Status != null && promo.Status.ToLower() == "active";
@@ -47,7 +49,7 @@ namespace GG_Shop_v3.Controllers
                 if (validDate && validMinValue && validStatus)
                 {
                     if (promo.Discount_Percentage.HasValue)
-                        discount = order.Total_Amount * (promo.Discount_Percentage.Value / 100);
+                        discount = total * (promo.Discount_Percentage.Value / 100);
                     else if (promo.Discount_Amount.HasValue)
                         discount = promo.Discount_Amount.Value;
                 }
@@ -69,10 +71,11 @@ namespace GG_Shop_v3.Controllers
             // Danh sách trạng thái đơn hàng
             ViewBag.StatusList = new SelectList(new[]
             {
-                new { Value = "Pending", Text = "Pending" },
-                new { Value = "Shipped", Text = "Shipped" },
-                new { Value = "Completed", Text = "Completed" },
-                new { Value = "Cancelled", Text = "Cancelled" }
+                new { Value = "Pending", Text = "Đang xử lí" },
+                new { Value = "Shipped", Text = "Đã giao" },
+                new { Value = "Completed", Text = "Hoàn thành" },
+                new { Value = "Paid", Text = "Đã trả" },
+                new { Value = "Cancelled", Text = "Đã hủy" }
             }, "Value", "Text");
 
             Session["TempOrderItems"] = new List<Order_Item>();
@@ -89,10 +92,11 @@ namespace GG_Shop_v3.Controllers
             ViewBag.SkuList = new SelectList(db.product_skus.Include(p => p.Product), "Id", "Sku");
             ViewBag.StatusList = new SelectList(new[]
             {
-            new { Value = "Pending", Text = "Pending" },
-            new { Value = "Shipped", Text = "Shipped" },
-            new { Value = "Completed", Text = "Completed" },
-            new { Value = "Cancelled", Text = "Cancelled" }
+                new { Value = "Pending", Text = "Đang xử lí" },
+                new { Value = "Shipped", Text = "Đã giao" },
+                new { Value = "Completed", Text = "Hoàn thành" },
+                new { Value = "Paid", Text = "Đã trả" },
+                new { Value = "Cancelled", Text = "Đã hủy" }
             }, "Value", "Text", order.Status);
 
             var tempItems = Session["TempOrderItems"] as List<Order_Item> ?? new List<Order_Item>();

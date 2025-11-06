@@ -26,7 +26,32 @@
                                     <dd class="col-sm-8">@Model.User.Username</dd>
 
                                     <dt class="col-sm-4">Trạng thái:</dt>
-                                    <dd class="col-sm-8">@Model.Status</dd>
+                                    <dd class="col-sm-8">
+                                        @if (@Model.Status == "Paid")
+                                        {
+                                            <div>Đã đặt</div>
+                                        }
+                                        else if (@Model.Status == "Pending")
+                                        {
+                                            <div>Đang xử lí</div>
+                                        }
+                                        else if (@Model.Status == "Cancelled")
+                                        {
+                                            <div>Đã hủy</div>
+                                        }
+                                        else if (@Model.Status == "Completed")
+                                        {
+                                            <div>Hoàn thành</div>
+                                        }
+                                        else if (@Model.Status == "Shipped")
+                                        {
+                                            <div>Đã giao</div>
+                                        }
+                                        else
+                                        {
+                                            <div>@Model.Status</div>
+                                        }
+                                    </dd>
 
                                     <dt class="col-sm-4">Tổng tiền:</dt>
                                     <dd class="col-sm-8">@String.Format("{0:N0} ₫", Model.Total_Amount)</dd>

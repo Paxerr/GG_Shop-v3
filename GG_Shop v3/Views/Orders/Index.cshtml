@@ -11,14 +11,14 @@
             <div class="col-lg-12">
                 <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
                     <div>
-                        <h4 class="mb-3">Order List</h4>
+                        <h4 class="mb-3">Danh sách đơn hàng</h4>
                         <p class="mb-0">
-                            Orders allow you to monitor order KPIs, track statuses,<br>
-                            and manage order performance seamlessly across your organization.
+                            Các đơn hàng cho phép bạn theo dõi các thông tin của đơn hàng, giám sát trạng thái,<br>
+                            và quản lý hiệu quả hoạt động của đơn hàng một cách liền mạch trong toàn bộ tổ chức.
                         </p>
                     </div>
                     <a href="@Url.Action("Create", "Orders")" class="btn btn-primary add-list">
-                        <i class="las la-plus mr-2"></i>Add Order
+                        <i class="las la-plus mr-2"></i>Thêm đơn hàng
                     </a>
                 </div>
             </div>
@@ -62,11 +62,23 @@
                                     <td>
                                         @if (item.Status == "Paid")
                                         {
-                                            <div class="badge badge-success">Paid</div>
+                                            <div class="badge badge-success">Đã đặt</div>
                                         }
                                         else if (item.Status == "Pending")
                                         {
-                                            <div class="badge badge-warning">Pending</div>
+                                            <div class="badge badge-warning">Đang xử lí</div>
+                                        }
+                                        else if (item.Status == "Cancelled")
+                                        {
+                                            <div class="badge badge-warning">Đã hủy</div>
+                                        }
+                                        else if (item.Status == "Completed")
+                                        {
+                                            <div class="badge badge-warning">Hoàn thành</div>
+                                        }
+                                        else if (item.Status == "Shipped")
+                                        {
+                                            <div class="badge badge-warning">Đã giao</div>
                                         }
                                         else
                                         {
