@@ -38,6 +38,8 @@ namespace GG_Shop_v3.Controllers
         // GET: Users/Create
         public ActionResult Create()
         {
+            ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường"});
+            ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng"});
             return View();
         }
 
@@ -48,13 +50,26 @@ namespace GG_Shop_v3.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,Username,Email,Password,Full_Name,Phone_Number,Country,Orders,Rank,Total_Spent,Role")] User user)
         {
+            if (db.users.Any(u => u.Username == user.Username))
+            {
+                ModelState.AddModelError("Username", "Tên tài khoản đã tồn tại");
+            }
+            if (db.users.Any(u => u.Email == user.Email))
+            {
+                ModelState.AddModelError("Email", "Email đã tồn tại");
+            }
+            if (user.Orders < 0)
+            {
+                ModelState.AddModelError("Orders", "Số đơn hàng phải >= 0");
+            }
             if (ModelState.IsValid)
             {
                 db.users.Add(user);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
+            ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
+            ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
             return View(user);
         }
 
