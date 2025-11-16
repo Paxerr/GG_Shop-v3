@@ -22,18 +22,18 @@ namespace GG_Shop_v3.Models
         [Required, MaxLength(255)]
         public string Password { get; set; }
 
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Full_Name { get; set; }
 
-        [MaxLength(20)]
+        [Required, MaxLength(20)]
         public string Phone_Number { get; set; }
 
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Country { get; set; }
 
         public int Orders { get; set; }
 
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Rank { get; set; }
 
         public double Total_Spent { get; set; }

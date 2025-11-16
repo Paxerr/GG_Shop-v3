@@ -4653,6 +4653,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\img_products\" />
+    <Folder Include="Models%28View%29\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -76,6 +76,8 @@ namespace GG_Shop_v3.Controllers
         // GET: Users/Edit/5
         public ActionResult Edit(int? id)
         {
+            ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
+            ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -93,14 +95,24 @@ namespace GG_Shop_v3.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Username,Email,Password,FullName,PhoneNumber,Country,Orders,Rank,TotalSpent,Role")] User user)
+        public ActionResult Edit([Bind(Include = "Id,Username,Email,Password,Full_Name,Phone_Number,Country,Orders,Rank,Total_Spent,Role")] User user)
         {
+            if (db.users.Where(u => u.Id != user.Id).Any(u => u.Username == user.Username))
+            {
+                ModelState.AddModelError("Username", "Tên tài khoản đã tồn tại");
+            }
+            if (db.users.Where(u => u.Id != user.Id).Any(u => u.Email == user.Email))
+            {
+                ModelState.AddModelError("Email", "Email đã tồn tại");
+            }
             if (ModelState.IsValid)
             {
                 db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+            ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
+            ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
             return View(user);
         }
 
