@@ -70,74 +70,110 @@ namespace GG_Shop_v3.Controllers
     decimal? BasePrice,
     int? BaseQuantity)
         {
-            if (ModelState.IsValid)
+            // Chuẩn hoá tên sản phẩm
+            if (product != null && !string.IsNullOrWhiteSpace(product.Title))
+                product.Title = product.Title.Trim();
+
+            // Kiểm tra Title rỗng
+            if (product == null || string.IsNullOrWhiteSpace(product.Title))
             {
-                using (var tran = db.Database.BeginTransaction())
+                ModelState.AddModelError("Title", "Tên sản phẩm không được để trống.");
+            }
+            else
+            {
+                // Kiểm tra trùng tên – tiếng Việt
+                string titleLower = product.Title.ToLower();
+
+                bool exists = db.products
+                                .Any(p => p.Title.ToLower() == titleLower);
+
+                if (exists)
                 {
-                    try
-                    {
-                        // 1) Save product
-                        db.products.Add(product);
-                        db.SaveChanges();
-
-                        // 2) Save skus (if any)
-                        if (skus != null)
-                        {
-                            foreach (var s in skus)
-                            {
-                                // skip empty rows
-                                var isEmpty = string.IsNullOrWhiteSpace(s.Sku)
-                                              && string.IsNullOrWhiteSpace(s.Color)
-                                              && string.IsNullOrWhiteSpace(s.Size)
-                                              && (s.Quantity == 0)
-                                              && (s.Price == 0m);
-                                if (isEmpty) continue;
-
-                                s.Product_Id = product.Id;
-                                // if Price/Quantity empty but you supplied base, use them
-                                if ((s.Price == 0m || s.Price == null) && BasePrice.HasValue) s.Price = BasePrice.Value;
-                                if ((s.Quantity == 0) && BaseQuantity.HasValue) s.Quantity = BaseQuantity.Value;
-
-                                db.product_skus.Add(s);
-                            }
-                        }
-
-                        // 3) Save images
-                        if (images != null)
-                        {
-                            var uploadFolder = Server.MapPath("~/uploads/products");
-                            if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
-
-                            foreach (var file in images)
-                            {
-                                if (file == null || file.ContentLength <= 0) continue;
-                                var ext = Path.GetExtension(file.FileName);
-                                var unique = Guid.NewGuid().ToString("N") + ext;
-                                var path = Path.Combine(uploadFolder, unique);
-                                file.SaveAs(path);
-
-                                db.product_images.Add(new Product_Image
-                                {
-                                    Product_Id = product.Id,
-                                    Image_Url = "/uploads/products/" + unique,
-                                    Is_Main = false
-                                });
-                            }
-                        }
-
-                        db.SaveChanges();
-                        tran.Commit();
-                        return RedirectToAction("Index");
-                    }
-                    catch (Exception ex)
-                    {
-                        tran.Rollback();
-                        ModelState.AddModelError("", "Error saving product: " + ex.Message);
-                    }
+                    ModelState.AddModelError("Title", "Tên sản phẩm đã tồn tại. Vui lòng chọn tên khác.");
                 }
             }
 
-            ViewBag.Category_Id = new SelectList(db.categories, "Id", "Name", product.Category_Id);
+            // Nếu lỗi → trả về form kèm thông báo
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Category_Id = new SelectList(db.categories, "Id", "Name", product?.Category_Id);
+                return View(product);
+            }
+
+            // -------- Không có lỗi → bắt đầu lưu ----------
+            using (var tran = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    // 1) Lưu product
+                    db.products.Add(product);
+                    db.SaveChanges();
+
+                    // 2) Lưu SKUs
+                    if (skus != null)
+                    {
+                        foreach (var s in skus)
+                        {
+                            bool isEmpty =
+                                string.IsNullOrWhiteSpace(s.Sku)
+                                && string.IsNullOrWhiteSpace(s.Color)
+                                && string.IsNullOrWhiteSpace(s.Size)
+                                && (s.Quantity == 0)
+                                && (s.Price == 0m);
+
+                            if (isEmpty) continue;
+
+                            s.Product_Id = product.Id;
+
+                            if ((s.Price == 0m || s.Price == null) && BasePrice.HasValue)
+                                s.Price = BasePrice.Value;
+
+                            if ((s.Quantity == 0) && BaseQuantity.HasValue)
+                                s.Quantity = BaseQuantity.Value;
+
+                            db.product_skus.Add(s);
+                        }
+                    }
+
+                    // 3) Lưu ảnh
+                    if (images != null)
+                    {
+                        var uploadFolder = Server.MapPath("~/uploads/products");
+                        if (!Directory.Exists(uploadFolder))
+                            Directory.CreateDirectory(uploadFolder);
+
+                        foreach (var file in images)
+                        {
+                            if (file == null || file.ContentLength <= 0) continue;
+
+                            var ext = Path.GetExtension(file.FileName);
+                            var unique = Guid.NewGuid().ToString("N") + ext;
+                            var path = Path.Combine(uploadFolder, unique);
+
+                            file.SaveAs(path);
+
+                            db.product_images.Add(new Product_Image
+                            {
+                                Product_Id = product.Id,
+                                Image_Url = "/uploads/products/" + unique,
+                                Is_Main = false
+                            });
+                        }
+                    }
+
+                    db.SaveChanges();
+                    tran.Commit();
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    ModelState.AddModelError("", "Có lỗi xảy ra khi lưu sản phẩm: " + ex.Message);
+                }
+            }
+
+            ViewBag.Category_Id = new SelectList(db.categories, "Id", "Name", product?.Category_Id);
             return View(product);
         }
 
