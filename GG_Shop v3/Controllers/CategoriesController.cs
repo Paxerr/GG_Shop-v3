@@ -38,6 +38,7 @@ namespace GG_Shop_v3.Controllers
         // GET: Categories/Create
         public ActionResult Create()
         {
+            
             return View();
         }
 
@@ -50,7 +51,15 @@ namespace GG_Shop_v3.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.categories.Add(category);
+                
+                    string nameLower = category.Name.ToLower();
+                    bool exists = db.categories.Any(c => c.Name.ToLower() == nameLower);
+                    if (exists)
+                    {
+                        ModelState.AddModelError("Name", "Tên danh mục đã tồn tại. Vui lòng chọn tên khác.");
+                        return View(category);
+                    }
+                    db.categories.Add(category);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
