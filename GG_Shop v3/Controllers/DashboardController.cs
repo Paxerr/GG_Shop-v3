@@ -16,6 +16,9 @@ namespace GG_Shop_v3.Controllers
         // GET: Dashboard
         public ActionResult Index()
         {
+            int totalSales = db.orders.Count();
+
+            ViewBag.TotalSales = totalSales;
             return View();
         }
 
