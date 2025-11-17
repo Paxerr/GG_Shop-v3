@@ -1,15 +1,19 @@
 ﻿@model IEnumerable<GG_Shop_v3.Models.Category>
+@using GG_Shop_v3.Models
+@using System.Linq
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Danh sách các danh mục";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
+
 <div class="content-page">
     <div class="container-fluid">
         <h2>Danh mục</h2>
         <a href="@Url.Action("Create", "Categories")" class="btn btn-danger mt-2">
             Tạo danh mục
-          </a> 
+        </a>
+
         <table class="table">
             <tr>
                 <th>Tên danh mục</th>
