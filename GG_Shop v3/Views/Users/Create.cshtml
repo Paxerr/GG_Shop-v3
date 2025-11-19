@@ -1,111 +1,124 @@
-﻿@model GG_Shop_v3.Models.User
-
-@{
+﻿@{
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
 <div class="content-page">
     <div class="container-fluid">
+        <form id="create_user" data-toggle="validator" role="form">
+            <div class="row">
 
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
-
-        <div class="form-horizontal">
-            <h4>CREATE USER</h4>
-            <hr />
-            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-            <div class="form-group">
-                <label class ="control-label col-md-2">Tên tài khoản</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Username, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Tên tài khoản *</label>
+                        <input type="text" class="form-control" name="username" required
+                               data-required-error="Vui lòng nhập tên tài khoản">
+                        <div class="help-block with-errors"></div>
+                    </div>
                 </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" class="form-control" name="email" required
+                               data-required-error="Vui lòng nhập email"
+                               data-type-error="Email không hợp lệ">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Mật khẩu *</label>
+                        <input type="password" class="form-control" name="password"
+                               required data-minlength="6"
+                               data-required-error="Vui lòng nhập mật khẩu"
+                               data-minlength-error="Mật khẩu phải từ 6 ký tự trở lên">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Tên người dùng *</label>
+                        <input type="text" class="form-control" name="full_name" required
+                               data-required-error="Vui lòng nhập tên người dùng">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Số điện thoại *</label>
+                        <input type="text" class="form-control" name="phone_number" required
+                               pattern="^[0-9]{10,11}$"
+                               data-required-error="Vui lòng nhập số điện thoại"
+                               data-pattern-error="Số điện thoại phải gồm 10–11 chữ số">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Quốc gia *</label>
+                        <input type="text" class="form-control" name="country" required
+                               data-required-error="Vui lòng nhập quốc gia">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Cấp bậc *</label>
+                        <select class="form-control" name="slc_rank" required
+                                data-required-error="Vui lòng chọn cấp bậc">
+                            <option value="">-- Chọn --</option>
+                            <option value="Vip">Vip</option>
+                            <option value="Thường">Thường</option>
+                        </select>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Vai trò *</label>
+                        <select class="form-control" name="slc_role" required
+                                data-required-error="Vui lòng chọn vai trò">
+                            <option value="">-- Chọn --</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Khách hàng">Khách hàng</option>
+                        </select>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="form-group">
-                <label class="control-label col-md-2">Email</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Mật khẩu</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Tên người dùng</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Full_Name, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Full_Name, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Số điện thoại</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Phone_Number, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Phone_Number, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Quốc gia</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Country, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Số đơn hàng</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Orders, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Orders, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Cấp bậc</label>
-                <div class="col-md-10">
-                    @Html.DropDownListFor(model => model.Rank, (SelectList)ViewBag.RankList, "Chọn cấp bậc", new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Rank, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Chi tiêu</label>
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Total_Spent, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Total_Spent, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-2">Vai trò</label>
-                <div class="col-md-10">
-                    @Html.DropDownListFor(model => model.Role, (SelectList)ViewBag.RoleList, "Chọn vai trò", new { @class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
-                    <input type="submit" value="Create" class="btn btn-primary mr-2" />
-                    <input type="reset" value="Reset" class="btn btn-danger" />
-                </div>
-                <div class="col-md-offset-2 col-md-10">
-                    @Html.ActionLink("Back to List", "Index")
-                </div>
-            </div>
-        </div>
-        }
+            <button type="submit" class="btn btn-primary mr-2" id="create">Thêm người dùng</button>
+            <button type="reset" class="btn btn-danger">Làm mới</button>
+        </form>
     </div>
 </div>
+<script>
+$('#create_user').validator().on('submit', function (e) {
+    if (e.isDefaultPrevented()) {
+        return; // có lỗi → validator sẽ hiển thị
+    }
+
+    e.preventDefault(); // hợp lệ → gửi AJAX
+
+    var form = $('#create_user')[0];
+    var formData = new FormData(form);
+
+    $.ajax({
+        type: "POST",
+        url: '@Url.Action("Insert", "Users")',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            alert(response);
+        }
+    });
+});
+</script>
