@@ -18,7 +18,13 @@ namespace GG_Shop_v3.Controllers
         // GET: Users
         public ActionResult Index()
         {
-            return View(db.users.ToList());
+            return View();
+        }
+
+        public JsonResult getListUsers()
+        {
+            var listUsers = db.users.ToList();
+            return Json(listUsers, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Users/Details/5
@@ -28,13 +34,19 @@ namespace GG_Shop_v3.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = db.users.Find(id);
-            if (user == null)
-            {
-                return HttpNotFound();
-            }
-            return View(user);
+            ViewBag.UserId = id;
+            return View();
         }
+
+        public JsonResult GetUserDetails(int? id)
+        {
+            var user = db.users.Find(id);
+
+            return Json(user, JsonRequestBehavior.AllowGet);
+        }
+
+
+
 
         // GET: Users/Create
         public ActionResult Create()
@@ -92,7 +104,7 @@ namespace GG_Shop_v3.Controllers
             return rs;
         }
 
-
+        
 
 
         // GET: Users/Edit/5

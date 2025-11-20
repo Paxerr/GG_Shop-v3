@@ -41,14 +41,9 @@ namespace GG_Shop_v3.Models
         [Required, MaxLength(20)]
         public string Role { get; set; }
 
-        public virtual ICollection<Order> OrdersList { get; set; }
-        public virtual ICollection<Cart> Carts { get; set; }
-
         public User()
         {
             // Khởi tạo các Collection
-            OrdersList = new HashSet<Order>();
-            Carts = new HashSet<Cart>();
         }
 
         // Constructor để khởi tạo User
@@ -66,8 +61,6 @@ namespace GG_Shop_v3.Models
             this.Role = role;
 
             // Khởi tạo các Collection
-            OrdersList = new HashSet<Order>();
-            Carts = new HashSet<Cart>();
         }
     }
 }
