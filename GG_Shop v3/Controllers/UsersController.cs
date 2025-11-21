@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.WebPages;
@@ -163,18 +164,28 @@ namespace GG_Shop_v3.Controllers
             {
                 return HttpNotFound();
             }
-            return View(user);
+            ViewBag.UserId = id;
+            return View();
         }
 
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public String DeleteUser()
         {
-            User user = db.users.Find(id);
-            db.users.Remove(user);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            string rs = "";
+            string Id_str = Request["Id"];
+            int Id;
+            int.TryParse(Id_str, out Id);
+            try
+            {
+                User user = db.users.Find(Id);
+                db.users.Remove(user);
+                db.SaveChanges();
+                rs = "Xóa người dùng thành công";
+            }
+            catch (Exception ex)
+            {
+                rs = "Xóa người dùng thất bại";
+            }
+            return rs;
         }
 
         protected override void Dispose(bool disposing)

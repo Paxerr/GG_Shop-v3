@@ -19,8 +19,11 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="list-action">
-                            <a class="badge bg-success mr-2" data-toggle="tooltip" data-placement="top" id="btnEdit">
+                            <a class="btn btn-outline-success rounded-pill mt-2" data-toggle="tooltip" data-placement="top" id="btnEdit">
                                 <i class="ri-pencil-line mr-0"></i> Chỉnh sửa
+                            </a>
+                            <a class="btn btn-outline-secondary rounded-pill mt-2 btn-delete-user" data-toggle="tooltip" data-placement="top" data-id="@ViewBag.UserId">
+                                <i class="ri-delete-bin-line"></i> Xóa người dùng
                             </a>
                         </div>
                     </div>
@@ -83,16 +86,32 @@
 
         </div>
     </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">Xác nhận xóa</h5>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc muốn xóa người dùng này?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-warning mt-2" data-dismiss="modal">Hủy</button>
+                    <button id="confirmDelete" class="btn btn-warning mt-2">Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 $(document).ready(function() {
     var userId = '@ViewBag.UserId';
-
+    var deleteId = userId;
     // Lấy dữ liệu user bằng AJAX
     $.ajax({
         url: '/Users/GetUserDetails',
-        type: 'POST',   
+        type: 'POST',
         data: { id: userId },
         success: function (res) {
             $('#username').text(res.Username);
@@ -113,6 +132,30 @@ $(document).ready(function() {
         error: function() {
             alert('Lỗi khi lấy dữ liệu người dùng');
         }
+    });
+
+    // Khi nhấn nút XÓA
+    $(document).on("click", ".btn-delete-user", function () {
+        $("#deleteModal").modal("show");
+    });
+
+    // Xác nhận xóa
+    $("#confirmDelete").click(function () {
+
+        $.ajax({
+            url: "/Users/DeleteUser",
+            type: "POST",
+            data: { id: deleteId },
+            success: function (rs) {
+                $("#deleteModal").modal("hide");
+                alert(rs);
+                window.location.href = "/Users/Index";
+
+            },
+            error: function () {
+                alert("Lỗi hệ thống!");
+            }
+        });
     });
 });
 </script>
