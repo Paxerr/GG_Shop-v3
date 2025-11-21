@@ -1,98 +1,148 @@
-﻿@model GG_Shop_v3.Models.User
-
-@{
+﻿@{
     ViewBag.Title = "Edit";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
 <div class="content-page">
     <div class="container-fluid">
-        <h2>Chỉnh sửa tài khoản @Model.Username</h2>
+        <h2>Chỉnh sửa tài khoản</h2>
 
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            <hr />
+            <form id="info_user" data-toggle="validator">
 
-    <div class="form-horizontal">
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <input type="number" name="Id" id="txtId" class="form-control" hidden />
+                <input type="number" name="Total_Spent" id="txtTotal_Spent" class="form-control" hidden />
+                <input type="text" name="Rank" id="txtRank" class="form-control" hidden />
+                <input type="number" name="Orders" id="txtOrders" class="form-control" hidden />
 
-        @*
-            các trường ẩn đi
-        *@
 
-        @Html.HiddenFor(model => model.Id)
-        @Html.HiddenFor(model => model.Orders)
-        @Html.HiddenFor(model => model.Total_Spent)
-        @Html.HiddenFor(model => model.Rank)
+                <div class="form-group">
+                    <span class="user_edit_label">Tên tài khoản</span>
+                    <div class="col-md-10">
+                        <input type="text" name="UserName" id="txtUsername" class="form-control" required data-required-error="Vui lòng nhập tên tài khoản" />
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
 
-        @*
-            Form nhập thông tin    
-        *@
+                <div class="form-group">
+                    <span class="user_edit_label">Email</span>
+                    <div class="col-md-10">
+                        <input type="text" name="Email" id="txtEmail" class="form-control" value="" required data-required-error="Vui lòng nhập Email" />
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <span class="user_edit_label">Tên tài khoản</span>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Username, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
-            </div>
+                <div class="form-group">
+                    <span class="user_edit_label">Mật khẩu</span>
+                    <div class="col-md-10">
+                        <input type="text" name="Password" id="txtPassword" class="form-control" required data-required-error="Vui lòng nhập mật khẩu" />
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <span class="user_edit_label">Tên người dùng</span>
+                    <div class="col-md-10">
+                        <input type="text" name="Full_Name" id="txtFullName" class="form-control" value="" required data-required-error="Vui lòng nhập Tên người dùng" />
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <span class="user_edit_label">Số điện thoại</span>
+                    <div class="col-md-10">
+                        <input type="text" name="Phone_Number" id="txtPhone_Number" class="form-control" value="" required data-required-error="Vui lòng nhập Số điện thoại" />
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <span class="user_edit_label">Quốc gia</span>
+                    <div class="col-md-10">
+                        <input type="text" name="Country" id="txtCountry" class="form-control" value="" required data-required-error="Vui lòng nhập Quốc gia" />
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <span class="user_edit_label">Vai trò</span>
+                    <div class="col-md-10">
+                        <select class="form-control" name="slc_role" id="slc_role" required
+                                data-required-error="Vui lòng chọn vai trò">
+                            <option value="">-- Chọn --</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Khách hàng">Khách hàng</option>
+                        </select>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Lưu" class="btn btn-primary mr-2" id="Save_btn" />
+                        @Html.ActionLink("Trở lại danh sách", "Index")
+                    </div>
+                </div>
+            </form>
         </div>
-
-        <div class="form-group">
-            <span class="user_edit_label">Email</span>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <span class="user_edit_label">Mật khẩu</span>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <span class="user_edit_label">Tên người dùng</span>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Full_Name, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Full_Name, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <span class="user_edit_label">Số điện thoại</span>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Phone_Number, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Phone_Number, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <span class="user_edit_label">Quốc gia</span>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Country, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <span class="user_edit_label">Vai trò</span>
-            <div class="col-md-10">
-                @Html.DropDownListFor(model => model.Role, (SelectList)ViewBag.RoleList, "Chọn vai trò", new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Lưu" class="btn btn-primary mr-2" />
-                @Html.ActionLink("Trở lại danh sách", "Index")
-            </div>
-        </div>
-    </div>
-        }
 
     </div>
 </div>
+
+
+<script>
+$(document).ready(function() {
+    var userId = '@ViewBag.UserId';
+
+    // Lấy dữ liệu user bằng AJAX
+    $.ajax({
+        url: '/Users/GetUserDetails',
+        type: 'POST',
+        data: { id: userId },
+        success: function (res) {
+            $('#txtId').val(res.Id);
+            $('#txtUsername').val(res.Username);
+            $('#txtPassword').val(res.Password);
+            $('#txtEmail').val(res.Email);
+            $('#txtFullName').val(res.Full_Name);
+            $('#txtPhone_Number').val(res.Phone_Number);
+            $('#txtCountry').val(res.Country);
+            $('#slc_role').val(res.Role);
+            $('#txtRank').val(res.Rank);
+            $('#txtTotal_Spent').val(res.Total_Spent);
+            $('#txtOrders').val(res.Orders);
+        },
+        error: function() {
+            alert('Lỗi khi lấy dữ liệu người dùng');
+        }
+    });
+});
+
+</script>
+
+<script>
+    $('#info_user').validator().on('submit', function (e) {
+    if (e.isDefaultPrevented()) {
+        return; // có lỗi → validator sẽ hiển thị
+    }
+
+    e.preventDefault(); // hợp lệ → gửi AJAX 
+
+    var form = $('#info_user')[0];
+    var formData = new FormData(form);
+
+    $.ajax({
+        type: "POST",
+        url: '@Url.Action("UpdateUser", "Users")',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            alert(response);
+        },
+        error: function () {
+            alert('Lỗi hệ thống');
+        }
+    });
+});
+</script>

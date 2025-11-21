@@ -27,7 +27,6 @@ namespace GG_Shop_v3.Controllers
             return Json(listUsers, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: Users/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -48,7 +47,6 @@ namespace GG_Shop_v3.Controllers
 
 
 
-        // GET: Users/Create
         public ActionResult Create()
         {
             return View();
@@ -75,20 +73,13 @@ namespace GG_Shop_v3.Controllers
             double total_spent;
             double.TryParse(total_spent_str, out total_spent);
 
-            //kiểm tra xem đã tồn tại đối tượng sv có mssv này chưa
             if (db.users.Any(o => o.Username == username_str))
             {
                 rs = "Tên đăng nhập đã tồn tại";
             }
             else
             {
-                //chưa tồn tại teen ddawng nhap.
-
-
-
-                //update thông tin cho đối tượng
                 User user = new User(username_str, email_str, password_str, full_name_str, phone_number_str, country_str, orders, rank_str, total_spent, role_str);
-
                 try
                 {
                     db.users.Add(user);
@@ -107,48 +98,58 @@ namespace GG_Shop_v3.Controllers
         
 
 
-        // GET: Users/Edit/5
         public ActionResult Edit(int? id)
         {
-            ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
-            ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
+            //ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
+            //ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = db.users.Find(id);
-            if (user == null)
-            {
-                return HttpNotFound();
-            }
-            return View(user);
+            ViewBag.UserId = id;
+            return View();
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Username,Email,Password,Full_Name,Phone_Number,Country,Orders,Rank,Total_Spent,Role")] User user)
+
+        public String UpdateUser()
         {
-            if (db.users.Where(u => u.Id != user.Id).Any(u => u.Username == user.Username))
+            string rs = "";
+            string Id_str = Request["Id"];
+            string username_str = Request["UserName"];
+            string email_str = Request["Email"];
+            string password_str = Request["Password"];
+            string full_name_str = Request["Full_Name"];
+            string phone_number_str = Request["Phone_Number"];
+            string country_str = Request["Country"];
+            string role_str = Request["slc_role"];
+            string orders_str = Request["Orders"];
+            string rank_str = Request["Rank"];
+            string total_spent_str = Request["Total_Spent"];
+
+            int Id;
+            int.TryParse(Id_str, out Id);
+
+            int orders;
+            int.TryParse(orders_str, out orders);
+            double total_spent;
+            double.TryParse(total_spent_str, out total_spent);
+
+            User user = new User(username_str, email_str, password_str, full_name_str, phone_number_str, country_str, orders, rank_str, total_spent, role_str);
+            user.Id = Id;
+            if (db.users.Where(u => u.Id != Id).Any(u => u.Username == username_str))
             {
-                ModelState.AddModelError("Username", "Tên tài khoản đã tồn tại");
+                rs = "Tên tài khoản đã tồn tại";
             }
-            if (db.users.Where(u => u.Id != user.Id).Any(u => u.Email == user.Email))
-            {
-                ModelState.AddModelError("Email", "Email đã tồn tại");
-            }
-            if (ModelState.IsValid)
+            else
             {
                 db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                rs = "Đã lưu thay đổi !";
             }
-            ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
-            ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
-            return View(user);
+
+            return rs;
         }
+
 
         // GET: Users/Delete/5
         public ActionResult Delete(int? id)
