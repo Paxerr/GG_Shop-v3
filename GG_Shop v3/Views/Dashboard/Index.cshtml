@@ -4,14 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>GG_Shop Admin Page</title>
-
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="~/Content/img_admin/favicon.ico" />
-    <link rel="stylesheet" href="~/Content/css_admin/backend-plugin.min.css">
-    <link rel="stylesheet" href="~/Content/css_admin/backend.css?v=1.0.0">
-    <link rel="stylesheet" href="~/Content/vendor_admin/fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="~/Content/vendor_admin/line-awesome/dist/line-awesome/css/line-awesome.min.css">
-    <link rel="stylesheet" href="~/Content/vendor_admin/remixicon/fonts/remixicon.css">
 </head>
 <body class="  ">
     <!-- Wrapper Start -->
@@ -78,8 +70,8 @@
                                                 <img src="~/Content/img_admin/product/2.png" class="img-fluid" alt="image">
                                             </div>
                                             <div>
-                                                <p class="mb-2">Total Cost</p>
-                                                <h4>$ 4598</h4>
+                                                <p class="mb-2">Doanh Thu</p>
+                                                <h4>@String.Format("{0:N0}", ViewBag.DoanhThu) đ</h4>
                                             </div>
                                         </div>
                                         <div class="iq-progress-bar mt-2">
@@ -97,8 +89,8 @@
                                                 <img src="~/Content/img_admin/product/3.png" class="img-fluid" alt="image">
                                             </div>
                                             <div>
-                                                <p class="mb-2">Product Sold</p>
-                                                <h4>4589 M</h4>
+                                                <p class="mb-2">Số sản phẩm bán ra</p>
+                                                <h4>@String.Format("{0:N0}", ViewBag.TongSanPham)</h4>
                                             </div>
                                         </div>
                                         <div class="iq-progress-bar mt-2">
@@ -281,118 +273,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="card card-block card-stretch card-height-helf">
-                            <div class="card-body">
-                                <div class="d-flex align-items-top justify-content-between">
-                                    <div class="">
-                                        <p class="mb-0">Income</p>
-                                        <h5>$ 98,7800 K</h5>
-                                    </div>
-                                    <div class="card-header-toolbar d-flex align-items-center">
-                                        <div class="dropdown">
-                                            <span class="dropdown-toggle dropdown-bg btn" id="dropdownMenuButton003"
-                                                  data-toggle="dropdown">
-                                                This Month<i class="ri-arrow-down-s-line ml-1"></i>
-                                            </span>
-                                            <div class="dropdown-menu dropdown-menu-right shadow-none"
-                                                 aria-labelledby="dropdownMenuButton003">
-                                                <a class="dropdown-item" href="#">Year</a>
-                                                <a class="dropdown-item" href="#">Month</a>
-                                                <a class="dropdown-item" href="#">Week</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="layout1-chart-3" class="layout-chart-1"></div>
-                            </div>
-                        </div>
-                        <div class="card card-block card-stretch card-height-helf">
-                            <div class="card-body">
-                                <div class="d-flex align-items-top justify-content-between">
-                                    <div class="">
-                                        <p class="mb-0">Expenses</p>
-                                        <h5>$ 45,8956 K</h5>
-                                    </div>
-                                    <div class="card-header-toolbar d-flex align-items-center">
-                                        <div class="dropdown">
-                                            <span class="dropdown-toggle dropdown-bg btn" id="dropdownMenuButton004"
-                                                  data-toggle="dropdown">
-                                                This Month<i class="ri-arrow-down-s-line ml-1"></i>
-                                            </span>
-                                            <div class="dropdown-menu dropdown-menu-right shadow-none"
-                                                 aria-labelledby="dropdownMenuButton004">
-                                                <a class="dropdown-item" href="#">Year</a>
-                                                <a class="dropdown-item" href="#">Month</a>
-                                                <a class="dropdown-item" href="#">Week</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="layout1-chart-4" class="layout-chart-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8">
-                        <div class="card card-block card-stretch card-height">
-                            <div class="card-header d-flex justify-content-between">
-                                <div class="header-title">
-                                    <h4 class="card-title">Order Summary</h4>
-                                </div>
-                                <div class="card-header-toolbar d-flex align-items-center">
-                                    <div class="dropdown">
-                                        <span class="dropdown-toggle dropdown-bg btn" id="dropdownMenuButton005"
-                                              data-toggle="dropdown">
-                                            This Month<i class="ri-arrow-down-s-line ml-1"></i>
-                                        </span>
-                                        <div class="dropdown-menu dropdown-menu-right shadow-none"
-                                             aria-labelledby="dropdownMenuButton005">
-                                            <a class="dropdown-item" href="#">Year</a>
-                                            <a class="dropdown-item" href="#">Month</a>
-                                            <a class="dropdown-item" href="#">Week</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex flex-wrap align-items-center mt-2">
-                                    <div class="d-flex align-items-center progress-order-left">
-                                        <div class="progress progress-round m-0 orange conversation-bar" data-percent="46">
-                                            <span class="progress-left">
-                                                <span class="progress-bar"></span>
-                                            </span>
-                                            <span class="progress-right">
-                                                <span class="progress-bar"></span>
-                                            </span>
-                                            <div class="progress-value text-secondary">46%</div>
-                                        </div>
-                                        <div class="progress-value ml-3 pr-5 border-right">
-                                            <h5>$12,6598</h5>
-                                            <p class="mb-0">Average Orders</p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center ml-5 progress-order-right">
-                                        <div class="progress progress-round m-0 primary conversation-bar" data-percent="46">
-                                            <span class="progress-left">
-                                                <span class="progress-bar"></span>
-                                            </span>
-                                            <span class="progress-right">
-                                                <span class="progress-bar"></span>
-                                            </span>
-                                            <div class="progress-value text-primary">46%</div>
-                                        </div>
-                                        <div class="progress-value ml-3">
-                                            <h5>$59,8478</h5>
-                                            <p class="mb-0">Top Orders</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body pt-0">
-                                <div id="layout1-chart-5"></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <!-- Page end  -->
             </div>
@@ -420,18 +300,4 @@
             </div>
         </div>
     </footer>
-    <!-- Backend Bundle JavaScript -->
-    <script src="~/Content/img_admin/js/backend-bundle.min.js"></script>
-
-    <!-- Table Treeview JavaScript -->
-    <script src="~/Content/img_admin/js/table-treeview.js"></script>
-
-    <!-- Chart Custom JavaScript -->
-    <script src="~/Content/img_admin/js/customizer.js"></script>
-
-    <!-- Chart Custom JavaScript -->
-    <script async src="~/Content/img_admin/js/chart-custom.js"></script>
-
-    <!-- app JavaScript -->
-    <script src="~/Content/img_admin/js/app.js"></script>
 </body>

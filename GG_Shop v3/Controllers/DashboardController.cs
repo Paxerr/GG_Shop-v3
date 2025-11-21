@@ -19,6 +19,15 @@ namespace GG_Shop_v3.Controllers
             int totalSales = db.orders.Count();
 
             ViewBag.TotalSales = totalSales;
+
+            decimal DoanhThu = db.orders.Sum(o => o.Total_Amount);
+            ViewBag.DoanhThu = DoanhThu;
+
+            int TongSanPham = db.order_items.Count();
+            ViewBag.TongSanPham = TongSanPham;
+
+
+
             return View();
         }
 

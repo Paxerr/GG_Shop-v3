@@ -101,8 +101,6 @@ namespace GG_Shop_v3.Controllers
 
         public ActionResult Edit(int? id)
         {
-            //ViewBag.RankList = new SelectList(new List<string> { "Vip", "Thường" });
-            //ViewBag.RoleList = new SelectList(new List<string> { "Admin", "Khách hàng" });
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
