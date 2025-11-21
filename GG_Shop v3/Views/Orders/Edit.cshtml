@@ -1,4 +1,4 @@
-﻿@model GG_Shop_v3.Models.Order
+﻿
 
 @{
     ViewBag.Title = "Edit Order";
@@ -16,44 +16,39 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        @using (Html.BeginForm())
-                        {
+                        <form id="edit_order_form">
                             @Html.AntiForgeryToken()
-                            @Html.HiddenFor(model => model.Id)
-                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            <input type="hidden" id="OrderId" name="Id" />
 
                             <div class="row">
                                 <!-- User -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Người Đặt *</label>
-                                        @Html.DropDownList("User_Id", null, htmlAttributes: new { @class = "form-control" })
-                                        @Html.ValidationMessageFor(model => model.User_Id, "", new { @class = "text-danger" })
+                                        <select id="User_Id" name="User_Id" class="form-control"></select>
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Tổng Tiền *</label>
-                                    @Html.EditorFor(model => model.Total_Amount, new { htmlAttributes = new { @class = "form-control" } })
-                                    @Html.ValidationMessageFor(model => model.Total_Amount, "", new { @class = "text-danger" })
+                                <!-- Total Amount -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Tổng Tiền *</label>
+                                        <input type="number" id="Total_Amount" name="Total_Amount" class="form-control" step="0.01" />
+                                    </div>
                                 </div>
 
                                 <!-- Status -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Trạng Thái *</label>
-                                        @Html.DropDownListFor(model => model.Status,
-                                            new SelectList(new[]
-                                            {
-                                                new { Value = "Đang xử lí", Text = "Đang xử lí" },
-                                                new { Value = "Đã giao", Text = "Đã giao" },
-                                                new { Value = "Hoàn thành", Text = "Hoàn thành" },
-                                                new { Value = "Đã trả", Text = "Đã trả" },
-                                                new { Value = "Đã hủy", Text = "Đã hủy" }
-                                            }, "Value", "Text", Model.Status),
-                                            "-- Chọn trạng thái --",
-                                            new { @class = "form-control" })
-                                        @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+                                        <select id="Status" name="Status" class="form-control">
+                                            <option value="">-- Chọn trạng thái --</option>
+                                            <option value="Đang xử lí">Đang xử lí</option>
+                                            <option value="Đã giao">Đã giao</option>
+                                            <option value="Hoàn thành">Hoàn thành</option>
+                                            <option value="Đã trả">Đã trả</option>
+                                            <option value="Đã hủy">Đã hủy</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -61,8 +56,9 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Mã Khuyến Mãi</label>
-                                        @Html.DropDownList("Promo_Id", null, "-- Không khuyến mãi --", htmlAttributes: new { @class = "form-control" })
-                                        @Html.ValidationMessageFor(model => model.Promo_Id, "", new { @class = "text-danger" })
+                                        <select id="Promo_Id" name="Promo_Id" class="form-control">
+                                            <option value="">-- Không khuyến mãi --</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -70,8 +66,7 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Địa Chỉ Giao Hàng *</label>
-                                        @Html.EditorFor(model => model.Shipping_Address, new { htmlAttributes = new { @class = "form-control" } })
-                                        @Html.ValidationMessageFor(model => model.Shipping_Address, "", new { @class = "text-danger" })
+                                        <input type="text" id="Shipping_Address" name="Shipping_Address" class="form-control" />
                                     </div>
                                 </div>
 
@@ -79,8 +74,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Ngày Tạo *</label>
-                                        @Html.TextBoxFor(model => model.Created_At, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                                        @Html.ValidationMessageFor(model => model.Created_At, "", new { @class = "text-danger" })
+                                        <input type="date" id="Created_At" name="Created_At" class="form-control" />
                                     </div>
                                 </div>
                             </div>
@@ -89,7 +83,7 @@
                                 <button type="submit" class="btn btn-primary mr-2">💾 Lưu</button>
                                 <a href="@Url.Action("Index")" class="btn btn-danger">Hủy</a>
                             </div>
-                        }
+                        </form>
                     </div>
                 </div>
             </div>
@@ -98,5 +92,96 @@
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+    // Lấy orderId từ query string
+            var pathParts = window.location.pathname.split('/');
+            var orderId = pathParts[pathParts.length - 1];
+            $('#OrderId').val(orderId);
+
+            // 1️⃣ Load dữ liệu order
+            $.ajax({
+                url: '/Orders/GetOrderDetails',
+                type: 'POST',
+                data: { id: orderId },
+                success: function (res) {
+                    if (!res) {
+                        alert('Không tìm thấy dữ liệu đơn hàng.');
+                        return;
+                    }
+
+                    $('#OrderId').val(res.Id);
+                    $('#User_Id').val(res.User_Id);
+                    $('#Total_Amount').val(res.Total_Amount);
+                    $('#Status').val(res.Status);
+                    $('#Shipping_Address').val(res.Shipping_Address);
+                    $('#Promo_Id').val(res.PromoId);
+                    $('#Created_At').val(res.Created_At);
+
+
+                    // Load users
+                    $.ajax({
+                        url: '/Orders/GetAllUsers',
+                        type: 'GET',
+                        success: function (users) {
+                            var options = '';
+                            users.forEach(function (u) {
+                                options += `<option value="${u.Id}" ${u.Id === res.User_Id ? 'selected' : ''}>${u.Username}</option>`;
+                            });
+                            $('#User_Id').html(options);
+                        }
+                    });
+
+                    // Load promos
+                    $.ajax({
+                        url: '/Orders/GetAllPromotions',
+                        type: 'GET',
+                        success: function (promos) {
+                            var options = '<option value="">-- Không khuyến mãi --</option>';
+                            promos.forEach(function (p) {
+                                options += `<option value="${p.Id}" ${p.Id === res.Promo_Id ? 'selected' : ''}>${p.Promo_Code}</option>`;
+                            });
+                            $('#Promo_Id').html(options);
+                        }
+                    });
+
+                },
+                error: function () {
+                    alert('Lỗi khi lấy dữ liệu đơn hàng.');
+                }
+            });
+
+            // 4️⃣ Submit form bằng AJAX
+            $('#edit_order_form').on('submit', function (e) {
+                e.preventDefault();
+
+                var formData = $(this).serialize();
+
+                // Nếu Promo_Id rỗng thì set null
+                if ($('#Promo_Id').val() === "") {
+                    formData += "&Promo_Id=null";
+                }
+
+                $.ajax({
+                    url: '/Orders/UpdateOrder',
+                    type: 'POST',
+                    data: formData,
+                    success: function (res) {
+                        // Nếu server trả về string "Cập nhật thành công"
+                        if (res === "Cập nhật thành công") {
+                            alert(res);
+                            // Redirect về danh sách
+                            window.location.href = '/Orders/Index';
+                        } else {
+                            alert(res);
+                        }
+                    },
+                    error: function () {
+                        alert('Lỗi khi cập nhật đơn hàng.');
+                    }
+                });
+            });
+
+        });
+    </script>
 }

@@ -1,4 +1,4 @@
-﻿@model GG_Shop_v3.Models.Order
+﻿
 
 @{
     ViewBag.Title = "Order Details";
@@ -14,106 +14,13 @@
                         <div class="header-title">
                             <h4 class="card-title">Chi tiết đơn hàng</h4>
                         </div>
-
                     </div>
 
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5 class="mb-3">Thông tin đơn hàng</h5>
-                                <dl class="row">
-                                    <dt class="col-sm-4">Người đặt:</dt>
-                                    <dd class="col-sm-8">@Model.User.Username</dd>
-
-                                    <dt class="col-sm-4">Trạng thái:</dt>
-                                    <dd class="col-sm-8">
-                                        @if (@Model.Status == "Đã đặt")
-                                        {
-                                            <div>Đã đặt</div>
-                                        }
-                                        else if (@Model.Status == "Đang xử lí")
-                                        {
-                                            <div>Đang xử lí</div>
-                                        }
-                                        else if (@Model.Status == "Đã hủy")
-                                        {
-                                            <div>Đã hủy</div>
-                                        }
-                                        else if (@Model.Status == "Hoàn thành")
-                                        {
-                                            <div>Hoàn thành</div>
-                                        }
-                                        else if (@Model.Status == "Đã giao")
-                                        {
-                                            <div>Đã giao</div>
-                                        }
-                                        else
-                                        {
-                                            <div>@Model.Status</div>
-                                        }
-                                    </dd>
-
-                                    <dt class="col-sm-4">Tổng tiền:</dt>
-                                    <dd class="col-sm-8">@String.Format("{0:N0} ₫", Model.Total_Amount)</dd>
-
-                                    <dt class="col-sm-4">Địa chỉ giao hàng:</dt>
-                                    <dd class="col-sm-8">@Model.Shipping_Address</dd>
-
-                                    <dt class="col-sm-4">Ngày tạo:</dt>
-                                    <dd class="col-sm-8">@Model.Created_At.ToString("dd/MM/yyyy HH:mm")</dd>
-
-                                    <dt class="col-sm-4">Mã khuyến mãi:</dt>
-                                    <dd class="col-sm-8">
-                                        @(Model.Promotion != null ? Model.Promotion.Promo_Code : "Không có")
-                                    </dd>
-                                    <dt class="col-sm-4">Số tiền giảm:</dt>
-                                    <dd class="col-sm-8">
-                                        @(ViewBag.Discount > 0
-                                            ? String.Format("{0:N0} ₫", ViewBag.Discount)
-                                            : "Không có")
-                                    </dd>
-                                </dl>
-                            </div>
+                        <!-- Nơi hiển thị dữ liệu AJAX -->
+                        <div id="order-details">
+                            <p>Đang tải dữ liệu đơn hàng...</p>
                         </div>
-
-                        <hr />
-
-                        <h5 class="mb-3 mt-4">🛒 Sản phẩm trong đơn</h5>
-
-                        @if (Model.Order_Items != null && Model.Order_Items.Any())
-                        {
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>Tên sản phẩm</th>
-                                            <th>Màu</th>
-                                            <th>Size</th>
-                                            <th>Số lượng</th>
-                                            <th>Giá (₫)</th>
-                                            <th>Tổng (₫)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model.Order_Items)
-                                        {
-                                            <tr>
-                                                <td>@item.Product_Sku.Product.Title</td>
-                                                <td>@item.Product_Sku.Color</td>
-                                                <td>@item.Product_Sku.Size</td>
-                                                <td>@item.Quantity</td>
-                                                <td>@String.Format("{0:N0}", item.Price)</td>
-                                                <td>@String.Format("{0:N0}", item.Quantity * item.Price)</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted"><i>Chưa có sản phẩm nào trong đơn.</i></p>
-                        }
 
                         <div class="text-center mt-4">
                             <a href="@Url.Action("Edit", "Orders", new { id = Model.Id })" class="btn btn-warning mr-2">
@@ -129,3 +36,79 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+$(document).ready(function() {
+    // Lấy orderId từ query string
+    var pathParts = window.location.pathname.split('/');
+    var orderId = pathParts[pathParts.length - 1];
+    $('#OrderId').val(orderId);
+
+    $.ajax({
+        url: '/Orders/GetOrderDetails',
+        type: 'POST',
+        data: { id: orderId },
+        success: function(res) {
+            if(!res){
+                $('#order-details').html('<p>Không tìm thấy dữ liệu đơn hàng.</p>');
+                return;
+            }
+
+            var html = `
+                <h5 class="mb-3">Thông tin đơn hàng</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Người đặt:</dt><dd class="col-sm-8">${res.UserName}</dd>
+                    <dt class="col-sm-4">Trạng thái:</dt><dd class="col-sm-8">${res.Status}</dd>
+                    <dt class="col-sm-4">Tổng tiền:</dt><dd class="col-sm-8">${Number(res.Total_Amount).toLocaleString()} ₫</dd>
+                    <dt class="col-sm-4">Địa chỉ giao hàng:</dt><dd class="col-sm-8">${res.Shipping_Address}</dd>
+                    <dt class="col-sm-4">Ngày tạo:</dt><dd class="col-sm-8">${res.Created_At}</dd>
+                    <dt class="col-sm-4">Mã khuyến mãi:</dt><dd class="col-sm-8">${res.PromoCode || 'Không có'}</dd>
+                    <dt class="col-sm-4">Số tiền giảm:</dt><dd class="col-sm-8">${res.Discount > 0 ? Number(res.Discount).toLocaleString() + ' ₫' : 'Không có'}</dd>
+                </dl>
+
+                <h5 class="mb-3 mt-4">🛒 Sản phẩm trong đơn</h5>
+            `;
+
+            if(res.Items && res.Items.length > 0){
+                html += `
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Màu</th>
+                                    <th>Size</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá (₫)</th>
+                                    <th>Tổng (₫)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${res.Items.map(i => `
+                                    <tr>
+                                        <td>${i.Product}</td>
+                                        <td>${i.Color}</td>
+                                        <td>${i.Size}</td>
+                                        <td>${i.Quantity}</td>
+                                        <td>${Number(i.Price).toLocaleString()}</td>
+                                        <td>${Number(i.Total).toLocaleString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                html += '<p class="text-muted"><i>Chưa có sản phẩm nào trong đơn.</i></p>';
+            }
+
+            $('#order-details').html(html);
+        },
+        error: function() {
+            $('#order-details').html('<p>Lỗi khi tải dữ liệu đơn hàng.</p>');
+        }
+    });
+});
+    </script>
+}

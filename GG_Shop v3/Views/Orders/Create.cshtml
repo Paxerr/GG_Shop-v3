@@ -1,5 +1,4 @@
-﻿@model GG_Shop_v3.Models.Order
-@{
+﻿@{
     ViewBag.Title = "Create Order";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
@@ -16,114 +15,184 @@
                     </div>
 
                     <div class="card-body">
-                        @using (Html.BeginForm("Create", "Orders", FormMethod.Post))
-                        {
+                        <form id="createOrderForm">
                             @Html.AntiForgeryToken()
-                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Người đặt *</label>
-                                        @Html.DropDownList("User_Id", null, "Chọn người dùng", new { @class = "form-control" })
+                                        <select id="User_Id" name="User_Id" class="form-control">
+                                            <option value="">Chọn người dùng</option>
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Địa chỉ giao hàng *</label>
-                                        @Html.EditorFor(m => m.Shipping_Address, new { htmlAttributes = new { @class = "form-control", placeholder = "Nhập địa chỉ giao hàng" } })
+                                        <input type="text" id="Shipping_Address" name="Shipping_Address" class="form-control" placeholder="Nhập địa chỉ giao hàng" />
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Trạng thái *</label>
-                                        @Html.DropDownList("Status", (SelectList)ViewBag.StatusList, "Chọn trạng thái", new { @class = "form-control" })
+                                        <select id="Status" name="Status" class="form-control">
+                                            <option value="">Chọn trạng thái</option>
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Mã khuyến mãi</label>
-                                        @Html.DropDownList("Promo_Id", null, "(Không áp dụng)", new { @class = "form-control" })
+                                        <select id="Promo_Id" name="Promo_Id" class="form-control">
+                                            <option value="">(Không áp dụng)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
 
                             <hr />
                             <h5 class="mb-3 mt-4">Thêm sản phẩm vào đơn</h5>
-
                             <div class="row align-items-end">
                                 <div class="col-md-4">
                                     <div class="form-group mb-0">
                                         <label>Chọn sản phẩm (SKU)</label>
-                                        @Html.DropDownList("SelectedSkuId", (SelectList)ViewBag.SkuList, "Chọn SKU", new { @class = "form-control" })
+                                        <select id="SelectedSkuId" class="form-control"></select>
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <div class="form-group mb-0">
                                         <label>Số lượng</label>
-                                        <input type="number" name="SelectedQuantity" class="form-control" value="1" min="1" />
+                                        <input type="number" id="SelectedQuantity" class="form-control" value="1" min="1" />
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <button type="submit" name="action" value="AddItem" class="btn btn-success w-100">
+                                    <button type="button" id="addItemBtn" class="btn btn-success w-100">
                                         + Thêm sản phẩm
                                     </button>
                                 </div>
                             </div>
 
-
-                            if (ViewBag.TempItems != null && ((List<GG_Shop_v3.Models.Order_Item>)ViewBag.TempItems).Any())
-                            {
-                                <div class="table-responsive mt-4">
-                                    <table class="table table-bordered table-striped">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <th>Tên sản phẩm</th>
-                                                <th>Màu</th>
-                                                <th>Size</th>
-                                                <th>Số lượng</th>
-                                                <th>Giá (₫)</th>
-                                                <th>Tổng (₫)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in (List<GG_Shop_v3.Models.Order_Item>)ViewBag.TempItems)
-                                            {
-                                                <tr>
-                                                    <td>@item.Product_Sku.Product.Title</td>
-                                                    <td>@item.Product_Sku.Color</td>
-                                                    <td>@item.Product_Sku.Size</td>
-                                                    <td>@item.Quantity</td>
-                                                    <td>@String.Format("{0:N0}", item.Price)</td>
-                                                    <td>@String.Format("{0:N0}", item.Quantity * item.Price)</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
+                            <div id="tempItemsContainer" class="mt-4">
                                 <p class="text-muted"><i>Chưa có sản phẩm nào trong đơn.</i></p>
-                            }
+                            </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" name="action" value="SaveOrder" class="btn btn-primary mr-2">
+                                <button type="button" id="saveOrderBtn" class="btn btn-primary mr-2">
                                     Lưu đơn hàng
                                 </button>
-                                <a href="@Url.Action("Index", "Orders")" class="btn btn-secondary">
-                                    Hủy
-                                </a>
+                                <a href="@Url.Action("Index", "Orders")" class="btn btn-secondary">Hủy</a>
                             </div>
-                        }
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+$(document).ready(function(){
+    const token = $('input[name="__RequestVerificationToken"]').val();
+
+    // Load Users
+    $.get('/Orders/GetAllUsers', function(users){
+        let html = '<option value="">Chọn người dùng</option>';
+        users.forEach(u => html += `<option value="${u.Id}">${u.Username}</option>`);
+        $('#User_Id').html(html);
+    });
+
+    // Load Status
+    $.get('/Orders/GetStatusList', function(statusList){
+        let html = '<option value="">Chọn trạng thái</option>';
+        statusList.forEach(s => html += `<option value="${s}">${s}</option>`);
+        $('#Status').html(html);
+    });
+
+    // Load SKUs
+    $.get('/Orders/GetAllSkus', function(skus){
+        let html = '<option value="">Chọn SKU</option>';
+        skus.forEach(s => html += `<option value="${s.Id}">${s.ProductTitle} - ${s.Color} - ${s.Size}</option>`);
+        $('#SelectedSkuId').html(html);
+    });
+
+    // Load Promotions
+    $.get('/Orders/GetAllPromotions', function(promos){
+        let html = '<option value="">(Không áp dụng)</option>';
+        promos.forEach(p => html += `<option value="${p.Id}">${p.Promo_Code}</option>`);
+        $('#Promo_Id').html(html);
+    });
+
+    // Thêm sản phẩm tạm
+    $('#addItemBtn').click(function(){
+        const skuId = $('#SelectedSkuId').val();
+        const quantity = parseInt($('#SelectedQuantity').val());
+        if(!skuId || quantity <= 0){ alert('Chọn sản phẩm và số lượng hợp lệ'); return; }
+
+        $.post('/Orders/AddTempItem', { SkuId: skuId, Quantity: quantity, __RequestVerificationToken: token }, function(res){
+            updateTempItems(res);
+        });
+    });
+
+    // Lưu đơn hàng
+    $('#saveOrderBtn').click(function(){
+        const orderData = {
+            User_Id: $('#User_Id').val(),
+            Shipping_Address: $('#Shipping_Address').val(),
+            Status: $('#Status').val(),
+            Promo_Id: $('#Promo_Id').val(),
+            __RequestVerificationToken: token
+        };
+
+        $.post('/Orders/CreateOrder', orderData, function(res){
+            if(res.success){
+                alert('Tạo đơn hàng thành công');
+                window.location.href = '/Orders/Index';
+            } else {
+                alert('Lỗi: ' + res.message);
+            }
+        });
+    });
+
+    // Hàm hiển thị TempItems
+    function updateTempItems(items){
+        if(items.length === 0){
+            $('#tempItemsContainer').html('<p class="text-muted"><i>Chưa có sản phẩm nào trong đơn.</i></p>');
+            return;
+        }
+
+        let html = `<div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>Tên sản phẩm</th>
+                            <th>Màu</th>
+                            <th>Size</th>
+                            <th>Số lượng</th>
+                            <th>Giá (₫)</th>
+                            <th>Tổng (₫)</th>
+                        </tr>
+                        </thead>
+                        <tbody>`;
+        items.forEach(i => {
+            html += `<tr>
+                        <td>${i.ProductTitle}</td>
+                        <td>${i.Color}</td>
+                        <td>${i.Size}</td>
+                        <td>${i.Quantity}</td>
+                        <td>${i.Price.toLocaleString()}</td>
+                        <td>${(i.Quantity*i.Price).toLocaleString()}</td>
+                     </tr>`;
+        });
+        html += `</tbody></table></div>`;
+        $('#tempItemsContainer').html(html);
+    }
+});
+    </script>
+}

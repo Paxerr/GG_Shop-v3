@@ -1,6 +1,4 @@
-﻿@model IEnumerable<GG_Shop_v3.Models.Order>
-
-@{
+﻿@{
     ViewBag.Title = "Order List";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
@@ -12,10 +10,7 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
                     <div>
                         <h4 class="mb-3">Danh sách đơn hàng</h4>
-                        <p class="mb-0">
-                            Các đơn hàng cho phép bạn theo dõi các thông tin của đơn hàng, giám sát trạng thái,<br>
-                            và quản lý hiệu quả hoạt động của đơn hàng một cách liền mạch trong toàn bộ tổ chức.
-                        </p>
+                       
                     </div>
                     <a href="@Url.Action("Create", "Orders")" class="btn btn-primary add-list">
                         <i class="las la-plus mr-2"></i>Thêm đơn hàng
@@ -28,12 +23,6 @@
                     <table id="datatable" class="data-table table mb-0 tbl-server-info">
                         <thead class="bg-white text-uppercase">
                             <tr class="ligth ligth-data">
-                                <th>
-                                    <div class="checkbox d-inline-block">
-                                        <input type="checkbox" class="checkbox-input" id="checkbox1">
-                                        <label for="checkbox1" class="mb-0"></label>
-                                    </div>
-                                </th>
                                 <th>ID</th>
                                 <th>Người Đặt</th>
                                 <th>Tổng Tiền</th>
@@ -44,78 +33,107 @@
                                 <th>Chức Năng</th>
                             </tr>
                         </thead>
-                        <tbody class="ligth-body">
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="checkbox d-inline-block">
-                                            <input type="checkbox" class="checkbox-input" id="check_@item.Id">
-                                            <label for="check_@item.Id" class="mb-0"></label>
-                                        </div>
-                                    </td>
-                                    <td>@item.Id</td>
-                                    <td>@item.User.Username</td>
-                                    <td>@String.Format("{0:N0} ₫", item.Total_Amount)</td>
-                                    <td>@(item.Promotion != null ? item.Promotion.Promo_Code : "—")</td>
-
-                                    <td>
-                                        @if (item.Status == "Đã đặt")
-                                        {
-                                            <div class="badge badge-success">Đã đặt</div>
-                                        }
-                                        else if (item.Status == "Đang xử lí")
-                                        {
-                                            <div class="badge badge-warning">Đang xử lí</div>
-                                        }
-                                        else if (item.Status == "Đã hủy")
-                                        {
-                                            <div class="badge badge-warning">Đã hủy</div>
-                                        }
-                                        else if (item.Status == "Hoàn thành")
-                                        {
-                                            <div class="badge badge-warning">Hoàn thành</div>
-                                        }
-                                        else if (item.Status == "Đã giao")
-                                        {
-                                            <div class="badge badge-warning">Đã giao</div>
-                                        }
-                                        else
-                                        {
-                                            <div class="badge badge-danger">@item.Status</div>
-                                        }
-                                    </td>
-                                    <td>@item.Shipping_Address</td>
-                                    <td>@item.Created_At.ToString("dd/MM/yyyy")</td>
-                                    <td>
-                                        <div class="d-flex align-items-center list-action">
-                                            <a class="badge badge-info mr-2" data-toggle="tooltip" title="View"
-                                               href="@Url.Action("Details", "Orders", new { id = item.Id })">
-                                                <i class="ri-eye-line mr-0"></i>
-                                            </a>
-                                            <a class="badge bg-success mr-2" data-toggle="tooltip" title="Edit"
-                                               href="@Url.Action("Edit", "Orders", new { id = item.Id })">
-                                                <i class="ri-pencil-line mr-0"></i>
-                                            </a>
-                                            <a class="badge bg-warning mr-2" data-toggle="tooltip" title="Delete"
-                                               href="@Url.Action("Delete", "Orders", new { id = item.Id })">
-                                                <i class="ri-delete-bin-line mr-0"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
+                        <tbody id="order-body" class="ligth-body">
                         </tbody>
                     </table>
-                    @section scripts {
-                        <script>
-                        $(document).ready(function () {
-                        $('#datatable').DataTable();
-                                    });
-                        </script>
-                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xác nhận xóa -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">Xác nhận xóa</h5>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc muốn xóa đơn hàng này?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-warning mt-2" data-dismiss="modal">Hủy</button>
+                    <button id="confirmDelete" class="btn btn-warning mt-2">Xóa</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section scripts {
+    <script>
+        let deleteId = 0;
+
+        function loadOrders() {
+            $.ajax({
+                url: '@Url.Action("GetOrders", "Orders")',
+                type: 'GET',
+                success: function (data) {
+                    let tbody = $("#order-body");
+                    tbody.empty();
+
+                    data.forEach(o => {
+                        tbody.append(`
+                            <tr>
+
+                                <td>${o.Id}</td>
+                                <td>${o.User}</td>
+                                <td>${o.Total_Amount.toLocaleString()} ₫</td>
+                                <td>${o.Promo}</td>
+                                <td><span class="badge badge-info">${o.Status}</span></td>
+                                <td>${o.Shipping_Address ?? "—"}</td>
+                                <td>${o.Created}</td>
+
+                                <td>
+                                    <div class="d-flex align-items-center list-action">
+                                        <a class="badge badge-info mr-2" href="/Orders/Details/${o.Id}">
+                                            <i class="ri-eye-line mr-0"></i>
+                                        </a>
+                                        <a class="badge bg-success mr-2" href="/Orders/Edit/${o.Id}">
+                                            <i class="ri-pencil-line mr-0"></i>
+                                        </a>
+                                        <a class="badge bg-warning mr-2 btn-delete-order" data-id="${o.Id}">
+                                            <i class="ri-delete-bin-line mr-0"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    $("#datatable").DataTable();
+                },
+                error: function () {
+                    alert("Lỗi khi tải dữ liệu đơn hàng!");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            loadOrders();
+
+            // Nhấn nút xóa
+            $(document).on("click", ".btn-delete-order", function () {
+                deleteId = $(this).data("id");
+                $("#deleteModal").modal("show");
+            });
+
+            // Xác nhận xóa
+            $("#confirmDelete").click(function () {
+                $.ajax({
+                    url: '/Orders/DeleteOrder/' + deleteId,
+                    type: 'POST',
+                    success: function () {
+                        $("#deleteModal").modal("hide");
+
+                        $("#datatable").DataTable().destroy();
+                        loadOrders();
+                    },
+                    error: function () {
+                        alert("Lỗi hệ thống!");
+                    }
+                });
+            });
+        });
+    </script>
+}
