@@ -166,7 +166,8 @@ namespace GG_Shop_v3.Controllers
             return View();
         }
 
-        public String DeleteUser()
+
+        public String BanUser()
         {
             string rs = "";
             string Id_str = Request["Id"];
@@ -175,16 +176,59 @@ namespace GG_Shop_v3.Controllers
             try
             {
                 User user = db.users.Find(Id);
-                db.users.Remove(user);
+                user.Status = "Ngừng hoạt động";
+                db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
-                rs = "Xóa người dùng thành công";
+                rs = "Người dùng đã bị ban";
             }
             catch (Exception ex)
             {
-                rs = "Xóa người dùng thất bại";
+                rs = "Ban người dùng thất bại";
             }
             return rs;
         }
+
+
+        public String UnbanUser()
+        {
+            string rs = "";
+            string Id_str = Request["Id"];
+            int Id;
+            int.TryParse(Id_str, out Id);
+            try
+            {
+                User user = db.users.Find(Id);
+                user.Status = "Hoạt động";
+                db.Entry(user).State = EntityState.Modified;
+                db.SaveChanges();
+                rs = "Người dùng đã được mở khóa";
+            }
+            catch (Exception ex)
+            {
+                rs = "Mở khóa người dùng thất bại";
+            }
+            return rs;
+        }
+
+        //public String DeleteUser()
+        //{
+        //    string rs = "";
+        //    string Id_str = Request["Id"];
+        //    int Id;
+        //    int.TryParse(Id_str, out Id);
+        //    try
+        //    {
+        //        User user = db.users.Find(Id);
+        //        db.users.Remove(user);
+        //        db.SaveChanges();
+        //        rs = "Xóa người dùng thành công";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        rs = "Xóa người dùng thất bại";
+        //    }
+        //    return rs;
+        //}
 
         protected override void Dispose(bool disposing)
         {

@@ -41,6 +41,9 @@ namespace GG_Shop_v3.Models
         [Required, MaxLength(20)]
         public string Role { get; set; }
 
+        [Required, MaxLength(50)]
+        public string Status { get; set; }
+
         public User()
         {
             // Khởi tạo các Collection
