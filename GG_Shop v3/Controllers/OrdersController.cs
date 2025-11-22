@@ -313,6 +313,7 @@ namespace GG_Shop_v3.Controllers
         public JsonResult GetAllUsers()
         {
             var users = db.users
+                .Where(u => u.Status == "Hoạt Động")
                 .Select(u => new { u.Id, u.Username })
                 .ToList();
 
