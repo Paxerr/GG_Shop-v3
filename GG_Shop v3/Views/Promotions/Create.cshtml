@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout_admin.cshtml";
+}
+<div class="content-page">
+    <div class="container-fluid">
+        <form id="create_user" data-toggle="validator" role="form">
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Tên tài khoản *</label>
+                        <input type="text" class="form-control" name="username" required
+                               data-required-error="Vui lòng nhập tên tài khoản">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" class="form-control" name="email" required
+                               data-required-error="Vui lòng nhập email"
+                               data-type-error="Email không hợp lệ">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Mật khẩu *</label>
+                        <input type="password" class="form-control" name="password"
+                               required data-minlength="6"
+                               data-required-error="Vui lòng nhập mật khẩu"
+                               data-minlength-error="Mật khẩu phải từ 6 ký tự trở lên">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Tên người dùng *</label>
+                        <input type="text" class="form-control" name="full_name" required
+                               data-required-error="Vui lòng nhập tên người dùng">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Số điện thoại *</label>
+                        <input type="text" class="form-control" name="phone_number" required
+                               pattern="^[0-9]{10,11}$"
+                               data-required-error="Vui lòng nhập số điện thoại"
+                               data-pattern-error="Số điện thoại phải gồm 10–11 chữ số">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Quốc gia *</label>
+                        <input type="text" class="form-control" name="country" required
+                               data-required-error="Vui lòng nhập quốc gia">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Cấp bậc *</label>
+                        <select class="form-control" name="slc_rank" required
+                                data-required-error="Vui lòng chọn cấp bậc">
+                            <option value="">-- Chọn --</option>
+                            <option value="Vip">Vip</option>
+                            <option value="Thường">Thường</option>
+                        </select>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Vai trò *</label>
+                        <select class="form-control" name="slc_role" required
+                                data-required-error="Vui lòng chọn vai trò">
+                            <option value="">-- Chọn --</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Khách hàng">Khách hàng</option>
+                        </select>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary mr-2" id="create">Thêm người dùng</button>
+            <button type="reset" class="btn btn-danger">Làm mới</button>
+        </form>
+    </div>
+</div>
+<script>
+$('#create_user').validator().on('submit', function (e) {
+    if (e.isDefaultPrevented()) {
+        return; // có lỗi → validator sẽ hiển thị
+    }
+
+    e.preventDefault(); // hợp lệ → gửi AJAX
+
+    var form = $('#create_user')[0];
+    var formData = new FormData(form);
+
+    $.ajax({
+        type: "POST",
+        url: '@Url.Action("Insert", "Users")',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            alert(response);
+        }
+    });
+});
+</script>

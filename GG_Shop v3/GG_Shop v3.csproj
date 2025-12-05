@@ -137,6 +137,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="Controllers\PromotionsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\U_shopController.cs" />
     <Compile Include="Global.asax.cs">
@@ -4664,6 +4665,10 @@
     <Content Include="Views\U_shop\Index.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Shared\_Layout_Login.cshtml" />
+    <Content Include="Views\Promotions\Index.cshtml" />
+    <Content Include="Views\Promotions\Edit.cshtml" />
+    <Content Include="Views\Promotions\Create.cshtml" />
+    <Content Include="Views\Promotions\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

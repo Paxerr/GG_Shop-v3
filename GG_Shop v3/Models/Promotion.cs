@@ -19,21 +19,20 @@ namespace GG_Shop_v3.Models
         [MaxLength(255)]
         public string Description { get; set; }
 
+        [Required]
         public decimal? Discount_Percentage { get; set; }
+        [Required]
 
         public decimal? Discount_Amount { get; set; }
-
+        [Required]
         public DateTime Start_Date { get; set; }
-
+        [Required]
         public DateTime End_Date { get; set; }
 
         public decimal? Min_Order_Value { get; set; }
-
         public int Uses_Count { get; set; }
 
-        [MaxLength(20)]
+        [Required]
         public string Status { get; set; }
-
-        public virtual ICollection<Order> Orders { get; set; }
     }
 }

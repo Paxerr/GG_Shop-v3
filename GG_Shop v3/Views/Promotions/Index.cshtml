@@ -1,0 +1,147 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout_admin.cshtml";
+}
+
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="mb-0">Danh sách chương trình giảm giá (Promotions)</h4>
+                    </div>
+                    <a href="@Url.Action("Create", "Promotions")" class="btn btn-primary add-list">
+                        <i></i>Thêm mã giảm giá
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="table-responsive rounded mb-3">
+
+                    <table id="datatable" class="data-table table mb-0 tbl-server-info">
+                        <thead class="bg-white text-uppercase">
+                            <tr class="ligth ligth-data">
+                                <th>Mã giảm giá</th>
+                                <th>Mô tả</th>
+                                <th>Số lượt đã dùng</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ligth-body">
+                        </tbody>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    @*pop-up xóa mã gg*@
+    <div class="modal fade" id="deleModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">Xác nhận xóa</h5>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc muốn dừng chương trình giảm giá này?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-warning mt-2" data-dismiss="modal">Hủy</button>
+                    <button id="confirmDele" class="btn btn-warning mt-2">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+@section scripts {
+    <script>
+
+    $(document).ready(function () {
+
+        var UserId = 0;
+
+    function loadUserTable(){
+        $.ajax({
+            url: '@Url.Action("getPromotionsList", "Promotions")',
+            type: 'POST',
+            success: function (rs) {
+                var tbody = $("#datatable tbody");
+                tbody.empty();
+
+                rs.forEach(function (u) {
+                    tbody.append(`
+                    <tr>
+                        <td>${u.Promo_Code}</td>
+                        <td>${u.Description}</td>
+                        <td>${u.Uses_Count}</td>
+                        <td>${u.Start_Date}</td>
+                        <td>${u.End_Date}</td>
+                        <td>${u.Status}</td>
+                        <td>
+                            <div class="d-flex align-items-center list-action">
+                                    <a class="badge badge-info mr-2" href="/Promotions/Details/${u.Id}">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                    <a class="badge bg-success mr-2" href="/Promotions/Edit/${u.Id}">
+                                        <i class="ri-pencil-line"></i>
+                                    </a>
+                                    <a class="badge bg-warning mr-2 btn-delete-promotions" data-id="${u.Id}">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </a>
+                              </div>
+                        </td>
+                    </tr>
+                `);
+                });
+                $('#datatable').DataTable();
+            },
+            error: function () {
+                alert('Lỗi hệ thống');
+            }
+        });
+        };
+
+    loadUserTable();
+
+    // Khi nhấn nút XÓA
+        $(document).on("click", ".btn-delete-promotions", function () {
+        PromoId = $(this).data("id");
+        $("#deleModal").modal("show");
+    });
+
+
+    // Xác nhận xóa
+    $("#confirmDele").click(function () {
+
+        $.ajax({
+            url: "/Users/delePromotions",
+            type: "POST",
+            data: { id: PromoId },
+            success: function (rs) {
+                $("#BanModal").modal("hide");
+
+                // load lại bảng
+                $("#datatable").DataTable().destroy();
+                loadUserTable();
+            },
+            error: function () {
+                alert("Lỗi hệ thống!");
+            }
+        });
+    });
+
+    });
+
+
+
+    </script>
+}
