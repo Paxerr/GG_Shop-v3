@@ -46,7 +46,7 @@ namespace GG_Shop_v3.Controllers
                 });
             }
 
-            // ⭐⭐ LƯU SESSION TẠI ĐÂY ⭐⭐
+            // bước lưu secction
             Session["User"] = user;
 
             return Json(new
@@ -180,15 +180,15 @@ namespace GG_Shop_v3.Controllers
                 return Json(new { success = false, message = "Vui lòng nhập đầy đủ thông tin" });
             }
 
-            // ❌ Email trùng
+            // kiểm tra trùng email
             if (db.users.Any(x => x.Email == model.Email))
                 return Json(new { success = false, message = "Email đã được sử dụng" });
 
-            // ❌ Username trùng
+            // kiểm tra trùng username
             if (db.users.Any(x => x.Username == model.Username))
                 return Json(new { success = false, message = "Tên đăng nhập đã tồn tại" });
 
-            // ❌ Phone trùng
+            // kiểm tra trung sdt
             if (db.users.Any(x => x.Phone_Number == model.PhoneNumber))
                 return Json(new { success = false, message = "Số điện thoại đã tồn tại" });
 

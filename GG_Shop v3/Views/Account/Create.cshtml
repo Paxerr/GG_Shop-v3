@@ -102,68 +102,64 @@
 </div>
 
 @section Scripts {
-    <script>
-        // --------------------------
-        // 🔍 Validate realtime Email
-        // --------------------------
-        $("#Email").on("blur", function () {
-            $.post("/Account/CheckEmail", { email: $(this).val() }, function (res) {
-                $("#EmailError").text(res.exists ? "Email đã tồn tại" : "");
-            });
+<script>
+    // check email
+    $("#Email").on("blur", function () {
+        $.post("/Account/CheckEmail", { email: $(this).val() }, function (res) {
+            $("#EmailError").text(res.exists ? "Email đã tồn tại" : "");
         });
+    });
 
-        // 🔍 Validate realtime Username
-        $("#Username").on("blur", function () {
-            $.post("/Account/CheckUsername", { username: $(this).val() }, function (res) {
-                $("#UsernameError").text(res.exists ? "Tên đăng nhập đã tồn tại" : "");
-            });
+    // check username
+    $("#Username").on("blur", function () {
+        $.post("/Account/CheckUsername", { username: $(this).val() }, function (res) {
+            $("#UsernameError").text(res.exists ? "Tên đăng nhập đã tồn tại" : "");
         });
+    });
 
-        // 🔍 Validate realtime Phone
-        $("#Phone_Number").on("blur", function () {
-            $.post("/Account/CheckPhone", { phone: $(this).val() }, function (res) {
-                $("#PhoneError").text(res.exists ? "Số điện thoại đã tồn tại" : "");
-            });
+    // check PhoneNumber
+    $("#Phone_Number").on("blur", function () {
+        $.post("/Account/CheckPhone", { phone: $(this).val() }, function (res) {
+            $("#PhoneError").text(res.exists ? "Số điện thoại đã tồn tại" : "");
         });
+    });
 
-        // 👁 Toggle password
-        $(".password-toggle").click(function () {
-            const input = $(this).siblings("input");
-            const type = input.attr("type") === "password" ? "text" : "password";
-            input.attr("type", type);
-            $(this).toggleClass("active");
-        });
+    // tonggle password
+    $(".password-toggle").click(function () {
+        const input = $(this).siblings("input");
+        const type = input.attr("type") === "password" ? "text" : "password";
+        input.attr("type", type);
+        $(this).toggleClass("active");
+    });
 
-        // ----------------------------------------
-        // 🚀 Submit AJAX Create Account
-        // ----------------------------------------
-        $("#registerForm").submit(function (e) {
-            e.preventDefault();
+    // Submit
+    $("#registerForm").submit(function (e) {
+        e.preventDefault();
 
-            $("#registerSubmit .btn-text").hide();
-            $("#registerSubmit .btn-spinner").removeClass("hidden");
+        $("#registerSubmit .btn-text").hide();
+        $("#registerSubmit .btn-spinner").removeClass("hidden");
 
-            $.ajax({
-                url: "/Account/Create",
-                method: "POST",
-                data: $("#registerForm").serialize(),
-                success: function (res) {
-                    $("#registerSubmit .btn-spinner").addClass("hidden");
-                    $("#registerSubmit .btn-text").show();
+        $.ajax({
+            url: "/Account/Create",
+            method: "POST",
+            data: $("#registerForm").serialize(),
+            success: function (res) {
+                $("#registerSubmit .btn-spinner").addClass("hidden");
+                $("#registerSubmit .btn-text").show();
 
-                    if (res.success) {
-                        alert(res.message);
-                        window.location.href = res.redirectUrl;
-                    } else {
-                        $("#registerGlobalError").text(res.message);
-                    }
-                },
-                error: function () {
-                    $("#registerSubmit .btn-spinner").addClass("hidden");
-                    $("#registerSubmit .btn-text").show();
-                    $("#registerGlobalError").text("Có lỗi xảy ra.");
+                if (res.success) {
+                    alert(res.message);
+                    window.location.href = res.redirectUrl;
+                } else {
+                    $("#registerGlobalError").text(res.message);
                 }
-            });
+            },
+            error: function () {
+                $("#registerSubmit .btn-spinner").addClass("hidden");
+                $("#registerSubmit .btn-text").show();
+                $("#registerGlobalError").text("Có lỗi xảy ra.");
+            }
         });
-    </script>
+    });
+</script>
 }
