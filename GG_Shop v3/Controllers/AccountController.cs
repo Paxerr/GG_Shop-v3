@@ -3,7 +3,6 @@ using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 
 namespace GG_Shop_v3.Controllers
@@ -12,74 +11,53 @@ namespace GG_Shop_v3.Controllers
     {
         private readonly DataContext db = new DataContext();
 
-        // GET: Account/Login
+        // GET: Login
         public ActionResult Login()
         {
             return View();
         }
 
+        // POST: Login (AJAX)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                if (Request.IsAjaxRequest())
+                return Json(new
                 {
-                    var errors = ModelState.Where(x => x.Value.Errors.Any())
+                    success = false,
+                    errors = ModelState.Where(x => x.Value.Errors.Any())
                         .ToDictionary(
                             kv => kv.Key,
                             kv => kv.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                        );
-
-                    return Json(new { success = false, errors });
-                }
-
-                return View(model);
+                        )
+                });
             }
 
             var user = await db.users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
             if (user == null || user.Password != model.Password)
             {
-                ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
-
-                if (Request.IsAjaxRequest())
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        errors = new { _global = new[] { "Email hoặc mật khẩu không đúng" } }
-                    });
-                }
-
-                return View(model);
-            }
-
-            // Lưu session
-            Session["User"] = new { user.Id, user.Email, user.Full_Name };
-            Session["RememberMe"] = model.RememberMe;
-
-            // Nếu muốn lưu cookie:
-            if (model.RememberMe)
-            {
-                HttpCookie cookie = new HttpCookie("UserEmail", user.Email);
-                cookie.Expires = DateTime.Now.AddDays(7);
-                Response.Cookies.Add(cookie);
-            }
-
-            if (Request.IsAjaxRequest())
-            {
                 return Json(new
                 {
-                    success = true,
-                    redirectUrl = Url.Action("Index", "Home")
+                    success = false,
+                    errors = new { _global = new[] { "Email hoặc mật khẩu không đúng" } }
                 });
             }
 
-            return RedirectToAction("Index", "Home");
+            // ⭐⭐ LƯU SESSION TẠI ĐÂY ⭐⭐
+            Session["User"] = user;
+
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("Index", "Home")
+            });
         }
 
+
+        // POST: Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Logout()
@@ -88,13 +66,186 @@ namespace GG_Shop_v3.Controllers
             return RedirectToAction("Login", "Account");
         }
 
-        protected override void Dispose(bool disposing)
+        // GET: Forgot Password
+        public ActionResult ForgotPassword()
         {
-            if (disposing)
-            {
-                db?.Dispose();
-            }
-            base.Dispose(disposing);
+            return View();
         }
+
+        // POST: Forgot Password (AJAX)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Vui lòng nhập email hợp lệ."
+                });
+            }
+
+            var user = db.users.FirstOrDefault(x => x.Email == model.Email);
+
+            if (user == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Email không tồn tại trong hệ thống"
+                });
+            }
+
+            string code = Guid.NewGuid().ToString();
+            Session["ResetCode"] = code;
+            Session["ResetEmail"] = model.Email;
+
+            return Json(new
+            {
+                success = true,
+                message = "Mã xác nhận đã được gửi đến email.",
+                redirectUrl = Url.Action("ResetPassword")
+            });
+        }
+
+        // GET: Reset Password
+        public ActionResult ResetPassword()
+        {
+            if (Session["ResetEmail"] == null)
+                return RedirectToAction("ForgotPassword");
+
+            return View();
+        }
+
+        // POST: Reset Password (AJAX)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = ModelState.Where(x => x.Value.Errors.Any())
+                        .ToDictionary(
+                            kv => kv.Key,
+                            kv => kv.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        )
+                });
+            }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = new { _global = new[] { "Mật khẩu xác nhận không khớp" } }
+                });
+            }
+
+            var user = db.users.FirstOrDefault(x => x.Email == model.Email);
+            if (user == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = new { _global = new[] { "Không tìm thấy người dùng" } }
+                });
+            }
+
+            user.Password = model.NewPassword;
+            db.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                message = "Đặt lại mật khẩu thành công!",
+                redirectUrl = Url.Action("Login")
+            });
+        }
+
+        public ActionResult Create()
+        {
+            return View("Create");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult Create(CreateViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { success = false, message = "Vui lòng nhập đầy đủ thông tin" });
+            }
+
+            // ❌ Email trùng
+            if (db.users.Any(x => x.Email == model.Email))
+                return Json(new { success = false, message = "Email đã được sử dụng" });
+
+            // ❌ Username trùng
+            if (db.users.Any(x => x.Username == model.Username))
+                return Json(new { success = false, message = "Tên đăng nhập đã tồn tại" });
+
+            // ❌ Phone trùng
+            if (db.users.Any(x => x.Phone_Number == model.PhoneNumber))
+                return Json(new { success = false, message = "Số điện thoại đã tồn tại" });
+
+            try
+            {
+                User u = new User
+                {
+                    Username = model.Username,
+                    Email = model.Email,
+                    Password = model.Password,
+                    Full_Name = model.FullName,
+                    Phone_Number = model.PhoneNumber,
+                    Country = model.Country,
+                    Orders = 0,
+                    Rank = "Bronze",
+                    Total_Spent = 0,
+                    Role = "User",
+                    Status = "Hoạt động"
+                };
+
+                db.users.Add(u);
+                db.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Tạo tài khoản thành công!",
+                    redirectUrl = Url.Action("Login", "Account")
+                });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: Không thể tạo tài khoản" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult CheckEmail(string email)
+        {
+            bool exists = db.users.Any(x => x.Email == email);
+            return Json(new { exists });
+        }
+
+        [HttpPost]
+        public JsonResult CheckUsername(string username)
+        {
+            bool exists = db.users.Any(x => x.Username == username);
+            return Json(new { exists });
+        }
+
+        [HttpPost]
+        public JsonResult CheckPhone(string phone)
+        {
+            bool exists = db.users.Any(x => x.Phone_Number == phone);
+            return Json(new { exists });
+        }
+
+
     }
 }

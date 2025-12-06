@@ -1,59 +1,112 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout_Login.cshtml";
-    ViewBag.Title = "Đăng nhập";
+    ViewBag.Title = "Đăng Nhập";
 }
 
 <div class="login-wrapper">
     <div class="login-header">
         <h2>Đăng Nhập</h2>
-        <p>Nhập thông tin tài khoản</p>
+        <p>Vui lòng nhập thông tin tài khoản !</p>
     </div>
 
-    @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm", @class = "login-form" }))
-    {
+    <form id="loginForm" class="login-form">
         @Html.AntiForgeryToken()
 
+        <!-- Email -->
         <div class="input-group">
             <div class="input-wrapper">
-                <label for="Email" class="sr-only">Email address</label>
-                <input id="Email" name="Email" type="email" class="form-control" placeholder="Địa chỉ Email" required />
+                <input id="Email" name="Email" type="email"
+                       class="form-control"
+                       placeholder="Địa chỉ Email" required />
             </div>
-            <span class="error-message" id="emailError" aria-live="polite"></span>
+            <span class="error-message text-danger" id="emailError"></span>
         </div>
 
+        <!-- Password -->
         <div class="input-group">
             <div class="input-wrapper password-wrapper">
-                <label for="Password" class="sr-only">Password</label>
-                <input id="Password" name="Password" type="password" class="form-control" placeholder="Mật khẩu" required />
-                <button class="password-toggle" type="button" aria-label="Toggle password visibility">
+                <input id="Password" name="Password" type="password"
+                       class="form-control"
+                       placeholder="Mật khẩu" required />
+
+                <button class="password-toggle" type="button">
                     <i class="fa-solid fa-eye"></i>
                     <i class="fa-solid fa-eye-slash"></i>
                 </button>
             </div>
-            <span class="error-message" id="passwordError" aria-live="polite"></span>
+            <span class="error-message text-danger" id="passwordError"></span>
         </div>
 
+        <!-- Forgot -->
         <div class="form-options">
-            <label class="remember-wrapper">
-                <input id="RememberMe" name="RememberMe" type="checkbox" />
-                <span>Ghi nhớ</span>
-            </label>
-            <a class="forgot-password" href="@Url.Action("ForgotPassword", "Account")">Quên mật khẩu</a>
+            <a class="forgot-password"
+               href="@Url.Action("ForgotPassword", "Account")">
+                Quên mật khẩu
+            </a>
         </div>
 
+        <!-- Submit -->
         <div class="input-group mt-3">
             <button type="submit" class="login-btn" id="loginSubmit">
                 <span class="btn-text">Đăng Nhập</span>
-                <span class="btn-spinner hidden" aria-hidden="true"></span>
+                <span class="btn-spinner hidden"></span>
             </button>
         </div>
-    }
+    </form>
 
     <div class="login-card-footer">
-        <small>Chưa có tài khoản? <a href="@Url.Action("Register", "Account")">Tạo tài khoản</a></small>
+        <small>
+            Chưa có tài khoản?
+            <a href="@Url.Action("Create", "Account")">Tạo tài khoản</a>
+        </small>
     </div>
+
+
 </div>
 
 @section Scripts {
-    <script src="~/Scripts/js/Login.js"></script>
+    <script>
+        $("#loginForm").submit(function (e) {
+            e.preventDefault();
+
+            $("#emailError").text("");
+            $("#passwordError").text("");
+
+            $("#loginSubmit").prop("disabled", true);
+
+            $.ajax({
+                url: "/Account/Login",
+                method: "POST",
+                data: $("#loginForm").serialize(),
+                success: function (res) {
+                    if (res.success) {
+                        window.location.href = res.redirectUrl;
+                    } else {
+                        if (res.errors) {
+                            if (res.errors.Email)
+                                $("#emailError").text(res.errors.Email[0]);
+                            if (res.errors.Password)
+                                $("#passwordError").text(res.errors.Password[0]);
+                            if (res.errors._global)
+                                $("#passwordError").text(res.errors._global[0]);
+                        }
+                    }
+                },
+                error: function () {
+                    $("#passwordError").text("Có lỗi xảy ra. Vui lòng thử lại.");
+                },
+                complete: function () {
+                    $("#loginSubmit").prop("disabled", false);
+                }
+            });
+        });
+
+        // Toggle password
+        $(".password-toggle").click(function () {
+            const input = $("#Password");
+            const type = input.attr("type") === "password" ? "text" : "password";
+            input.attr("type", type);
+            $(this).toggleClass("active");
+        });
+    </script>
 }

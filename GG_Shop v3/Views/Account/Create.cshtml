@@ -1,0 +1,169 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout_Login.cshtml";
+    ViewBag.Title = "Tạo tài khoản";
+}
+
+<div class="login-wrapper">
+    <div class="login-header">
+        <h2>Tạo Tài Khoản</h2>
+        <p>Nhập thông tin để đăng ký</p>
+    </div>
+
+    <form id="registerForm" class="login-form">
+        @Html.AntiForgeryToken()
+
+        <!-- Full Name -->
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input id="FullName" name="FullName" type="text"
+                       class="form-control" placeholder="Họ và tên" required />
+            </div>
+            <span class="error-message" id="FullNameError"></span>
+        </div>
+
+        <!-- Email -->
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input id="Email" name="Email" type="email"
+                       class="form-control" placeholder="Email" required />
+            </div>
+            <span class="error-message" id="EmailError"></span>
+        </div>
+
+        <!-- Username -->
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input id="Username" name="Username" type="text"
+                       class="form-control" placeholder="Tên đăng nhập" required />
+            </div>
+            <span class="error-message" id="UsernameError"></span>
+        </div>
+
+        <!-- Phone -->
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input id="Phone_Number" name="Phone_Number" type="text"
+                       class="form-control" placeholder="Số điện thoại" required />
+            </div>
+            <span class="error-message" id="PhoneError"></span>
+        </div>
+
+        <!-- Country -->
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input id="Country" name="Country" type="text" value="Vietnam"
+                       class="form-control" placeholder="Quốc gia" required />
+            </div>
+            <span class="error-message" id="CountryError"></span>
+        </div>
+
+        <!-- Password -->
+        <div class="input-group">
+            <div class="input-wrapper password-wrapper">
+                <input id="Password" name="Password" type="password"
+                       class="form-control" placeholder="Mật khẩu" required />
+
+                <button class="password-toggle" type="button">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+            <span class="error-message" id="PasswordError"></span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="input-group">
+            <div class="input-wrapper password-wrapper">
+                <input id="ConfirmPassword" name="ConfirmPassword" type="password"
+                       class="form-control" placeholder="Xác nhận mật khẩu" required />
+
+                <button class="password-toggle" type="button">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+            <span class="error-message" id="ConfirmPasswordError"></span>
+        </div>
+
+        <span id="registerGlobalError" class="text-danger"></span>
+
+        <div class="input-group mt-3">
+            <button type="submit" class="login-btn" id="registerSubmit">
+                <span class="btn-text">Tạo tài khoản</span>
+                <span class="btn-spinner hidden"></span>
+            </button>
+        </div>
+    </form>
+
+    <div class="login-card-footer">
+        <small>
+            Đã có tài khoản?
+            <a href="@Url.Action("Login", "Account")">Đăng nhập</a>
+        </small>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --------------------------
+        // 🔍 Validate realtime Email
+        // --------------------------
+        $("#Email").on("blur", function () {
+            $.post("/Account/CheckEmail", { email: $(this).val() }, function (res) {
+                $("#EmailError").text(res.exists ? "Email đã tồn tại" : "");
+            });
+        });
+
+        // 🔍 Validate realtime Username
+        $("#Username").on("blur", function () {
+            $.post("/Account/CheckUsername", { username: $(this).val() }, function (res) {
+                $("#UsernameError").text(res.exists ? "Tên đăng nhập đã tồn tại" : "");
+            });
+        });
+
+        // 🔍 Validate realtime Phone
+        $("#Phone_Number").on("blur", function () {
+            $.post("/Account/CheckPhone", { phone: $(this).val() }, function (res) {
+                $("#PhoneError").text(res.exists ? "Số điện thoại đã tồn tại" : "");
+            });
+        });
+
+        // 👁 Toggle password
+        $(".password-toggle").click(function () {
+            const input = $(this).siblings("input");
+            const type = input.attr("type") === "password" ? "text" : "password";
+            input.attr("type", type);
+            $(this).toggleClass("active");
+        });
+
+        // ----------------------------------------
+        // 🚀 Submit AJAX Create Account
+        // ----------------------------------------
+        $("#registerForm").submit(function (e) {
+            e.preventDefault();
+
+            $("#registerSubmit .btn-text").hide();
+            $("#registerSubmit .btn-spinner").removeClass("hidden");
+
+            $.ajax({
+                url: "/Account/Create",
+                method: "POST",
+                data: $("#registerForm").serialize(),
+                success: function (res) {
+                    $("#registerSubmit .btn-spinner").addClass("hidden");
+                    $("#registerSubmit .btn-text").show();
+
+                    if (res.success) {
+                        alert(res.message);
+                        window.location.href = res.redirectUrl;
+                    } else {
+                        $("#registerGlobalError").text(res.message);
+                    }
+                },
+                error: function () {
+                    $("#registerSubmit .btn-spinner").addClass("hidden");
+                    $("#registerSubmit .btn-text").show();
+                    $("#registerGlobalError").text("Có lỗi xảy ra.");
+                }
+            });
+        });
+    </script>
+}

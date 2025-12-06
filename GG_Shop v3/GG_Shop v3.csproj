@@ -147,7 +147,7 @@
     <Compile Include="Models\Cart_Item.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\DataContext.cs" />
-    <Compile Include="Models\Login.cs" />
+    <Compile Include="Models\Account.cs" />
     <Compile Include="Models\Order_Item.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\Payment_Details.cs" />
@@ -163,7 +163,7 @@
     <Content Include="Content\css\elegant-icons.css" />
     <Content Include="Content\css\font-awesome.min.css" />
     <Content Include="Content\css\jquery-ui.min.css" />
-    <Content Include="Content\css\Login.css" />
+    <Content Include="Content\css\login.css" />
     <Content Include="Content\css\magnific-popup.css" />
     <Content Include="Content\css\nice-select.css" />
     <Content Include="Content\css\owl.carousel.min.css" />
@@ -4603,16 +4603,17 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\js\bootstrap.min.js" />
+    <Content Include="Scripts\js\ForgotPassword.js" />
     <Content Include="Scripts\js\jquery-3.3.1.min.js" />
     <Content Include="Scripts\js\jquery.countdown.min.js" />
     <Content Include="Scripts\js\jquery.magnific-popup.min.js" />
     <Content Include="Scripts\js\jquery.nice-select.min.js" />
     <Content Include="Scripts\js\jquery.nicescroll.min.js" />
     <Content Include="Scripts\js\jquery.slicknav.js" />
-    <Content Include="Scripts\js\Login.js" />
     <Content Include="Scripts\js\main.js" />
     <Content Include="Scripts\js\mixitup.min.js" />
     <Content Include="Scripts\js\owl.carousel.min.js" />
+    <Content Include="Scripts\js\ResetPassword.js" />
     <Content Include="Scripts\js_admin\animated.js" />
     <Content Include="Scripts\js_admin\app.js" />
     <Content Include="Scripts\js_admin\backend-bundle.min.js" />
@@ -4669,6 +4670,9 @@
     <Content Include="Views\Promotions\Edit.cshtml" />
     <Content Include="Views\Promotions\Create.cshtml" />
     <Content Include="Views\Promotions\Details.cshtml" />
+    <Content Include="Views\Account\ForgotPassword.cshtml" />
+    <Content Include="Views\Account\ResetPassword.cshtml" />
+    <Content Include="Views\Account\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

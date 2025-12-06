@@ -1,266 +1,163 @@
-﻿
-/* ---------- Root / Base ---------- */
-root {
+﻿/* ---------- Root / Base ---------- */
+:root {
+    --card-width: 520px;
+}
+
+/* Background */
+body {
     min-height: 100vh;
     display: flex;
-    align-items: flex-start; 
+    align-items: center;
     justify-content: center;
-    padding-top: 6vh;
     background: var(--login-bg);
+    margin: 0;
+    padding: 0;
 }
 
-
-/* Page background (nếu cần) */
-body {
-    background: var(--login-bg);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* ---------- Container / Card ---------- */
+/* ---------- Login Card ---------- */
 .login-wrapper {
-    max-width: 480px; 
-    margin: 8vh auto 0; 
+    width: 520px;
     background: var(--card-bg);
-    padding: 32px;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(22,27,34,0.08);
-    border: 1px solid rgba(15,23,42,0.04);
+    padding: 48px 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 55px rgba(0,0,0,0.12);
+    border: 1px solid rgba(15,23,42,0.06);
+    display: flex;
+    margin-top: 100px;
+    flex-direction: column;
+    align-items: stretch;
 }
 
-    /* Header */
-    .login-wrapper .login-header {
-        text-align: center;
-        margin-bottom: 14px;
+/* Header */
+.login-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+    .login-header h2 {
+        font-size: 1.9rem;
+        font-weight: 700;
+        margin-bottom: 10px;
     }
 
-        .login-wrapper .login-header h2 {
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin: 0 0 6px;
-            color: var(--text);
-        }
+    .login-header p {
+        font-size: 1.1rem;
+        color: var(--muted);
+    }
 
-        .login-wrapper .login-header p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
-
-/* ---------- Form controls ---------- */
-.input-group {
-    margin-bottom: 14px;
+/* ---------- Form ---------- */
+.login-form {
+    width: 100%;
 }
 
-/* Input wrapper to allow icon button on right */
+.input-group {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
 .input-wrapper {
+    width: 100%;
     position: relative;
 }
 
-    .input-wrapper .form-control {
-        width: 100%;
-        height: 44px;
-        padding: 10px 44px 10px 12px;
-        border-radius: 8px;
-        box-sizing: border-box;
-        border: 1px solid var(--input-border);
-        background: #fbfdff;
-        color: var(--text);
-        box-shadow: none;
-        transition: border-color .15s ease, box-shadow .15s ease;
-        font-size: 0.95rem;
-    }
-
-        .input-wrapper .form-control::placeholder {
-            color: #9aa4b2;
-        }
-
-        .input-wrapper .form-control:focus {
-            outline: none;
-            border-color: var(--primary-500);
-            box-shadow: 0 6px 18px rgba(37,99,235,0.08);
-        }
-
-/* If you use labels visually hidden for accessibility */
-.sr-only {
-    position: absolute !important;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0,0,0,0);
-    border: 0;
+.form-control {
+    width: 100%;
+    height: 52px;
+    padding: 12px 48px 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(15,23,42,0.09);
+    background: white;
+    font-size: 1.08rem;
 }
 
-/* Password toggle button (eye) */
+    .form-control:focus {
+        border-color: var(--primary-500);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.15);
+    }
+
+/* ---------- Password Toggle FIXED ---------- */
 .password-wrapper .password-toggle {
-    position: absolute;
-    right: 8px;
+    position: absolute !important; /* FIX TRÔI XUỐNG */
+    right: 14px !important; /* nằm sát cạnh phải */
     top: 50%;
     transform: translateY(-50%);
     border: none;
     background: transparent;
-    padding: 6px;
     cursor: pointer;
+    font-size: 20px;
     color: var(--muted);
-    font-size: 16px;
+    padding: 0;
 }
 
-    .password-wrapper .password-toggle:focus {
-        outline: none;
-    }
+.password-toggle .fa-eye-slash {
+    display: none;
+}
 
-    /* Toggle icon visibility classes (works with JS toggling .visible) */
-    .password-wrapper .password-toggle .fa-eye {
-        display: inline-block;
-    }
+.password-toggle.active .fa-eye {
+    display: none;
+}
 
-    .password-wrapper .password-toggle .fa-eye-slash {
-        display: none;
-    }
+.password-toggle.active .fa-eye-slash {
+    display: inline-block;
+}
 
-    .password-wrapper .password-toggle.visible .fa-eye {
-        display: none;
-    }
+/* ---------- Error message ---------- */
+.error-message {
+    font-size: 13.5px;
+    margin-top: 5px;
+    color: #e63946;
+}
 
-    .password-wrapper .password-toggle.visible .fa-eye-slash {
-        display: inline-block;
-    }
-
-/* ---------- Options row ---------- */
+/* ---------- Forgot password ---------- */
 .form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 6px;
+    width: 100%;
+    text-align: right;
     margin-bottom: 12px;
-    font-size: 0.92rem;
-    color: #374151;
 }
 
-.remember-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-}
-
-    .remember-wrapper input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        accent-color: var(--primary-500);
-        cursor: pointer;
-    }
-
-/* Forgot link */
 .forgot-password {
+    font-size: 0.95rem;
     color: var(--primary-500);
     text-decoration: none;
+    transition: color .15s ease;
 }
 
+    /* FIX hover không bị trắng nữa */
     .forgot-password:hover {
+        color: #1d4ed8 !important; /* xanh đậm hơn */
         text-decoration: underline;
     }
 
 /* ---------- Button ---------- */
 .login-btn {
     width: 100%;
-    height: 44px;
-    border-radius: 8px;
+    height: 52px;
+    border-radius: 12px;
     border: none;
     background: linear-gradient(180deg, #3b82f6, #2563eb);
-    color: #fff;
+    color: white;
+    font-size: 1.25rem;
     font-weight: 600;
-    font-size: 0.98rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: transform .06s ease, box-shadow .06s ease, opacity .12s ease;
     cursor: pointer;
+    box-shadow: 0 6px 18px rgba(37,99,235,0.25);
 }
 
-    .login-btn:active {
-        transform: translateY(1px);
+    .login-btn:hover {
+        box-shadow: 0 8px 22px rgba(37,99,235,0.33);
     }
 
-    .login-btn:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-
-    /* Spinner inside button (hidden by default) */
-    .login-btn .btn-spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255,255,255,0.35);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin .8s linear infinite;
-        display: inline-block;
-    }
-
-        .login-btn .btn-spinner.hidden {
-            display: none;
-        }
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* ---------- Error messages ---------- */
-.error-message {
-    color: var(--danger);
-    font-size: 0.85rem;
-    margin-top: 6px;
-    min-height: 18px;
-}
-
-/* Footer small text */
-.login-footer {
-    text-align: center;
-    margin-top: 12px;
-    color: var(--muted);
-    font-size: 0.9rem;
-}
-
-/* ---------- Card footer (link) ---------- */
+/* ---------- Footer ---------- */
 .login-card-footer {
-    margin-top: 12px;
     text-align: center;
-    font-size: 0.9rem;
+    margin-top: 20px;
     color: var(--muted);
 }
 
     .login-card-footer a {
         color: var(--primary-500);
-        text-decoration: none;
     }
 
         .login-card-footer a:hover {
             text-decoration: underline;
         }
-
-/* ---------- Small helpers ---------- */
-.text-center {
-    text-align: center;
-}
-
-.mt-3 {
-    margin-top: 1rem;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 480px) {
-    .login-wrapper {
-        margin: 4vh 16px;
-        padding: 20px;
-    }
-
-        .login-wrapper .login-header h2 {
-            font-size: 1.25rem;
-        }
-}
