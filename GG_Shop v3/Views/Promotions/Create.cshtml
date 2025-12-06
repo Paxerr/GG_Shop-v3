@@ -4,89 +4,105 @@
 }
 <div class="content-page">
     <div class="container-fluid">
-        <form id="create_user" data-toggle="validator" role="form">
+        <form id="create_promotion" data-toggle="validator" role="form" novalidate>
             <div class="row">
 
+                <!-- Promo Code -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label>Tên tài khoản *</label>
-                        <input type="text" class="form-control" name="username" required
-                               data-required-error="Vui lòng nhập tên tài khoản">
+                        <label>Mã giảm giá *</label>
+                        <input type="text" class="form-control" name="Promo_Code"
+                               required data-required-error="Vui lòng nhập mã giảm giá">
                         <div class="help-block with-errors"></div>
                     </div>
                 </div>
 
+                <!-- Description -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label>Email *</label>
-                        <input type="email" class="form-control" name="email" required
-                               data-required-error="Vui lòng nhập email"
-                               data-type-error="Email không hợp lệ">
+                        <label>Mô tả *</label>
+                        <input type="text" class="form-control" name="Description"
+                               required data-required-error="Vui lòng nhập mô tả">
                         <div class="help-block with-errors"></div>
                     </div>
                 </div>
 
+                <!-- Type -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label>Mật khẩu *</label>
-                        <input type="password" class="form-control" name="password"
-                               required data-minlength="6"
-                               data-required-error="Vui lòng nhập mật khẩu"
-                               data-minlength-error="Mật khẩu phải từ 6 ký tự trở lên">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Tên người dùng *</label>
-                        <input type="text" class="form-control" name="full_name" required
-                               data-required-error="Vui lòng nhập tên người dùng">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Số điện thoại *</label>
-                        <input type="text" class="form-control" name="phone_number" required
-                               pattern="^[0-9]{10,11}$"
-                               data-required-error="Vui lòng nhập số điện thoại"
-                               data-pattern-error="Số điện thoại phải gồm 10–11 chữ số">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Quốc gia *</label>
-                        <input type="text" class="form-control" name="country" required
-                               data-required-error="Vui lòng nhập quốc gia">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Cấp bậc *</label>
-                        <select class="form-control" name="slc_rank" required
-                                data-required-error="Vui lòng chọn cấp bậc">
+                        <label>Loại giảm giá *</label>
+                        <select class="form-control" id="promoType" name="Type"
+                                required data-required-error="Vui lòng chọn loại giảm giá">
                             <option value="">-- Chọn --</option>
-                            <option value="Vip">Vip</option>
-                            <option value="Thường">Thường</option>
+                            <option value="Giảm theo %">Giảm theo %</option>
+                            <option value="Giảm theo số tiền">Giảm theo số tiền</option>
                         </select>
                         <div class="help-block with-errors"></div>
                     </div>
                 </div>
 
-                <div class="col-md-12">
+                <!-- Discount Percentage -->
+                <div class="col-md-6" id="percentGroup" style="display:none;">
                     <div class="form-group">
-                        <label>Vai trò *</label>
-                        <select class="form-control" name="slc_role" required
-                                data-required-error="Vui lòng chọn vai trò">
+                        <label>Phần trăm giảm (%) *</label>
+                        <input type="number" class="form-control" name="Discount_Percentage"
+                               min="1" max="100"
+                               data-required-error="Vui lòng nhập phần trăm giảm">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <!-- Discount Amount -->
+                <div class="col-md-6" id="amountGroup" style="display:none;">
+                    <div class="form-group">
+                        <label>Số tiền giảm (VNĐ) *</label>
+                        <input type="number" class="form-control" name="Discount_Amount"
+                               min="1"
+                               data-required-error="Vui lòng nhập số tiền giảm">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <!-- Start date -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Ngày bắt đầu *</label>
+                        <input type="date" class="form-control" name="Start_Date"
+                               required data-required-error="Vui lòng chọn ngày bắt đầu">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <!-- End date -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Ngày kết thúc *</label>
+                        <input type="date" class="form-control" name="End_Date"
+                               required data-required-error="Vui lòng chọn ngày kết thúc">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <!-- Min order value -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Giá trị đơn hàng tối thiểu *</label>
+                        <input type="number" class="form-control" name="Min_Order_Value"
+                               required min="0"
+                               data-required-error="Vui lòng nhập giá trị tối thiểu">
+                        <div class="help-block with-errors"></div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Trạng thái *</label>
+                        <select class="form-control" name="Status"
+                                required data-required-error="Vui lòng chọn trạng thái">
                             <option value="">-- Chọn --</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Khách hàng">Khách hàng</option>
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Ngừng hoạt động">Ngừng hoạt động</option>
                         </select>
                         <div class="help-block with-errors"></div>
                     </div>
@@ -94,31 +110,89 @@
 
             </div>
 
-            <button type="submit" class="btn btn-primary mr-2" id="create">Thêm người dùng</button>
+            <button type="submit" class="btn btn-primary mr-2">Tạo mã giảm giá</button>
             <button type="reset" class="btn btn-danger">Làm mới</button>
         </form>
     </div>
 </div>
+
 <script>
-$('#create_user').validator().on('submit', function (e) {
-    if (e.isDefaultPrevented()) {
-        return; // có lỗi → validator sẽ hiển thị
-    }
+    $(function () {
 
-    e.preventDefault(); // hợp lệ → gửi AJAX
+        // Hàm bật/tắt required % giảm
+        function setPercentRequired(on) {
+            var $el = $("input[name='Discount_Percentage']");
+            $el.prop("required", on);
 
-    var form = $('#create_user')[0];
-    var formData = new FormData(form);
-
-    $.ajax({
-        type: "POST",
-        url: '@Url.Action("Insert", "Users")',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (response) {
-            alert(response);
+            if (on) {
+                $el.attr("data-required-error", "Vui lòng nhập phần trăm giảm");
+            } else {
+                $el.removeAttr("data-required-error");
+                $el.val("");
+                $el.closest('.form-group').find('.help-block.with-errors').empty();
+            }
         }
+
+        // Hàm bật/tắt required số tiền giảm
+        function setAmountRequired(on) {
+            var $el = $("input[name='Discount_Amount']");
+            $el.prop("required", on);
+
+            if (on) {
+                $el.attr("data-required-error", "Vui lòng nhập số tiền giảm");
+            } else {
+                $el.removeAttr("data-required-error");
+                $el.val("");
+                $el.closest('.form-group').find('.help-block.with-errors').empty();
+            }
+        }
+
+        // Khi load trang tắt cả 2
+        setPercentRequired(false);
+        setAmountRequired(false);
+        $("#percentGroup, #amountGroup").hide();
+
+        // Khi đổi loại giảm giá
+        $("#promoType").on("change", function () {
+            var type = $(this).val();
+
+            // reset
+            $("#percentGroup, #amountGroup").hide();
+            setPercentRequired(false);
+            setAmountRequired(false);
+
+            if (type === "Giảm theo %") {
+                $("#percentGroup").show();
+                setPercentRequired(true);
+            } else if (type === "Giảm theo số tiền") {
+                $("#amountGroup").show();
+                setAmountRequired(true);
+            }
+        });
+
+        // AJAX submit
+        $("#create_promotion").validator().on("submit", function (e) {
+            if (e.isDefaultPrevented()) return;
+
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Insert", "Promotions")',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    alert(res);
+                },
+                error: function () {
+                    alert("Lỗi hệ thống!");
+                }
+            });
+        });
+
     });
-});
 </script>
+
