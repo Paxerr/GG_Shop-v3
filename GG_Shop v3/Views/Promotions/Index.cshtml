@@ -67,7 +67,7 @@
 
     $(document).ready(function () {
 
-        var UserId = 0;
+        var PromoId;
 
     function loadUserTable(){
         $.ajax({
@@ -113,7 +113,7 @@
     loadUserTable();
 
     // Khi nhấn nút XÓA
-        $(document).on("click", ".btn-delete-promotions", function () {
+    $(document).on("click", ".btn-delete-promotions", function () {
         PromoId = $(this).data("id");
         $("#deleModal").modal("show");
     });
@@ -123,12 +123,12 @@
     $("#confirmDele").click(function () {
 
         $.ajax({
-            url: "/Users/delePromotions",
+            url: "/Promotions/delePromotions",
             type: "POST",
             data: { id: PromoId },
             success: function (rs) {
-                $("#BanModal").modal("hide");
-
+                $("#deleModal").modal("hide");
+                alert(rs);
                 // load lại bảng
                 $("#datatable").DataTable().destroy();
                 loadUserTable();

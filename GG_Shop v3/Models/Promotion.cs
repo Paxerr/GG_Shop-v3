@@ -18,10 +18,9 @@ namespace GG_Shop_v3.Models
 
         [MaxLength(255)]
         public string Description { get; set; }
-
         [Required]
+        public string Type { get; set; }
         public decimal? Discount_Percentage { get; set; }
-        [Required]
 
         public decimal? Discount_Amount { get; set; }
         [Required]
@@ -31,8 +30,6 @@ namespace GG_Shop_v3.Models
 
         public decimal? Min_Order_Value { get; set; }
         public int Uses_Count { get; set; }
-
-        [Required]
         public string Status { get; set; }
     }
 }
