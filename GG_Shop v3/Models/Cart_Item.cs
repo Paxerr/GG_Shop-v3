@@ -17,7 +17,7 @@ namespace GG_Shop_v3.Models
         public int Cart_Id { get; set; }
 
         [ForeignKey("Product_Sku")]
-        public int Sku_Id { get; set; }
+        public int Product_Sku_Id { get; set; }
 
         public int Quantity { get; set; }
 

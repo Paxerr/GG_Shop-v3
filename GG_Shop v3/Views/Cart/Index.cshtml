@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Content/cart.css" />
+
+<section class="content-header">
+    <div class="container-fluid">
+        <h1>GIỎ HÀNG</h1>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <!-- bảng sản phẩm -->
+            <div class="col-md-8">
+                <div class="card cart-box">
+                    <div class="card-header">
+                        <h3 class="card-title">Sản phẩm</h3>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <table class="table table-striped cart-table">
+                            <thead>
+                                <tr>
+                                    <th>Ảnh</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Thành tiền</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="cartBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="/U_shop/Index" class="btn btn-secondary">
+                            ← Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng thanh toán -->
+            <div class="col-md-4">
+                <div class="card order-summary">
+                    <div class="card-header">
+                        <h4 class="summary-title">THÔNG TIN ĐƠN HÀNG</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="summary-row">
+                            <span>Tạm tính:</span>
+                            <span id="subTotal">0₫</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Phí ship:</span>
+                            <span>0₫</span>
+                        </div>
+
+                        <!-- Mã giảm giá -->
+                        <div class="discount-box mt-3">
+                            <label>Mã giảm giá</label>
+                            <div class="input-group">
+                                <input id="promoCode" type="text" class="form-control" placeholder="Nhập mã giảm giá...">
+                                <button class="btn btn-info" onclick="applyPromo()">Áp dụng</button>
+                            </div>
+                            <p id="promoMessage" class="text-success mt-1" style="display:none"></p>
+                        </div>
+
+                        <hr />
+
+                        <div class="summary-total">
+                            <span>Thành tiền:</span>
+                            <span id="totalPrice">0₫</span>
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-3">THANH TOÁN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+    let orderTotal = 0;    // giá chưa giảm
+    let discountAmount = 0; // tiền giảm
+
+    loadCart();
+
+    function loadCart() {
+        $.get("/Cart/GetCart", function (res) {
+
+            if (!res.success || !res.cart || res.cart.Items.length === 0) {
+                $("#cartBody").html("<tr><td colspan='6' class='text-center py-4'>Giỏ hàng trống</td></tr>");
+                $("#subTotal").text("0₫");
+                $("#totalPrice").text("0₫");
+                return;
+            }
+
+            let html = "";
+            orderTotal = 0;
+
+            res.cart.Items.forEach(item => {
+
+                let sum = item.Product.Price * item.Quantity;
+                orderTotal += sum;
+
+                html += `
+                    <tr>
+                        <td><img src="${item.Product.Image}" class="cart-img"></td>
+
+                        <td>
+                            <b>${item.Product.Name}</b><br/>
+                            ${item.Product.Color ?? ''} / ${item.Product.Size ?? ''}
+                        </td>
+
+                        <td>${item.Product.Price.toLocaleString()}₫</td>
+
+                        <td>
+                            <input type="number" class="form-control qty-input"
+                                   value="${item.Quantity}"
+                                   onchange="updateQty(${item.Id}, this.value)">
+                        </td>
+
+                        <td>${sum.toLocaleString()}₫</td>
+
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.Id})">
+                                X
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            $("#cartBody").html(html);
+            updateTotal();
+        });
+    }
+
+    function updateTotal() {
+        $("#subTotal").text(orderTotal.toLocaleString() + "₫");
+        $("#totalPrice").text((orderTotal - discountAmount).toLocaleString() + "₫");
+    }
+
+    function updateQty(id, qty) {
+        if (qty <= 0) return;
+        $.post("/Cart/UpdateQty", { id: id, qty: qty }, loadCart);
+    }
+
+    function deleteItem(id) {
+        if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
+        $.post("/Cart/DeleteItem", { id: id }, loadCart);
+    }
+
+    // Áp mã giảm giá
+    function applyPromo() {
+
+        let code = $("#promoCode").val().trim();
+
+        if (code === "") {
+            alert("Vui lòng nhập mã giảm giá!");
+            return;
+        }
+
+        $.post("/Cart/ApplyPromotion", { code: code }, function (res) {
+
+            if (!res.success) {
+                $("#promoMessage").removeClass("text-success").addClass("text-danger")
+                    .text(res.message).show();
+                discountAmount = 0;
+                updateTotal();
+                return;
+            }
+
+            discountAmount = res.discount;
+
+            $("#promoMessage")
+                .removeClass("text-danger")
+                .addClass("text-success")
+                .text("Áp dụng mã giảm giá thành công!")
+                .show();
+
+            updateTotal();
+        });
+    }
+
+</script>
+}
