@@ -1,5 +1,4 @@
-﻿<!-- Header Section Begin -->
-<header class="header">
+﻿<header class="header">
     <div class="header__top">
         <div class="container">
             <div class="row">
@@ -10,18 +9,41 @@
                 </div>
                 <div class="col-lg-6 col-md-5">
                     <div class="header__top__right">
+
                         <div class="header__top__links">
-                            <a href="#">Sign in</a>
-                            @*<a href="#">FAQs</a>*@
+                            @if (Session["User"] == null)
+                            {
+                                // 1. CHƯA ĐĂNG NHẬP: Hiển thị icon Đăng nhập
+                                <a href="@Url.Action("Login", "Account")" title="Đăng nhập">
+                                    <i class="fa fa-sign-in"></i> Đăng nhập
+                                </a>
+                            }
+                            else
+                            {
+                                // 2. ĐÃ ĐĂNG NHẬP: Hiển thị Dropdown menu
+
+                                // Đặt class 'dropdown' lên container chính
+                                <div class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Tài khoản cá nhân">
+                                        <i class="fa fa-user-circle"></i> Tài khoản
+                                    </a>
+
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
+                                            <p style="color : black ">Thông tin Tài khoản</p>
+                                        </a>
+                                        <a class="dropdown-item" href="@Url.Action("MyOrders", "Order")">
+                                            <p style="color : black ">Đơn hàng</p>
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="@Url.Action("Logout", "Account")">
+                                            <p style="color : black ">Đăng xuất</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
                         </div>
-                        @*<div class="header__top__hover">
-                            <span>Usd <i class="arrow_carrot-down"></i></span>
-                            <ul>
-                                <li>USD</li>
-                                <li>EUR</li>
-                                <li>USD</li>
-                            </ul>
-                        </div>*@
+                        @*<div class="header__top__hover"> ... *@
                     </div>
                 </div>
             </div>
@@ -57,13 +79,10 @@
             <div class="col-lg-3 col-md-3">
                 <div class="header__nav__option">
                     <a href="#" class="search-switch"><img src="~/Content/img/icon/search.png" alt=""></a>
-                    @*<a href="#"><img src="~/Content/img/icon/heart.png" alt=""></a>*@
                     <a href="#"><img src="~/Content/img/icon/cart.png" alt=""> <span>0</span></a>
-                    @*<div class="price">$0.00</div>*@
                 </div>
             </div>
         </div>
         <div class="canvas__open"><i class="fa fa-bars"></i></div>
     </div>
 </header>
-<!-- Header Section End -->
