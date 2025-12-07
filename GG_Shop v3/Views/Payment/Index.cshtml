@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/css/payment.css" rel="stylesheet" />
+
+<div class="payment-container container">
+
+    <!-- Breadcrumb -->
+    <div class="payment-breadcrumb">
+        <a href="/Cart/Index">Giỏ hàng</a>
+        <span>/</span>
+        <span>Thanh toán</span>
+    </div>
+
+    <div class="row">
+
+        <!-- LEFT -->
+        <div class="col-lg-7 col-md-7 col-12 payment-left">
+
+            <h3 class="payment-title">Thông tin giao hàng</h3>
+
+            <form id="PaymentForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label>Họ và tên</label>
+                    <input id="FullName" name="FullName" class="payment-input" required />
+                </div>
+
+                <!-- Email + Phone -->
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label>Email</label>
+                        <input id="Email" name="Email" class="payment-input" required />
+                    </div>
+                    <div class="form-group col">
+                        <label>Số điện thoại</label>
+                        <input id="Phone" name="Phone" class="payment-input" required />
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="form-group">
+                    <label>Địa chỉ</label>
+                    <input id="Address" name="Address" class="payment-input" required />
+                </div>
+
+                <!-- City / District / Ward -->
+                <div class="form-row">
+                    <div class="form-group col">
+                        <label>Tỉnh/TP</label>
+                        <select id="City" class="payment-input"></select>
+                    </div>
+                    <div class="form-group col">
+                        <label>Quận/Huyện</label>
+                        <select id="District" class="payment-input"></select>
+                    </div>
+                    <div class="form-group col">
+                        <label>Phường/Xã</label>
+                        <select id="Ward" class="payment-input"></select>
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div class="form-group">
+                    <label>Ghi chú</label>
+                    <textarea id="Note" class="payment-input" rows="3"></textarea>
+                </div>
+
+                <!-- Payment Method -->
+                <h4 class="payment-title mt-4">Phương thức thanh toán</h4>
+
+                <label class="payment-method">
+                    <input type="radio" name="PaymentMethod" value="COD" checked />
+                    Thanh toán khi nhận hàng (COD)
+                </label>
+
+                <span id="PaymentError" class="text-danger"></span>
+
+            </form>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-5 col-md-5 col-12 payment-right">
+
+            <div class="order-summary">
+
+                <h4 class="summary-title">Đơn hàng</h4>
+
+                <div id="OrderItems"></div>
+
+                <!-- Promo -->
+                <div class="promo-section">
+                    <input id="PromoCode" class="promo-input" placeholder="Mã giảm giá" />
+                    <button id="ApplyPromo" class="promo-btn">Dùng</button>
+                </div>
+
+                <hr />
+
+                <div class="summary-line">
+                    <span>Tổng cộng</span>
+                    <span id="TotalPrice">0₫</span>
+                </div>
+
+                <button id="SubmitOrder" class="submit-order-btn">
+                    Hoàn tất đơn hàng
+                </button>
+
+                <a href="/Cart/Index" class="back-cart-link">← Quay lại giỏ hàng</a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
