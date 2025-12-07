@@ -1,118 +1,93 @@
 ﻿using GG_Shop_v3.Models;
-using System;
-using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 
-namespace GG_Shop_v3.Controllers
+public class PaymentController : Controller
 {
-    public class PaymentController : Controller
+    private DataContext db = new DataContext();
+
+    // --- LOAD VIEW PAYMENT ---
+    public ActionResult Index()
     {
-        private DataContext db = new DataContext();
+        return View();
+    }
 
-        // GET: Payment
-        public ActionResult Index()
+    // --- LẤY GIỎ HÀNG NGƯỜI DÙNG ---
+    private Cart GetUserCart()
+    {
+        if (Session["UserId"] == null) return null;
+
+        int userId = (int)Session["UserId"];
+
+        return db.carts
+            .Include("Cart_Items.Product_Sku")
+            .Include("Cart_Items.Product_Sku.Product")
+            .Include("Cart_Items.Product_Sku.Product.Product_Images")
+            .FirstOrDefault(c => c.User_Id == userId);
+    }
+
+    // --- LOAD CART CHO PAYMENT ---
+    public JsonResult LoadPaymentCart()
+    {
+        var cart = GetUserCart();
+        if (cart == null)
         {
-            return View();
+            return Json(new
+            {
+                success = false,
+                items = new object[0],
+                total = 0
+            }, JsonRequestBehavior.AllowGet);
         }
 
-        // ===========================
-        //  XỬ LÝ THANH TOÁN / ĐẶT HÀNG
-        // ===========================
-        [HttpPost]
-        public JsonResult CreateOrder(int userId, string shippingAddress, string promoCode)
+        var items = cart.Cart_Items.Select(i => new
         {
-            try
-            {
-                // 1. Lấy cart theo user
-                var cart = db.carts
-                    .Include(c => c.Cart_Items.Select(ci => ci.Product_Sku))
-                    .FirstOrDefault(c => c.User_Id == userId);
+            Name = i.Product_Sku.Product.Title,
+            Price = i.Product_Sku.Price,
+            Quantity = i.Quantity
+        }).ToList();
 
-                if (cart == null || cart.Cart_Items.Count == 0)
-                {
-                    return Json(new { status = false, message = "Giỏ hàng đang trống!" });
-                }
+        var total = items.Sum(x => x.Price * x.Quantity);
 
-                // 2. Tính tổng tiền
-                decimal totalAmount = cart.Cart_Items.Sum(item =>
-                    item.Quantity * item.Product_Sku.Price
-                );
+        return Json(new { success = true, items = items, total = total },
+            JsonRequestBehavior.AllowGet);
+    }
 
-                // 3. Áp dụng mã giảm giá (nếu có)
-                Promotion promo = null;
-                if (!string.IsNullOrEmpty(promoCode))
-                {
-                    promo = db.promotions.FirstOrDefault(p =>
-                        p.Promo_Code == promoCode &&
-                        p.Status == "Active" &&
-                        DateTime.Now >= p.Start_Date &&
-                        DateTime.Now <= p.End_Date
-                    );
+    // --- ÁP MÃ GIẢM GIÁ ---
+    [HttpPost]
+    public JsonResult ApplyPromotion(string code)
+    {
+        var promo = db.promotions.FirstOrDefault(p => p.Promo_Code == code);
 
-                    if (promo != null)
-                    {
-                        if (promo.Type == "Giảm theo %")
-                        {
-                            totalAmount -= (totalAmount * (promo.Discount_Percentage ?? 0) / 100);
-                        }
-                        else if (promo.Type == "Giảm theo tiền")
-                        {
-                            totalAmount -= (promo.Discount_Amount ?? 0);
-                        }
+        if (promo == null)
+            return Json(new { success = false, msg = "Mã không hợp lệ!" });
 
-                        if (totalAmount < 0) totalAmount = 0;
-                    }
-                }
+        var cart = GetUserCart();
+        var subtotal = cart.Cart_Items.Sum(i => i.Quantity * i.Product_Sku.Price);
 
-                // 4. Tạo Order
-                var order = new Order()
-                {
-                    User_Id = userId,
-                    Total_Amount = totalAmount,
-                    Status = "Pending",
-                    Shipping_Address = shippingAddress,
-                    Promo_Id = promo?.Id,
-                    Created_At = DateTime.Now
-                };
+        decimal discount = 0;
+        string text = "";
 
-                db.orders.Add(order);
-                db.SaveChanges();
-
-                // 5. Tạo Order_Items
-                foreach (var item in cart.Cart_Items)
-                {
-                    var orderItem = new Order_Item()
-                    {
-                        Order_Id = order.Id,
-                        Sku_Id = item.Product_Sku_Id,
-                        Quantity = item.Quantity,
-                        Price = item.Product_Sku.Price
-                    };
-
-                    db.order_items.Add(orderItem);
-
-                    // 6. Trừ tồn kho
-                    item.Product_Sku.Quantity -= item.Quantity;
-                    db.Entry(item.Product_Sku).State = EntityState.Modified;
-                }
-
-                // 7. Xóa cart sau khi tạo order
-                db.cart_items.RemoveRange(cart.Cart_Items);
-
-                db.SaveChanges();
-
-                return Json(new
-                {
-                    status = true,
-                    message = "Đặt hàng thành công!",
-                    orderId = order.Id
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "Lỗi thanh toán!", error = ex.Message });
-            }
+        if (promo.Type == "PERCENT")
+        {
+            discount = subtotal * (promo.Discount_Percentage ?? 0) / 100;
+            text = "-" + promo.Discount_Percentage + "%";
         }
+        else if (promo.Type == "AMOUNT")
+        {
+            discount = promo.Discount_Amount ?? 0;
+            text = "-" + discount.ToString("N0") + "₫";
+        }
+        else if (promo.Type == "FREESHIP")
+        {
+            text = "Miễn phí vận chuyển";
+        }
+
+        return Json(new
+        {
+            success = true,
+            discount = discount,
+            text = text
+        });
     }
 }

@@ -106,8 +106,24 @@
     font-weight: 700;
 }
 
-/* Back to cart */
-.back-cart-link {
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.discount-box .input-group {
+    margin-top: 8px;
+}
+
+.btn-back-cart {
     display: block;
     margin-top: 15px;
     text-align: center;
@@ -115,3 +131,9 @@
     font-size: 14px;
     text-decoration: underline;
 }
+
+    .btn-back-cart:hover {
+        background-color: #084298; 
+        color: #fff;
+        text-decoration: none;
+    }

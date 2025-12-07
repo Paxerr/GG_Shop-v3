@@ -48,6 +48,7 @@ namespace GG_Shop_v3.Controllers
 
             // bước lưu secction
             Session["User"] = user;
+            Session["UserId"] = user.Id;
 
             return Json(new
             {

@@ -13,7 +13,6 @@
 
 <section class="content">
     <div class="container-fluid">
-
         <div class="row">
             <!-- bảng sản phẩm -->
             <div class="col-md-8">
@@ -26,17 +25,16 @@
                         <table class="table table-striped cart-table">
                             <thead>
                                 <tr>
-                                    <th>Ảnh</th>
+                                    <th style="width:100px">Ảnh</th>
                                     <th>Sản phẩm</th>
-                                    <th>Giá</th>
-                                    <th>Số lượng</th>
-                                    <th>Thành tiền</th>
-                                    <th></th>
+                                    <th style="width:120px">Giá</th>
+                                    <th style="width:110px">Số lượng</th>
+                                    <th style="width:140px">Thành tiền</th>
+                                    <th style="width:60px"></th>
                                 </tr>
                             </thead>
 
                             <tbody id="cartBody">
-
                             </tbody>
                         </table>
                     </div>
@@ -65,19 +63,8 @@
 
                         <div class="summary-row">
                             <span>Phí ship:</span>
-                            <span>0₫</span>
+                            <span id="shipFee">0₫</span>
                         </div>
-
-                        <!-- Mã giảm giá -->
-                        <div class="discount-box mt-3">
-                            <label>Mã giảm giá</label>
-                            <div class="input-group">
-                                <input id="promoCode" type="text" class="form-control" placeholder="Nhập mã giảm giá...">
-                                <button class="btn btn-info" onclick="applyPromo()">Áp dụng</button>
-                            </div>
-                            <p id="promoMessage" class="text-success mt-1" style="display:none"></p>
-                        </div>
-
                         <hr />
 
                         <div class="summary-total">
@@ -85,121 +72,106 @@
                             <span id="totalPrice">0₫</span>
                         </div>
 
-                        <button class="btn btn-primary btn-block mt-3">THANH TOÁN</button>
+                        <p class="mt-2">Bạn có thể nhập mã giảm giá ở trang thanh toán</p>
+                        <a href="/Payment/Index" class="btn btn-primary btn-block mt-3">ĐẶT HÀNG</a>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </section>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>
 
-    let orderTotal = 0;    // giá chưa giảm
-    let discountAmount = 0; // tiền giảm
+@section scripts {
+    <script>
 
-    loadCart();
+        $(document).ready(function () {
 
-    function loadCart() {
-        $.get("/Cart/GetCart", function (res) {
+            function loadCart() {
+                $.ajax({
+                    url: "/Cart/GetCart",
+                    type: "GET",
+                    success: function (rs) {
 
-            if (!res.success || !res.cart || res.cart.Items.length === 0) {
-                $("#cartBody").html("<tr><td colspan='6' class='text-center py-4'>Giỏ hàng trống</td></tr>");
-                $("#subTotal").text("0₫");
-                $("#totalPrice").text("0₫");
-                return;
-            }
+                        let body = $("#cartBody");
+                        body.empty();
 
-            let html = "";
-            orderTotal = 0;
+                        if (!rs.success || rs.items.length === 0) {
+                            body.append(`<tr><td colspan="5" class="text-center">Giỏ hàng trống</td></tr>`);
+                            return;
+                        }
 
-            res.cart.Items.forEach(item => {
+                        rs.items.forEach(function (i) {
 
-                let sum = item.Product.Price * item.Quantity;
-                orderTotal += sum;
+                            body.append(`
+                            <tr>
+                                <td><img src="${i.Product.Image}" class="cart-img"></td>
+                                <td>${i.Product.Name}<br><small>${i.Product.Color} / ${i.Product.Size}</small></td>
+                                <td>${formatMoney(i.Product.Price)}</td>
 
-                html += `
-                    <tr>
-                        <td><img src="${item.Product.Image}" class="cart-img"></td>
+                                <td>
+                                    <input type="number"
+                                           class="form-control qty-input update-qty"
+                                           data-id="${i.Id}"
+                                           value="${i.Quantity}">
+                                </td>
 
-                        <td>
-                            <b>${item.Product.Name}</b><br/>
-                            ${item.Product.Color ?? ''} / ${item.Product.Size ?? ''}
-                        </td>
+                                <td>${formatMoney(i.Product.Price * i.Quantity)}</td>
 
-                        <td>${item.Product.Price.toLocaleString()}₫</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm delete-item" data-id="${i.Id}">
+                                        Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                        });
 
-                        <td>
-                            <input type="number" class="form-control qty-input"
-                                   value="${item.Quantity}"
-                                   onchange="updateQty(${item.Id}, this.value)">
-                        </td>
+                        $("#cartTotal").text(formatMoney(rs.total));
+                    },
+                    error: function () {
+                        alert("Lỗi hệ thống!");
+                    }
+                });
+            };
 
-                        <td>${sum.toLocaleString()}₫</td>
+            loadCart();
 
-                        <td>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.Id})">
-                                X
-                            </button>
-                        </td>
-                    </tr>
-                `;
+            // Update SL
+            $(document).on("change", ".update-qty", function () {
+                let id = $(this).data("id");
+                let qty = $(this).val();
+
+                $.ajax({
+                    url: "/Cart/UpdateQuantity",
+                    type: "POST",
+                    data: { id: id, qty: qty },
+                    success: function () {
+                        loadCart();
+                    }
+                });
             });
 
-            $("#cartBody").html(html);
-            updateTotal();
+            // Xóa item
+            $(document).on("click", ".delete-item", function () {
+                let id = $(this).data("id");
+
+                $.ajax({
+                    url: "/Cart/DeleteItem",
+                    type: "POST",
+                    data: { id: id },
+                    success: function () {
+                        loadCart();
+                    }
+                });
+            });
+
         });
-    }
 
-    function updateTotal() {
-        $("#subTotal").text(orderTotal.toLocaleString() + "₫");
-        $("#totalPrice").text((orderTotal - discountAmount).toLocaleString() + "₫");
-    }
-
-    function updateQty(id, qty) {
-        if (qty <= 0) return;
-        $.post("/Cart/UpdateQty", { id: id, qty: qty }, loadCart);
-    }
-
-    function deleteItem(id) {
-        if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
-        $.post("/Cart/DeleteItem", { id: id }, loadCart);
-    }
-
-    // Áp mã giảm giá
-    function applyPromo() {
-
-        let code = $("#promoCode").val().trim();
-
-        if (code === "") {
-            alert("Vui lòng nhập mã giảm giá!");
-            return;
+        function formatMoney(num) {
+            return num.toLocaleString("vi-VN") + "₫";
         }
 
-        $.post("/Cart/ApplyPromotion", { code: code }, function (res) {
-
-            if (!res.success) {
-                $("#promoMessage").removeClass("text-success").addClass("text-danger")
-                    .text(res.message).show();
-                discountAmount = 0;
-                updateTotal();
-                return;
-            }
-
-            discountAmount = res.discount;
-
-            $("#promoMessage")
-                .removeClass("text-danger")
-                .addClass("text-success")
-                .text("Áp dụng mã giảm giá thành công!")
-                .show();
-
-            updateTotal();
-        });
-    }
-
-</script>
+    </script>
 }
