@@ -15,25 +15,25 @@
 
                     <div class="checkout__input">
                         <p>Họ Tên<span>*</span></p>
-                        <input id="FullName" type="text">
+                        <input id="FullName" type="text"readonly>
                     </div>
 
                     <div class="checkout__input">
                         <p>Địa chỉ<span>*</span></p>
-                        <input id="Country" type="text" class="checkout__input__add">
+                        <input id="shipping_address" type="text" class="checkout__input__add">
                     </div>
 
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="checkout__input">
                                 <p>SĐT<span>*</span></p>
-                                <input id="Phone" type="text">
+                                <input id="Phone" type="text"readonly>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="checkout__input">
                                 <p>Email<span>*</span></p>
-                                <input id="Email" type="text">
+                                <input id="Email" type="text"readonly>
                             </div>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                     $("#FullName").val(res.user.Full_Name);
                     $("#Email").val(res.user.Email);
                     $("#Phone").val(res.user.Phone_Number);
-                    $("#Country").val(res.user.Country);
+                    
 
                     let html = '';
                     let total = 0;
@@ -119,10 +119,10 @@
                 method: 'POST',
                 data: {
                     fullName: $("#FullName").val(),
-                    country: $("#Country").val(),
+                    shipping_address: $("#shipping_address").val(),
                     phone: $("#Phone").val(),
                     email: $("#Email").val(),
-                    note: $("#Note").val()
+                    
                 },
                 success: function (res) {
                     if (res.success) {

@@ -29,10 +29,10 @@ namespace GG_Shop_v3.Controllers
         {
             try
             {
-                Session["User_Id"] = 1;
+                
                 if (Session["User_Id"] == null)
                 {
-                    return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "", Country = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
+                    return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
                 }
                 int userId = (int)Session["User_Id"];
                 Session["User_Id"] = 1;
@@ -45,7 +45,7 @@ namespace GG_Shop_v3.Controllers
                         Full_Name = "",
                         Email = "",
                         Phone_Number = "",
-                        Country = ""
+                        
                     };
 
                     return Json(new { user = emptyUser, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
@@ -79,7 +79,7 @@ namespace GG_Shop_v3.Controllers
                         user.Full_Name,
                         user.Email,
                         user.Phone_Number,
-                        user.Country
+                        
                     },
                     cartItems = cartItemsList
                 };
@@ -94,14 +94,14 @@ namespace GG_Shop_v3.Controllers
         }
 
         [HttpPost]
-        public JsonResult PlaceOrder(string fullName, string country, string phone, string email, string note)
+        public JsonResult PlaceOrder( string shipping_address)
         {
             try
             {
-                Session["User_Id"] = 1;
+                
                 if (Session["User_Id"] == null)
                 {
-                    return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "", Country = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
+                    return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
                 }
                 int userId = (int)Session["User_Id"];
                 Session["User_Id"] = 1;
@@ -117,7 +117,7 @@ namespace GG_Shop_v3.Controllers
                 var order = new Order
                 {
                     User_Id = userId,
-                    Shipping_Address = country ?? "",
+                    Shipping_Address = shipping_address ?? "",
                     Total_Amount = total,
                     Created_At = DateTime.Now,
                     Status = "Đang xử lý"
