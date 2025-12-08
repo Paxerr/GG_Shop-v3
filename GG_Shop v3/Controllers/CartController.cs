@@ -8,35 +8,33 @@ public class CartController : Controller
 {
     private DataContext db = new DataContext();
 
-    // VIEW INDEX - giữ session test ở đây chỉ khi bạn muốn test nhanh.
+    // VIEW CART
     public ActionResult Index()
     {
-        //Session["UserId"] = 6; //DÙNG ĐỂ TEST
 
-        // Nếu chưa login, redirect sang login, ( NẾU TEST THÌ COMMENT CÁI NÀY LẠI)
-        if (Session["UserId"] == null)
+        if (Session["User_Id"] == null)
         {
-             Session["ReturnUrl"] = Url.Action("Index", "Cart");
-             return RedirectToAction("Login", "Account");
+            Session["ReturnUrl"] = Url.Action("Index", "Cart");
+            return RedirectToAction("Login", "Account");
         }
 
         return View();
     }
 
+    // Lấy user id từ Session
     private int? CurrentUserId
     {
         get
         {
-            if (Session["UserId"] == null) return null;
-            int tmp;
-            return int.TryParse(Session["UserId"].ToString(), out tmp) ? (int?)tmp : null;
+            if (Session["User_Id"] == null) return null;
+            int uid;
+            return int.TryParse(Session["User_Id"].ToString(), out uid) ? (int?)uid : null;
         }
     }
 
-    // HELP: lấy giỏ hàng của user theo Session + Include đầy đủ
+    // Lấy giỏ hàng 
     private Cart GetUserCart(int userId)
     {
-        // load đầy đủ liên quan, tránh lazy-loading null
         return db.carts
             .Include(c => c.Cart_Items)
             .Include(c => c.Cart_Items.Select(ci => ci.Product_Sku))
@@ -45,47 +43,35 @@ public class CartController : Controller
             .FirstOrDefault(c => c.User_Id == userId);
     }
 
-    // JSON API
+    // GET CART JSON
     public JsonResult GetCart()
     {
         try
         {
             var uid = CurrentUserId;
             if (uid == null)
-            {
-                // Trả về rõ ràng cho client biết chưa login
                 return Json(new { success = false, msg = "NOT_LOGIN", items = new object[0], total = 0 }, JsonRequestBehavior.AllowGet);
-            }
 
             var cart = GetUserCart(uid.Value);
 
-            if (cart == null || cart.Cart_Items == null || !cart.Cart_Items.Any())
-            {
+            if (cart == null || !cart.Cart_Items.Any())
                 return Json(new { success = true, items = new object[0], total = 0 }, JsonRequestBehavior.AllowGet);
-            }
 
             var items = cart.Cart_Items.Select(ci =>
             {
-                // Lấy ảnh chính hoặc ảnh đầu tiên
                 var mainImg = ci.Product_Sku?.Product?.Product_Images?.FirstOrDefault(i => i.Is_Main == true)?.Image_Url
                               ?? ci.Product_Sku?.Product?.Product_Images?.FirstOrDefault()?.Image_Url;
 
-                // Normalize image URL -> trả về site-root-relative hoặc absolute
-                string imageUrl = Url.Content("~/uploads/products/no-image.png"); // default fallback (đảm bảo file exist)
+                string imageUrl = Url.Content("~/uploads/products/no-image.png");
+
                 if (!string.IsNullOrEmpty(mainImg))
                 {
                     mainImg = mainImg.Trim();
-                    // nếu bắt đầu bằng http/https hoặc / -> dùng nguyên
-                    if (mainImg.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-                        || mainImg.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
-                        || mainImg.StartsWith("/"))
-                    {
+
+                    if (mainImg.StartsWith("http") || mainImg.StartsWith("/"))
                         imageUrl = mainImg;
-                    }
                     else
-                    {
-                        imageUrl = Url.Content("~/uploads/products/") + mainImg;
-                    }
+                        imageUrl = Url.Content("~/uploads/products/" + mainImg);
                 }
 
                 return new
@@ -95,7 +81,7 @@ public class CartController : Controller
                     Product = new
                     {
                         Name = ci.Product_Sku?.Product?.Title ?? "",
-                        Price = ci.Product_Sku != null ? ci.Product_Sku.Price : 0,
+                        Price = ci.Product_Sku?.Price ?? 0,
                         Color = ci.Product_Sku?.Color,
                         Size = ci.Product_Sku?.Size,
                         Image = imageUrl
@@ -103,25 +89,24 @@ public class CartController : Controller
                 };
             }).ToList();
 
-            var total = items.Sum(x => (decimal)x.Product.Price * x.Quantity);
+            var total = items.Sum(x => x.Product.Price * x.Quantity);
 
             return Json(new { success = true, items = items, total = total }, JsonRequestBehavior.AllowGet);
         }
         catch (Exception ex)
         {
-            // Trả lỗi có ích cho debug (cẩn thận khi deploy production)
-            return Json(new { success = false, msg = ex.Message, items = new object[0], total = 0 }, JsonRequestBehavior.AllowGet);
+            return Json(new { success = false, msg = ex.Message }, JsonRequestBehavior.AllowGet);
         }
     }
 
-    // Update số lượng
+    // UPDATE QTY
     [HttpPost]
     public JsonResult UpdateQuantity(int id, int qty)
     {
         try
         {
             var item = db.cart_items.Find(id);
-            if (item == null) return Json(new { success = false, msg = "Sản phẩm không tồn tại" });
+            if (item == null) return Json(new { success = false, msg = "Không tìm thấy sản phẩm" });
 
             if (qty <= 0) qty = 1;
             item.Quantity = qty;
@@ -135,14 +120,14 @@ public class CartController : Controller
         }
     }
 
-    // Xóa item
+    // DELETE ITEM
     [HttpPost]
     public JsonResult DeleteItem(int id)
     {
         try
         {
             var item = db.cart_items.Find(id);
-            if (item == null) return Json(new { success = false, msg = "Không tìm thấy" });
+            if (item == null) return Json(new { success = false, msg = "Không tìm thấy sản phẩm" });
 
             db.cart_items.Remove(item);
             db.SaveChanges();
@@ -155,51 +140,38 @@ public class CartController : Controller
         }
     }
 
-    // Áp mã giảm giá (trả discount và text, code)
+    // APPLY PROMO (giảm ở giỏ – không lưu vào order)
     [HttpPost]
     public JsonResult ApplyPromotion(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
             return Json(new { success = false, msg = "Vui lòng nhập mã." });
 
-        var promo = db.promotions.FirstOrDefault(p =>
-            (p.Promo_Code != null && p.Promo_Code.ToUpper() == code.ToUpper())
-        );
-
-        if (promo == null) return Json(new { success = false, msg = "Mã không hợp lệ hoặc đã hết hạn." });
+        var promo = db.promotions.FirstOrDefault(p => p.Promo_Code.ToUpper() == code.ToUpper());
+        if (promo == null)
+            return Json(new { success = false, msg = "Mã giảm giá không hợp lệ." });
 
         var uid = CurrentUserId;
         if (uid == null) return Json(new { success = false, msg = "Bạn chưa đăng nhập." });
 
         var cart = GetUserCart(uid.Value);
-        if (cart == null || cart.Cart_Items == null || !cart.Cart_Items.Any())
+        if (cart == null || !cart.Cart_Items.Any())
             return Json(new { success = false, msg = "Giỏ hàng trống." });
 
-        decimal subtotal = cart.Cart_Items.Sum(i => i.Quantity * i.Product_Sku.Price);
+        decimal subtotal = cart.Cart_Items.Sum(c => c.Quantity * c.Product_Sku.Price);
         decimal discount = 0;
-        string text = "";
-        string type = (promo.Type ?? "").ToString().ToUpper();
+
+        string type = promo.Type?.ToUpper() ?? "";
 
         if (type.Contains("PERCENT"))
-        {
-            var pct = (promo.Discount_Percentage ?? 0);
-            discount = subtotal * pct / 100m;
-            text = "-" + pct.ToString("0.#") + "%";
-        }
+            discount = subtotal * (promo.Discount_Percentage ?? 0) / 100m;
         else if (type.Contains("AMOUNT"))
-        {
-            discount = (promo.Discount_Amount ?? 0);
-            text = "-" + discount.ToString("N0") + "₫";
-        }
-        else if (type.Contains("FREESHIP"))
-        {
-            text = "Miễn phí vận chuyển";
-        }
+            discount = promo.Discount_Amount ?? 0;
 
-        return Json(new { success = true, discount = discount, text = text, code = (promo.Promo_Code) });
+        return Json(new { success = true, discount = discount, code = promo.Promo_Code });
     }
 
-    // PlaceOrder: tạo order, trừ tồn kho, xóa cart_items, trả redirectUrl
+    // PLACE ORDER 
     [HttpPost]
     public JsonResult PlaceOrder(string shippingAddress, string promoCode)
     {
@@ -209,75 +181,56 @@ public class CartController : Controller
             if (uid == null) return Json(new { success = false, msg = "Bạn chưa đăng nhập." });
 
             var cart = GetUserCart(uid.Value);
-            if (cart == null || !cart.Cart_Items.Any()) return Json(new { success = false, msg = "Giỏ hàng trống." });
+            if (cart == null || !cart.Cart_Items.Any())
+                return Json(new { success = false, msg = "Giỏ hàng trống." });
 
-            decimal subtotal = cart.Cart_Items.Sum(i => i.Quantity * i.Product_Sku.Price);
-            decimal discount = 0;
-            Promotion promo = null;
+            // Tổng tiền (KHÔNG ÁP PROMO)
+            decimal total = cart.Cart_Items.Sum(i => i.Product_Sku.Price * i.Quantity);
 
-            if (!string.IsNullOrWhiteSpace(promoCode))
-            {
-                promo = db.promotions.FirstOrDefault(p =>
-                    (p.Promo_Code != null && p.Promo_Code.ToUpper() == promoCode.ToUpper())
-                );
-                if (promo != null)
-                {
-                    string type = (promo.Type ?? "").ToString().ToUpper();
-                    if (type.Contains("PERCENT"))
-                    {
-                        var pct = (promo.Discount_Percentage ?? 0);
-                        discount = subtotal * pct / 100m;
-                    }
-                    else if (type.Contains("AMOUNT"))
-                    {
-                        discount = (promo.Discount_Amount ?? 0);
-                    }
-                }
-            }
-
-            decimal totalAmount = Math.Max(subtotal - discount, 0);
-
+            // Tạo đơn
             var order = new Order
             {
                 User_Id = uid.Value,
-                Total_Amount = totalAmount,
-                Status = "pending",
-                Shipping_Address = shippingAddress,
-                Promo_Id = promo?.Id ?? (int?)null,
-                Created_At = DateTime.Now
+                Shipping_Address = shippingAddress ?? "",
+                Total_Amount = total,
+                Created_At = DateTime.Now,
+                Status = "Đang xử lý"
             };
+
             db.orders.Add(order);
             db.SaveChanges();
 
+            // ORDER ITEMS + trừ tồn kho
             foreach (var item in cart.Cart_Items.ToList())
             {
-                if (item.Product_Sku.Quantity < item.Quantity)
-                    return Json(new { success = false, msg = "Sản phẩm " + item.Product_Sku.Product.Title + " không đủ số lượng." });
+                var sku = db.product_skus.FirstOrDefault(s => s.Id == item.Sku_Id);
 
-                var orderItem = new Order_Item
+                db.order_items.Add(new Order_Item
                 {
                     Order_Id = order.Id,
                     Sku_Id = item.Sku_Id,
                     Quantity = item.Quantity,
-                    Price = item.Product_Sku.Price
-                };
-                db.order_items.Add(orderItem);
+                    Price = sku?.Price ?? 0
+                });
 
-                item.Product_Sku.Quantity -= item.Quantity;
-                db.Entry(item.Product_Sku).State = EntityState.Modified;
+                if (sku != null)
+                    sku.Quantity = Math.Max(0, sku.Quantity - item.Quantity);
             }
 
+            // Clear cart
             db.cart_items.RemoveRange(cart.Cart_Items);
             db.SaveChanges();
 
-            string redirectUrl = Url.Action("Detail", "Order", new { id = order.Id });
-            if (string.IsNullOrWhiteSpace(redirectUrl)) redirectUrl = "/Order/Detail/" + order.Id;
+            // CHUYỂN TỚI TRANG ĐẶT HÀNG 
+            string redirectUrl = Url.Action("Index", "U_Orders");
+            if (string.IsNullOrWhiteSpace(redirectUrl))
+                redirectUrl = "/U_Orders/Index";
 
             return Json(new { success = true, redirectUrl = redirectUrl });
         }
         catch (Exception ex)
         {
-            return Json(new { success = false, msg = "Lỗi khi đặt hàng: " + ex.Message });
+            return Json(new { success = false, msg = ex.Message });
         }
     }
 }

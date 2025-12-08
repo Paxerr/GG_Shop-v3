@@ -35,7 +35,6 @@ namespace GG_Shop_v3.Controllers
                     return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
                 }
                 int userId = (int)Session["User_Id"];
-                Session["User_Id"] = 1;
                 // Lấy user, kiểm tra null
                 var user = db.users.FirstOrDefault(x => x.Id == userId);
                 if (user == null)
@@ -104,7 +103,6 @@ namespace GG_Shop_v3.Controllers
                     return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
                 }
                 int userId = (int)Session["User_Id"];
-                Session["User_Id"] = 1;
                 var cart = db.carts
                     .Include(c => c.Cart_Items.Select(ci => ci.Product_Sku))
                     .FirstOrDefault(c => c.User_Id == userId);

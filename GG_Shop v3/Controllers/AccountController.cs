@@ -31,12 +31,16 @@ namespace GG_Shop_v3.Controllers
 
             if (user == null || user.Password != model.Password)
             {
-                return Json(new { success = false, message = "Email hoặc mật khẩu không đúng" });
+                return Json(new
+                {
+                    success = false,
+                    errors = new { _global = new[] { "Email hoặc mật khẩu không đúng" } }
+                });
             }
 
             // LƯU SESSION
-            Session["UserId"] = user.Id;
             Session["User"] = user;
+            Session["User_Id"] = user.Id;
 
             // Nếu user được gửi từ Cart → quay lại Cart
             string returnUrl = Session["ReturnUrl"] != null ? Session["ReturnUrl"].ToString() : Url.Action("Index", "Home");

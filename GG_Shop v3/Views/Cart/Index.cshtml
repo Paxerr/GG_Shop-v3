@@ -2,7 +2,7 @@
     ViewBag.Title = "Giỏ hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var checkoutUrl = Url.Action("Index", "Payment"); // <-- đổi nếu cần
+    var checkoutUrl = Url.Action("Index", "Home"); 
 }
 
 <link rel="stylesheet" href="~/Content/css/cart.css" />
@@ -30,8 +30,8 @@
                                 <tr>
                                     <th style="width:100px">Ảnh</th>
                                     <th>Sản phẩm</th>
-                                    <th style="width:120px">Giá</th>
-                                    <th style="width:160px">Số lượng</th>
+                                    <th style="width:100px">Giá</th>
+                                    <th style="width:120px">Số lượng</th>
                                     <th style="width:140px">Thành tiền</th>
                                     <th style="width:60px"></th>
                                 </tr>
@@ -97,12 +97,12 @@
     <script>
 $(function () {
 
-    var checkoutUrl = '@checkoutUrl'; // URL SANG ĐẶT HÀNG
+    var checkoutUrl = '@checkoutUrl'; 
     var appliedDiscount = 0;
     var appliedCode = null;
     var shipFee = 0;
 
-    // helper escape để tránh phá vỡ HTML nếu tên sản phẩm có ký tự đặc biệt
+    // helper escape để tránh hỏng form 
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
         return String(text)
@@ -117,7 +117,6 @@ $(function () {
         return Number(n).toLocaleString('vi-VN') + "₫";
     }
 
-    // đảm bảo fallback tồn tại trên máy (thay đường dẫn nếu project của bạn dùng khác)
     var FALLBACK_IMAGE = '/uploads/products/no-image.png';
 
     function loadCart() {
@@ -147,10 +146,7 @@ $(function () {
                     var line = price * qty;
                     subtotal += line;
 
-                    // controller đã normalize Image, vẫn fallback nếu null
                     var image = it.Product.Image && it.Product.Image.trim() ? it.Product.Image.trim() : FALLBACK_IMAGE;
-
-                    // Tạo element bằng template literal an toàn
                     var tr = `
                         <tr>
                             <td>
@@ -283,7 +279,7 @@ $(function () {
             type: 'POST',
             data: { shippingAddress: '', promoCode: promoCode },
             success: function (res) {
-                btn.prop('disabled', false).text('THANH TOÁN');
+                btn.prop('disabled', false).text('ĐẶT HÀNG');
                 if (!res || !res.success) {
                     alert(res ? res.msg : 'Đặt hàng thất bại');
                     return;
