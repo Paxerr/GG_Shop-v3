@@ -140,6 +140,7 @@
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PromotionsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="Controllers\U_OrdersController.cs" />
     <Compile Include="Controllers\U_shopController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -4679,6 +4680,7 @@
     <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Views\Account\Create.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
+    <Content Include="Views\U_Orders\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
