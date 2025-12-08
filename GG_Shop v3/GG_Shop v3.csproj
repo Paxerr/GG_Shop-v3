@@ -137,7 +137,6 @@
     <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
-    <Compile Include="Controllers\PaymentController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PromotionsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
@@ -170,7 +169,6 @@
     <Content Include="Content\css\magnific-popup.css" />
     <Content Include="Content\css\nice-select.css" />
     <Content Include="Content\css\owl.carousel.min.css" />
-    <Content Include="Content\css\payment.css" />
     <Content Include="Content\css\slicknav.min.css" />
     <Content Include="Content\css\style.css" />
     <Content Include="Content\css_admin\backend-plugin.min.css" />
@@ -4657,6 +4655,7 @@
     <Content Include="uploads\products\03.png" />
     <Content Include="uploads\products\04.png" />
     <Content Include="uploads\products\05.png" />
+    <Content Include="uploads\products\057fe2be-1ac6-4ff7-8519-eb39c14c8e0c.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -4680,7 +4679,6 @@
     <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Views\Account\Create.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
-    <Content Include="Views\Payment\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

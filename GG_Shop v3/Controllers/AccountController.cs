@@ -24,37 +24,26 @@ namespace GG_Shop_v3.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return Json(new
-                {
-                    success = false,
-                    errors = ModelState.Where(x => x.Value.Errors.Any())
-                        .ToDictionary(
-                            kv => kv.Key,
-                            kv => kv.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                        )
-                });
+                return Json(new { success = false, message = "Thông tin không hợp lệ" });
             }
 
             var user = await db.users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
             if (user == null || user.Password != model.Password)
             {
-                return Json(new
-                {
-                    success = false,
-                    errors = new { _global = new[] { "Email hoặc mật khẩu không đúng" } }
-                });
+                return Json(new { success = false, message = "Email hoặc mật khẩu không đúng" });
             }
 
-            // bước lưu secction
-            Session["User"] = user;
+            // LƯU SESSION
             Session["UserId"] = user.Id;
+            Session["User"] = user;
 
-            return Json(new
-            {
-                success = true,
-                redirectUrl = Url.Action("Index", "Home")
-            });
+            // Nếu user được gửi từ Cart → quay lại Cart
+            string returnUrl = Session["ReturnUrl"] != null ? Session["ReturnUrl"].ToString() : Url.Action("Index", "Home");
+
+            Session.Remove("ReturnUrl");
+
+            return Json(new { success = true, redirectUrl = returnUrl });
         }
 
 
@@ -63,8 +52,8 @@ namespace GG_Shop_v3.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Logout()
         {
-            Session.Remove("User");
-            return RedirectToAction("Login", "Account");
+            Session.Clear();
+            return RedirectToAction("Login");
         }
 
         // GET: Forgot Password

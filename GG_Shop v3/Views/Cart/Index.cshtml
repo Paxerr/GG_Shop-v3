@@ -1,9 +1,11 @@
 ﻿@{
     ViewBag.Title = "Giỏ hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var checkoutUrl = Url.Action("Index", "Payment"); // <-- đổi nếu cần
 }
 
-<link rel="stylesheet" href="~/Content/cart.css" />
+<link rel="stylesheet" href="~/Content/css/cart.css" />
 
 <section class="content-header">
     <div class="container-fluid">
@@ -14,164 +16,288 @@
 <section class="content">
     <div class="container-fluid">
         <div class="row">
-            <!-- bảng sản phẩm -->
+            <!-- LEFT: product list -->
             <div class="col-md-8">
                 <div class="card cart-box">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title">Sản phẩm</h3>
+                        <small class="text-muted">Bạn có <span id="cartCount">0</span> sản phẩm</small>
                     </div>
 
                     <div class="card-body p-0">
-                        <table class="table table-striped cart-table">
+                        <table class="table cart-table">
                             <thead>
                                 <tr>
                                     <th style="width:100px">Ảnh</th>
                                     <th>Sản phẩm</th>
                                     <th style="width:120px">Giá</th>
-                                    <th style="width:110px">Số lượng</th>
+                                    <th style="width:160px">Số lượng</th>
                                     <th style="width:140px">Thành tiền</th>
                                     <th style="width:60px"></th>
                                 </tr>
                             </thead>
 
                             <tbody id="cartBody">
+                                <tr><td colspan="6" class="text-center py-4">Đang tải...</td></tr>
                             </tbody>
                         </table>
                     </div>
 
                     <div class="card-footer">
-                        <a href="/U_shop/Index" class="btn btn-secondary">
-                            ← Tiếp tục mua sắm
-                        </a>
+                        <div class="d-flex w-100 align-items-center">
+                            <input id="promoCodeCart" class="promo-input" placeholder="Mã giảm giá" />
+                            <button id="applyPromoCartBtn" class="btn btn-dark ml-2">Áp dụng</button>
+                            <a href="/U_shop/Index" class="btn btn-outline-secondary ml-auto">Tiếp tục mua sắm</a>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Bảng thanh toán -->
+            <!-- RIGHT: summary -->
             <div class="col-md-4">
                 <div class="card order-summary">
                     <div class="card-header">
                         <h4 class="summary-title">THÔNG TIN ĐƠN HÀNG</h4>
                     </div>
-
                     <div class="card-body">
-
                         <div class="summary-row">
-                            <span>Tạm tính:</span>
+                            <span>Tạm tính</span>
                             <span id="subTotal">0₫</span>
                         </div>
 
+                        <div id="promoAppliedRow" style="display:none" class="summary-row">
+                            <span id="promoLabel">Mã giảm</span>
+                            <span id="promoValue">-0₫</span>
+                        </div>
+
                         <div class="summary-row">
-                            <span>Phí ship:</span>
+                            <span>Phí ship</span>
                             <span id="shipFee">0₫</span>
                         </div>
+
                         <hr />
 
                         <div class="summary-total">
-                            <span>Thành tiền:</span>
+                            <span>Thành tiền</span>
                             <span id="totalPrice">0₫</span>
                         </div>
 
-                        <p class="mt-2">Bạn có thể nhập mã giảm giá ở trang thanh toán</p>
-                        <a href="/Payment/Index" class="btn btn-primary btn-block mt-3">ĐẶT HÀNG</a>
+                        <button id="placeOrderBtn" class="btn btn-primary btn-block mt-3">ĐẶT HÀNG</button>
+
+                        <p class="mt-3 text-muted small">Sử dụng mã giảm giá sẽ được hiển thị ngay phía trên và trừ trực tiếp vào tổng.</p>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
 
-
-
 @section scripts {
     <script>
+$(function () {
 
-        $(document).ready(function () {
+    var checkoutUrl = '@checkoutUrl'; // URL SANG ĐẶT HÀNG
+    var appliedDiscount = 0;
+    var appliedCode = null;
+    var shipFee = 0;
 
-            function loadCart() {
-                $.ajax({
-                    url: "/Cart/GetCart",
-                    type: "GET",
-                    success: function (rs) {
+    // helper escape để tránh phá vỡ HTML nếu tên sản phẩm có ký tự đặc biệt
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
-                        let body = $("#cartBody");
-                        body.empty();
+    function formatMoney(n) {
+        return Number(n).toLocaleString('vi-VN') + "₫";
+    }
 
-                        if (!rs.success || rs.items.length === 0) {
-                            body.append(`<tr><td colspan="5" class="text-center">Giỏ hàng trống</td></tr>`);
-                            return;
-                        }
+    // đảm bảo fallback tồn tại trên máy (thay đường dẫn nếu project của bạn dùng khác)
+    var FALLBACK_IMAGE = '/uploads/products/no-image.png';
 
-                        rs.items.forEach(function (i) {
+    function loadCart() {
+        $.ajax({
+            url: '/Cart/GetCart',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                var body = $("#cartBody");
+                body.empty();
 
-                            body.append(`
-                            <tr>
-                                <td><img src="${i.Product.Image}" class="cart-img"></td>
-                                <td>${i.Product.Name}<br><small>${i.Product.Color} / ${i.Product.Size}</small></td>
-                                <td>${formatMoney(i.Product.Price)}</td>
+                if (!res || !res.success || !res.items || res.items.length === 0) {
+                    body.append('<tr><td colspan="6" class="text-center py-4">Giỏ hàng trống</td></tr>');
+                    $("#subTotal").text(formatMoney(0));
+                    $("#totalPrice").text(formatMoney(0));
+                    $("#cartCount").text(0);
+                    $("#promoAppliedRow").hide();
+                    return;
+                }
 
-                                <td>
-                                    <input type="number"
-                                           class="form-control qty-input update-qty"
-                                           data-id="${i.Id}"
-                                           value="${i.Quantity}">
-                                </td>
+                var subtotal = 0;
+                $("#cartCount").text(res.items.length);
 
-                                <td>${formatMoney(i.Product.Price * i.Quantity)}</td>
+                res.items.forEach(function (it) {
+                    var price = Number(it.Product.Price || 0);
+                    var qty = Number(it.Quantity || 1);
+                    var line = price * qty;
+                    subtotal += line;
 
-                                <td>
-                                    <button class="btn btn-danger btn-sm delete-item" data-id="${i.Id}">
-                                        Xóa
-                                    </button>
-                                </td>
-                            </tr>
-                        `);
-                        });
+                    // controller đã normalize Image, vẫn fallback nếu null
+                    var image = it.Product.Image && it.Product.Image.trim() ? it.Product.Image.trim() : FALLBACK_IMAGE;
 
-                        $("#cartTotal").text(formatMoney(rs.total));
-                    },
-                    error: function () {
-                        alert("Lỗi hệ thống!");
-                    }
+                    // Tạo element bằng template literal an toàn
+                    var tr = `
+                        <tr>
+                            <td>
+                                <img src="${image}"
+                                     class="cart-img"
+                                     onerror="(function(img){ img.onerror=null; img.src='${FALLBACK_IMAGE}'; })(this)">
+                            </td>
+                            <td>
+                                <div style="font-weight:700; font-size:16px; line-height:1.2;">${escapeHtml(it.Product.Name)}</div>
+                                <div class="product-meta">${escapeHtml(it.Product.Color || '')}${it.Product.Size ? ' / ' + escapeHtml(it.Product.Size) : ''}</div>
+                            </td>
+                            <td>${formatMoney(price)}</td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                                    <button class="btn btn-light btn-sm qty-decrease" data-id="${it.Id}">−</button>
+                                    <input type="number" min="1" value="${qty}" class="form-control qty-input update-qty" data-id="${it.Id}" style="width:70px;">
+                                    <button class="btn btn-light btn-sm qty-increase" data-id="${it.Id}">+</button>
+                                </div>
+                            </td>
+                            <td style="color:#c0392b; font-weight:700;">${formatMoney(line)}</td>
+                            <td>
+                                <button class="btn btn-outline-danger btn-sm delete-item" data-id="${it.Id}">✕</button>
+                            </td>
+                        </tr>
+                    `;
+
+                    body.append(tr);
                 });
-            };
 
-            loadCart();
+                $("#subTotal").text(formatMoney(subtotal));
+                var total = Math.max(subtotal - appliedDiscount + shipFee, 0);
 
-            // Update SL
-            $(document).on("change", ".update-qty", function () {
-                let id = $(this).data("id");
-                let qty = $(this).val();
-
-                $.ajax({
-                    url: "/Cart/UpdateQuantity",
-                    type: "POST",
-                    data: { id: id, qty: qty },
-                    success: function () {
-                        loadCart();
-                    }
-                });
-            });
-
-            // Xóa item
-            $(document).on("click", ".delete-item", function () {
-                let id = $(this).data("id");
-
-                $.ajax({
-                    url: "/Cart/DeleteItem",
-                    type: "POST",
-                    data: { id: id },
-                    success: function () {
-                        loadCart();
-                    }
-                });
-            });
-
+                if (appliedDiscount > 0) {
+                    $("#promoValue").text('-' + formatMoney(appliedDiscount));
+                    $("#promoLabel").text('Mã: ' + appliedCode);
+                    $("#promoAppliedRow").show();
+                } else {
+                    $("#promoAppliedRow").hide();
+                }
+                $("#totalPrice").text(formatMoney(total));
+            },
+            error: function (xhr, st, err) {
+                console.error('Lỗi tải giỏ hàng: ', st, err, xhr);
+                var body = $("#cartBody");
+                body.html('<tr><td colspan="6" class="text-center py-4 text-danger">Lỗi tải giỏ hàng</td></tr>');
+            }
         });
+    }
 
-        function formatMoney(num) {
-            return num.toLocaleString("vi-VN") + "₫";
-        }
+    // gọi lần đầu
+    loadCart();
 
+    // qty controls
+    $(document).on('click', '.qty-decrease', function () {
+        var input = $(this).closest('tr').find('.update-qty');
+        var val = Math.max(1, Number(input.val()) - 1);
+        input.val(val).trigger('change');
+    });
+    $(document).on('click', '.qty-increase', function () {
+        var input = $(this).closest('tr').find('.update-qty');
+        var val = Number(input.val()) + 1;
+        input.val(val).trigger('change');
+    });
+
+    $(document).on('change', '.update-qty', function () {
+        var id = $(this).data('id');
+        var qty = Math.max(1, parseInt($(this).val()) || 1);
+        $.ajax({
+            url: '/Cart/UpdateQuantity',
+            type: 'POST',
+            data: { id: id, qty: qty },
+            success: function (res) {
+                if (res && res.success) loadCart();
+                else alert('Cập nhật thất bại');
+            },
+            error: function () { alert('Lỗi hệ thống'); }
+        });
+    });
+
+    // delete
+    $(document).on('click', '.delete-item', function () {
+        var id = $(this).data('id');
+        if (!confirm('Bạn có chắc muốn xóa?')) return;
+        $.ajax({
+            url: '/Cart/DeleteItem',
+            type: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (res && res.success) loadCart();
+                else alert('Xóa thất bại');
+            },
+            error: function () { alert('Lỗi hệ thống'); }
+        });
+    });
+
+    // apply promo
+    $('#applyPromoCartBtn').click(function () {
+        var code = $('#promoCodeCart').val().trim();
+        if (!code) { alert('Vui lòng nhập mã giảm giá'); return; }
+
+        $.ajax({
+            url: '/Cart/ApplyPromotion',
+            type: 'POST',
+            data: { code: code },
+            success: function (res) {
+                if (!res || !res.success) {
+                    alert(res ? res.msg : 'Áp mã thất bại');
+                    appliedDiscount = 0;
+                    appliedCode = null;
+                    loadCart();
+                    return;
+                }
+                appliedDiscount = Number(res.discount || 0);
+                appliedCode = (res.code || code);
+                alert('Áp mã thành công: ' + (res.text || ''));
+                loadCart();
+            },
+            error: function () { alert('Áp mã thất bại'); }
+        });
+    });
+
+    // place order
+    $('#placeOrderBtn').click(function () {
+        var promoCode = appliedCode || '';
+        var btn = $(this);
+        btn.prop('disabled', true).text('Đang xử lý...');
+
+        $.ajax({
+            url: '/Cart/PlaceOrder',
+            type: 'POST',
+            data: { shippingAddress: '', promoCode: promoCode },
+            success: function (res) {
+                btn.prop('disabled', false).text('THANH TOÁN');
+                if (!res || !res.success) {
+                    alert(res ? res.msg : 'Đặt hàng thất bại');
+                    return;
+                }
+                var go = res.redirectUrl || checkoutUrl || '/';
+                window.location.href = go;
+            },
+            error: function () {
+                btn.prop('disabled', false).text('THANH TOÁN');
+                alert('Lỗi hệ thống. Vui lòng thử lại.');
+            }
+        });
+    });
+
+});
     </script>
 }
