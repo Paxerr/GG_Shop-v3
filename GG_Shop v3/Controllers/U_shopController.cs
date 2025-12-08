@@ -40,7 +40,7 @@ namespace GG_Shop_v3.Controllers
                           .Include(p => p.Category)
                           .Include(p => p.Product_Sku)
                           .Include(p => p.Product_Images)
-                          .Where(p => p.Status == "active");
+                          .Where(p => p.Status == "Đang bán");
 
             // ============================
             // FILTER CATEGORY
