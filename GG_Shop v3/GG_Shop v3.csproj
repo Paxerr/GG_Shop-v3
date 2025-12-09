@@ -138,9 +138,11 @@
     <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
+    <Compile Include="Controllers\OrdersHistoryController.cs" />
     <Compile Include="Controllers\ProductsAjaxController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PromotionsController.cs" />
+    <Compile Include="Controllers\UserProfileController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\U_OrdersController.cs" />
     <Compile Include="Controllers\U_shopController.cs" />
@@ -4684,6 +4686,8 @@
     <Content Include="Views\Cart\Index.cshtml" />
     <Content Include="Views\U_Orders\Index.cshtml" />
     <Content Include="Views\ProductsAjax\Index.cshtml" />
+    <Content Include="Views\OrdersHistory\Index.cshtml" />
+    <Content Include="Views\UserProfile\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

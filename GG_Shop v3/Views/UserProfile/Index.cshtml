@@ -1,0 +1,598 @@
+﻿@model GG_Shop_v3.Models.User
+@{
+    ViewBag.Title = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* CSS cho trang thông tin cá nhân */
+    .profile-container {
+        display: flex;
+        gap: 30px;
+        margin-top: 30px;
+        min-height: 600px;
+    }
+
+    .sidebar {
+        width: 280px;
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        height: fit-content;
+    }
+
+    .content-area {
+        flex: 1;
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        min-height: 500px;
+    }
+
+    .user-welcome {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 20px;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7fad39, #5a8c29);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .user-name {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .user-email {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .menu-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #555;
+        font-weight: 500;
+    }
+
+        .menu-item:hover {
+            background: #f0f8ff;
+            color: #7fad39;
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: #7fad39;
+            color: white;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+    .logout-item {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+        .logout-item .menu-item {
+            color: #e74c3c;
+        }
+
+            .logout-item .menu-item:hover {
+                background: #ffeaea;
+                color: #c0392b;
+            }
+
+    /* Form styles */
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-title {
+        color: #333;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #7fad39;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #444;
+    }
+
+        .form-label.required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: #7fad39;
+            box-shadow: 0 0 0 3px rgba(127, 173, 57, 0.1);
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background: #f9f9f9;
+            cursor: not-allowed;
+        }
+
+    .btn-save {
+        background: #7fad39;
+        color: white;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-save:hover {
+            background: #6a8f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(127, 173, 57, 0.3);
+        }
+
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+    .message-box {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 6px;
+        display: none;
+    }
+
+    .message-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .message-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    /* Password strength indicator */
+    .password-strength {
+        margin-top: 5px;
+        height: 4px;
+        background: #eee;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .strength-bar {
+        height: 100%;
+        width: 0;
+        transition: width 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #e74c3c;
+    }
+
+    .strength-medium {
+        background: #f39c12;
+    }
+
+    .strength-strong {
+        background: #2ecc71;
+    }
+
+    /* Edit mode */
+    .edit-mode {
+        background: #fff9e6;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px dashed #f1c40f;
+    }
+
+    .edit-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-edit {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+
+    .btn-cancel {
+        background: #95a5a6;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+        .btn-cancel:hover {
+            background: #7f8c8d;
+        }
+</style>
+
+<div class="container">
+    <div class="profile-container">
+        <!-- Sidebar bên trái -->
+        <div class="sidebar">
+            <div class="user-welcome">
+                <div class="user-avatar">
+                    @Model.Full_Name.Substring(0, 1).ToUpper()
+                </div>
+                <div class="user-name">@Model.Full_Name</div>
+                <div class="user-email">@Model.Email</div>
+            </div>
+
+            <ul class="menu-list">
+                <li class="menu-item active" onclick="loadContent('profile')">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Thông tin cá nhân</span>
+                </li>
+                <li class="menu-item" onclick="loadContent('orders')">
+                    <i class="fas fa-history"></i>
+                    <span>Lịch sử đơn hàng</span>
+                </li>
+                <li class="menu-item" onclick="loadContent('edit')">
+                    <i class="fas fa-edit"></i>
+                    <span>Chỉnh sửa thông tin</span>
+                </li>
+                <li class="menu-item" onclick="loadContent('password')">
+                    <i class="fas fa-key"></i>
+                    <span>Đổi mật khẩu</span>
+                </li>
+
+                <li class="logout-item">
+                    <a href="@Url.Action("Logout", "UserProfile")" class="menu-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Nội dung bên phải -->
+        <div class="content-area">
+            <!-- Thông tin cá nhân (mặc định) -->
+            <div id="profileContent" class="content-section">
+                <h3 class="form-title">Thông tin cá nhân</h3>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="form-label">Họ và tên</label>
+                        <div class="info-display">@Model.Full_Name</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số điện thoại</label>
+                        <div class="info-display">@Model.Phone_Number</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <div class="info-display">@Model.Email</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tên đăng nhập</label>
+                        <div class="info-display">@Model.Username</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch sử đơn hàng -->
+            <div id="ordersContent" class="content-section" style="display: none;">
+                <h3 class="form-title">Lịch sử đơn hàng</h3>
+                <div class="text-center p-5">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h4>Lịch sử đơn hàng của bạn</h4>
+                    <p class="text-muted mb-4">Xem và quản lý tất cả đơn hàng bạn đã đặt</p>
+                    <a href="@Url.Action("Index", "OrdersHistory")" class="btn-save">
+                        <i class="fas fa-external-link-alt"></i> Xem chi tiết
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chỉnh sửa thông tin -->
+            <div id="editContent" class="content-section" style="display: none;">
+                <h3 class="form-title">Chỉnh sửa thông tin cá nhân</h3>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="form-label required">Họ và tên</label>
+                        <input type="text" id="editFullName" class="form-control" value="@Model.Full_Name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Số điện thoại</label>
+                        <input type="tel" id="editPhone" class="form-control" value="@Model.Phone_Number">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Email</label>
+                        <input type="email" id="editEmail" class="form-control" value="@Model.Email">
+                    </div>
+                    <button class="btn-save" onclick="updateProfile()">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
+                    <div id="editMessage" class="message-box"></div>
+                </div>
+            </div>
+
+            <!-- Đổi mật khẩu -->
+            <div id="passwordContent" class="content-section" style="display: none;">
+                <h3 class="form-title">Đổi mật khẩu</h3>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label class="form-label required">Mật khẩu hiện tại</label>
+                        <input type="password" id="currentPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Mật khẩu mới</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="Nhập mật khẩu mới" oninput="checkPasswordStrength()">
+                        <div class="password-strength">
+                            <div id="strengthBar" class="strength-bar"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Nhập lại mật khẩu mới</label>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Nhập lại mật khẩu mới">
+                    </div>
+                    <button class="btn-save" onclick="changePassword()">
+                        <i class="fas fa-key"></i> Đổi mật khẩu
+                    </button>
+                    <div id="passwordMessage" class="message-box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Biến lưu trạng thái
+        var currentContent = 'profile';
+
+        $(document).ready(function () {
+            loadUserInfo();
+        });
+
+        // Chuyển đổi nội dung
+        function loadContent(content) {
+            // Ẩn tất cả nội dung
+            $('.content-section').hide();
+            $('.menu-item').removeClass('active');
+
+            // Hiển thị nội dung được chọn
+            $('#' + content + 'Content').show();
+            $(`.menu-item:contains('${getMenuText(content)}')`).addClass('active');
+
+            currentContent = content;
+
+            // Nếu là trang chỉnh sửa, load lại thông tin
+            if (content === 'edit') {
+                loadUserInfo();
+            }
+        }
+
+        // Lấy text menu tương ứng
+        function getMenuText(content) {
+            switch (content) {
+                case 'profile': return 'Thông tin cá nhân';
+                case 'orders': return 'Lịch sử đơn hàng';
+                case 'edit': return 'Chỉnh sửa thông tin';
+                case 'password': return 'Đổi mật khẩu';
+                default: return '';
+            }
+        }
+
+        // Load thông tin user
+        function loadUserInfo() {
+            $.get('/UserProfile/GetUserInfo', function (response) {
+                if (response.success && response.user) {
+                    var user = response.user;
+
+                    // Cập nhật sidebar
+                    $('.user-name').text(user.Full_Name);
+                    $('.user-email').text(user.Email);
+                    $('.user-avatar').text(user.Full_Name.substring(0, 1).toUpperCase());
+
+                    // Cập nhật form chỉnh sửa
+                    $('#editFullName').val(user.Full_Name);
+                    $('#editPhone').val(user.Phone_Number);
+                    $('#editEmail').val(user.Email);
+
+                    // Cập nhật trang thông tin
+                    $('#profileContent .info-display').eq(0).text(user.Full_Name);
+                    $('#profileContent .info-display').eq(1).text(user.Phone_Number);
+                    $('#profileContent .info-display').eq(2).text(user.Email);
+                    $('#profileContent .info-display').eq(3).text(user.Username);
+                }
+            });
+        }
+
+        // Cập nhật thông tin cá nhân
+        function updateProfile() {
+            var fullName = $('#editFullName').val();
+            var phone = $('#editPhone').val();
+            var email = $('#editEmail').val();
+
+            // Validate
+            if (!fullName || !phone || !email) {
+                showMessage('editMessage', 'Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showMessage('editMessage', 'Email không hợp lệ', 'error');
+                return;
+            }
+
+            // Gửi request
+            $.post('/UserProfile/UpdateProfile', {
+                fullName: fullName,
+                phone: phone,
+                email: email
+            }, function (response) {
+                if (response.success) {
+                    showMessage('editMessage', response.message, 'success');
+                    loadUserInfo(); // Reload thông tin
+                } else {
+                    showMessage('editMessage', response.message, 'error');
+                }
+            });
+        }
+
+        // Đổi mật khẩu
+        function changePassword() {
+            var currentPassword = $('#currentPassword').val();
+            var newPassword = $('#newPassword').val();
+            var confirmPassword = $('#confirmPassword').val();
+
+            // Validate
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showMessage('passwordMessage', 'Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showMessage('passwordMessage', 'Mật khẩu phải có ít nhất 6 ký tự', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showMessage('passwordMessage', 'Mật khẩu mới không khớp', 'error');
+                return;
+            }
+
+            // Gửi request
+            $.post('/UserProfile/ChangePassword', {
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+                confirmPassword: confirmPassword
+            }, function (response) {
+                if (response.success) {
+                    showMessage('passwordMessage', response.message, 'success');
+                    // Xóa form
+                    $('#currentPassword').val('');
+                    $('#newPassword').val('');
+                    $('#confirmPassword').val('');
+                    $('#strengthBar').css('width', '0');
+                } else {
+                    showMessage('passwordMessage', response.message, 'error');
+                }
+            });
+        }
+
+        // Kiểm tra độ mạnh mật khẩu
+        function checkPasswordStrength() {
+            var password = $('#newPassword').val();
+            var strength = 0;
+
+            if (password.length >= 6) strength += 25;
+            if (password.match(/[a-z]+/)) strength += 25;
+            if (password.match(/[A-Z]+/)) strength += 25;
+            if (password.match(/[0-9]+/)) strength += 25;
+
+            $('#strengthBar').css('width', strength + '%');
+
+            if (strength <= 25) {
+                $('#strengthBar').removeClass('strength-medium strength-strong').addClass('strength-weak');
+            } else if (strength <= 50) {
+                $('#strengthBar').removeClass('strength-weak strength-strong').addClass('strength-medium');
+            } else {
+                $('#strengthBar').removeClass('strength-weak strength-medium').addClass('strength-strong');
+            }
+        }
+
+        // Hiển thị thông báo
+        function showMessage(elementId, message, type) {
+            var element = $('#' + elementId);
+            element.removeClass('message-success message-error message-warning');
+            element.addClass('message-' + type);
+            element.text(message);
+            element.show();
+
+            // Tự động ẩn sau 5 giây
+            setTimeout(function () {
+                element.hide();
+            }, 5000);
+        }
+
+        // Validate email - SỬA LỖI Ở ĐÂY
+        function isValidEmail(email) {
+            var re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            return re.test(email);
+        }
+            }
+    </script>
+}

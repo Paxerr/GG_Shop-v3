@@ -1,0 +1,514 @@
+﻿@{
+    ViewBag.Title = "Lịch sử đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* CSS cho trang lịch sử đơn hàng */
+    .orders-history-container {
+        display: flex;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .orders-list {
+        flex: 1;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    .order-details {
+        flex: 2;
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        min-height: 600px;
+    }
+
+    .order-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f9f9f9;
+    }
+
+        .order-card:hover {
+            background: #f0f8ff;
+            border-color: #7fad39;
+            transform: translateX(5px);
+        }
+
+        .order-card.active {
+            background: #e8f5e9;
+            border-color: #7fad39;
+            border-left: 4px solid #7fad39;
+        }
+
+    .order-id {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .order-date {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .order-status {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-delivered {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-shipped {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .order-amount {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e74c3c;
+        margin-top: 5px;
+    }
+
+    /* Chi tiết đơn hàng */
+    .order-header {
+        border-bottom: 2px solid #7fad39;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+        .order-header h3 {
+            color: #333;
+            margin: 0;
+        }
+
+    .product-item {
+        display: flex;
+        gap: 20px;
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #f5f5f5;
+    }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .product-variant {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .product-quantity {
+        color: #888;
+        font-size: 13px;
+    }
+
+    .product-price {
+        font-weight: bold;
+        color: #e74c3c;
+        text-align: right;
+        min-width: 100px;
+    }
+
+    /* Thông tin đơn hàng */
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-top: 30px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #333;
+        font-size: 15px;
+    }
+
+    /* Tổng tiền */
+    .order-total {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #eee;
+        text-align: right;
+    }
+
+        .order-total .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+    /* Loading và empty state */
+    .loading-spinner {
+        text-align: center;
+        padding: 50px;
+        color: #666;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+    /* Phân trang */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .pagination-btn {
+        padding: 8px 15px;
+        margin: 0 5px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .pagination-btn:hover {
+            background: #7fad39;
+            color: white;
+            border-color: #7fad39;
+        }
+
+        .pagination-btn.active {
+            background: #7fad39;
+            color: white;
+            border-color: #7fad39;
+        }
+
+        .pagination-btn:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+  
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mt-4 mb-4">📦 Lịch sử đơn hàng</h2>
+        </div>
+    </div>
+
+    <div class="orders-history-container">
+        <!-- Danh sách đơn hàng (bên trái) -->
+        <div class="orders-list">
+            <h4>Đơn hàng của bạn</h4>
+            <div id="ordersList">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách đơn hàng...
+                </div>
+            </div>
+            <div id="paginationContainer" class="pagination-container"></div>
+        </div>
+
+        <!-- Chi tiết đơn hàng (bên phải) -->
+        <div class="order-details">
+            <div id="orderDetails">
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <h4>Chưa chọn đơn hàng</h4>
+                    <p>Chọn một đơn hàng từ danh sách để xem chi tiết</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var currentPage = 1;
+        var pageSize = 10;
+        var selectedOrderId = null;
+
+        $(document).ready(function () {
+            loadOrders(currentPage);
+        });
+
+        // Tải danh sách đơn hàng
+        function loadOrders(page) {
+            currentPage = page;
+            $('#ordersList').html('<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Đang tải danh sách đơn hàng...</div>');
+
+            $.get('/OrdersHistory/GetUserOrders', { page: page, pageSize: pageSize }, function (response) {
+                if (response.success && response.orders && response.orders.length > 0) {
+                    renderOrdersList(response.orders, response.paging);
+                } else {
+                    $('#ordersList').html('<div class="empty-state"><i class="fas fa-box-open"></i><h4>Không có đơn hàng</h4><p>Bạn chưa có đơn hàng nào</p></div>');
+                    $('#paginationContainer').empty();
+                }
+            }).fail(function () {
+                $('#ordersList').html('<div class="text-danger text-center p-4">Lỗi khi tải danh sách đơn hàng</div>');
+            });
+        }
+
+        // Render danh sách đơn hàng
+        function renderOrdersList(orders, paging) {
+            var html = '';
+            $.each(orders, function (index, order) {
+                var statusClass = getStatusClass(order.Status);
+                var statusText = getStatusText(order.Status);
+                var formattedAmount = formatVND(order.Total_Amount);
+
+                html += `
+                    <div class="order-card ${selectedOrderId === order.Id ? 'active' : ''}" onclick="selectOrder(${order.Id})">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="order-id">#${order.Id}</div>
+                                <div class="order-date">${order.Date}</div>
+                                <span class="order-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="order-amount">${formattedAmount}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            $('#ordersList').html(html);
+            renderPagination(paging);
+        }
+
+        // Render phân trang
+        function renderPagination(paging) {
+            var html = '';
+            var maxPagesToShow = 5;
+            var startPage = Math.max(1, paging.page - Math.floor(maxPagesToShow / 2));
+            var endPage = Math.min(paging.totalPages, startPage + maxPagesToShow - 1);
+
+            // Điều chỉnh startPage nếu cần
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+
+            // Nút Previous
+            html += `<button class="pagination-btn" ${paging.page === 1 ? 'disabled' : ''} onclick="loadOrders(${paging.page - 1})">
+                        <i class="fas fa-chevron-left"></i>
+                     </button>`;
+
+            // Các trang
+            for (var i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === paging.page ? 'active' : ''}" onclick="loadOrders(${i})">${i}</button>`;
+            }
+
+            // Nút Next
+            html += `<button class="pagination-btn" ${paging.page === paging.totalPages ? 'disabled' : ''} onclick="loadOrders(${paging.page + 1})">
+                        <i class="fas fa-chevron-right"></i>
+                     </button>`;
+
+            $('#paginationContainer').html(html);
+        }
+
+        // Chọn đơn hàng để xem chi tiết
+        function selectOrder(orderId) {
+            selectedOrderId = orderId;
+            $('.order-card').removeClass('active');
+            $('.order-card[onclick*="' + orderId + '"]').addClass('active');
+            loadOrderDetails(orderId);
+        }
+
+        // Tải chi tiết đơn hàng
+        function loadOrderDetails(orderId) {
+            $('#orderDetails').html('<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Đang tải chi tiết đơn hàng...</div>');
+
+            $.get('/OrdersHistory/GetOrderDetails', { orderId: orderId }, function (response) {
+                if (response.success) {
+                    renderOrderDetails(response.order, response.orderItems);
+                } else {
+                    $('#orderDetails').html('<div class="text-danger text-center p-4">' + response.message + '</div>');
+                }
+            }).fail(function () {
+                $('#orderDetails').html('<div class="text-danger text-center p-4">Lỗi khi tải chi tiết đơn hàng</div>');
+            });
+        }
+
+        // Render chi tiết đơn hàng
+        function renderOrderDetails(order, orderItems) {
+            var statusClass = getStatusClass(order.Status);
+            var statusText = getStatusText(order.Status);
+            var formattedAmount = formatVND(order.Total_Amount);
+
+            var html = `
+                <div class="order-header">
+                    <h3>Đơn hàng #${order.Id}</h3>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="order-status ${statusClass}">${statusText}</span>
+                        <span class="order-date">${order.Date}</span>
+                    </div>
+                </div>
+
+                <h5>Sản phẩm (${orderItems.length} sản phẩm)</h5>
+            `;
+
+            // Danh sách sản phẩm
+            $.each(orderItems, function (index, item) {
+                var itemTotal = formatVND(item.TotalPrice);
+                var itemPrice = formatVND(item.Price);
+
+                html += `
+                    <div class="product-item">
+                        <div class="product-image">
+                            <img src="${item.ImageUrl || '/Content/images/default.jpg'}" alt="${item.ProductTitle}" onerror="this.src='/Content/images/default.jpg'">
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">${item.ProductTitle}</div>
+                            <div class="product-variant">SKU: ${item.ProductSku}</div>
+                            ${item.Color ? `<div class="product-variant">Màu: ${item.Color}</div>` : ''}
+                            ${item.Size ? `<div class="product-variant">Size: ${item.Size}</div>` : ''}
+                            <div class="product-quantity">Số lượng: ${item.Quantity}</div>
+                        </div>
+                        <div class="product-price">
+                            <div>${itemPrice}</div>
+                            <div style="font-size: 16px; color: #333;">Tổng: ${itemTotal}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Thông tin đơn hàng
+            html += `
+                <div class="order-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Số điện thoại:</span>
+                        <span class="info-value">${order.PhoneNumber || 'Chưa cập nhật'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Địa chỉ giao hàng:</span>
+                        <span class="info-value">${order.Shipping_Address || 'Chưa cập nhật'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phương thức thanh toán:</span>
+                        <span class="info-value">${order.PaymentMethod || 'Chưa xác định'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mã giảm giá:</span>
+                        <span class="info-value">${order.PromoCode || 'Không có'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Trạng thái thanh toán:</span>
+                        <span class="info-value">${order.PaymentStatus || 'Chưa xác định'}</span>
+                    </div>
+                    ${order.Discount > 0 ? `
+                    <div class="info-item">
+                        <span class="info-label">Giảm giá:</span>
+                        <span class="info-value text-danger">-${formatVND(order.Discount)}</span>
+                    </div>` : ''}
+                </div>
+
+                <div class="order-total">
+                    <div class="mb-2">Tổng cộng:</div>
+                    <div class="amount">${formattedAmount}</div>
+                </div>
+            `;
+
+            $('#orderDetails').html(html);
+        }
+
+        // Hàm hỗ trợ
+        function getStatusClass(status) {
+            if (!status) return 'status-pending';
+
+            var statusLower = status.toLowerCase();
+            if (statusLower.includes('delivered') || statusLower.includes('đã giao')) return 'status-delivered';
+            if (statusLower.includes('shipped') || statusLower.includes('đang giao')) return 'status-shipped';
+            if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'status-cancelled';
+            return 'status-pending';
+        }
+
+        function getStatusText(status) {
+            if (!status) return 'Đang xử lý';
+
+            var statusLower = status.toLowerCase();
+            if (statusLower.includes('delivered') || statusLower.includes('đã giao')) return 'Đã giao hàng';
+            if (statusLower.includes('shipped') || statusLower.includes('đang giao')) return 'Đang vận chuyển';
+            if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'Đã hủy';
+            return 'Đang xử lý';
+        }
+
+        // Hàm format tiền VND (giữ lại từ code trước)
+        function formatVND(amount) {
+            if (!amount || amount <= 0) return "0₫";
+            return amount.toLocaleString('vi-VN') + '₫';
+        }
+    </script>
+}
