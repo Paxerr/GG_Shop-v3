@@ -1,0 +1,430 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<input type="hidden" id="productId" value="@ViewBag.ProductId" />
+
+<style>
+    /* CSS cho khung hình ảnh */
+    .product-image-frame {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        width: 100%;
+    }
+
+    .image-section {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .thumbnail-column {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100px;
+    }
+
+    .main-image-column {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 450px;
+    }
+
+    .thumbnail-item {
+        width: 100px;
+        height: 100px;
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        background: white;
+        padding: 5px;
+    }
+
+        .thumbnail-item:hover {
+            border-color: #ddd;
+        }
+
+        .thumbnail-item.active {
+            border-color: #7fad39;
+            transform: scale(1.05);
+        }
+
+        .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+    #mainImage {
+        max-width: 100%;
+        max-height: 420px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    /* CSS cho các nút size/color */
+    .sku-size.active, .sku-color.active {
+        background-color: #7fad39 !important;
+        color: white !important;
+        border-color: #7fad39 !important;
+    }
+
+    /* CSS CHO RELATED PRODUCTS HOVER */
+    .related__products .product__item {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+
+    .related__products .product__item:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .related__products .product__item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .related__products .product__item:hover::before {
+        opacity: 1;
+    }
+
+    .related__products .product__item img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: all 0.5s ease;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .related__products .product__item:hover img {
+        transform: scale(1.08);
+    }
+
+    .related__products .product__item h6 {
+        padding: 20px 15px;
+        margin: 0;
+        text-align: center;
+        background: white;
+        font-weight: 600;
+        color: #333;
+        transition: all 0.3s ease;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .related__products .product__item:hover h6 {
+        color: #7fad39;
+        background: #f9f9f9;
+    }
+
+    .related__products a {
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+
+    .related__products a:hover {
+        text-decoration: none;
+    }
+
+    /* Thêm hiệu ứng overlay khi hover */
+    .related__products .product__item .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(127, 173, 57, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 12px;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .related__products .product__item:hover .overlay {
+        opacity: 1;
+    }
+    /* CSS cho giá sản phẩm related */
+    .product__item .product-price {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #7fad39;
+        margin: 10px 0;
+        padding: 0 15px;
+        transition: all 0.3s ease;
+    }
+
+    .product__item:hover .product-price {
+        transform: translateY(-5px);
+    }
+
+    
+    }
+</style>
+
+<section class="product-details spad">
+    <div class="container">
+
+        <!-- KHUNG RIÊNG CHO PHẦN ẢNH -->
+        <div class="product-image-frame">
+            <div class="image-section">
+                <!-- Cột thumbnail 3 ảnh nhỏ -->
+                <div class="thumbnail-column">
+                    <div id="thumb-list"></div>
+                </div>
+
+                <!-- Cột ảnh chính lớn -->
+                <div class="main-image-column">
+                    <img id="mainImage" alt="Product Image">
+                </div>
+            </div>
+        </div>
+
+        <!-- Phần thông tin sản phẩm -->
+        <div class="row">
+            <div class="col-lg-6">
+                <h3 id="productTitle"></h3>
+                <span id="price" class="product__details__price h4 text-danger"></span>
+
+                <div class="product__details__widget mt-4">
+                    <p class="fw-bold mb-2">Kích cỡ:</p>
+                    <div id="sizeList" class="btn-group flex-wrap"></div>
+
+                    <p class="fw-bold mb-2 mt-3">Màu s:</p>
+                    <div id="colorList" class="btn-group flex-wrap"></div>
+
+                    <p class="fw-bold mb-2 mt-3">Số lượng:</p>
+                    <input id="quantity" type="number" value="1" min="1"
+                           class="form-control" style="width:100px" />
+                </div>
+
+                <button id="addCart" class="site-btn mt-4">Thêm vào giỏ hàng</button>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Mô tả sản phẩm</h5>
+                        <p id="description" class="card-text"></p>
+                        <div class="mt-3">
+                            <strong>Danh mục sản phẩm:</strong>
+                            <span id="category" class="badge bg-success"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <div class="related__products spad mt-5">
+            <h3 class="related__title">Sản phẩm liên quan</h3>
+            <div class="row" id="relatedList"></div>
+        </div>
+
+    </div>
+</section>
+
+@section scripts {
+    <script>
+        var productId = $("#productId").val();
+        var selectedSku = null;
+        var fullData = null;
+        var selectedColor = null;
+
+        $(document).ready(function () {
+            loadProduct();
+            loadRelated();
+        });
+
+        // ============================================
+        // 🔵 LOAD CHI TIẾT SẢN PHẨM
+        // ============================================
+        function loadProduct() {
+            $.get("/ProductsAjax/GetProduct", { id: productId }, function (res) {
+                fullData = res;
+                setMainImageDefault(res.Images);
+
+                $("#productTitle").text(res.Title);
+                $("#description").text(res.Description);
+                $("#category").text(res.Category);
+
+                loadImages(res.Images);
+                loadSkuOptions(res.Skus);
+            });
+        }
+
+        // 🟦 Load danh sách thumbnail
+        function loadImages(images) {
+            let html = "";
+            $.each(images, function (i, img) {
+                html += `<div class="thumbnail-item" onclick="setMain('${img.Image_Url}', this)">
+                                    <img src="${img.Image_Url}" alt="Thumbnail ${i + 1}">
+                                 </div>`;
+            });
+            $("#thumb-list").html(html);
+
+            // Đặt thumbnail đầu tiên là active
+            $(".thumbnail-item").first().addClass("active");
+        }
+
+        // 🟦 Image mặc định (ảnh chính)
+        function setMainImageDefault(images) {
+            let main = images.find(x => x.Is_Main) || images[0];
+            if (main) {
+                $("#mainImage").attr("src", main.Image_Url);
+            }
+        }
+
+        // 🟦 Click thumbnail
+        function setMain(url, element) {
+            $("#mainImage").attr("src", url);
+            // Bỏ active tất cả thumbnail
+            $(".thumbnail-item").removeClass("active");
+            // Active thumbnail được click
+            $(element).addClass("active");
+        }
+
+        // ============================================
+        // 🔵 LOAD SKU (Size & Color)
+        // ============================================
+        function loadSkuOptions(skus) {
+            let sizeHtml = "";
+            let colorHtml = "";
+
+            $.each(skus, function (i, s) {
+                // SIZE
+                if (s.Size)
+                    sizeHtml += `<button class="btn btn-outline-dark m-1 sku-size"
+                                                onclick="selectSku(${s.Id}, '${s.Color}')">${s.Size}</button>`;
+
+                // COLOR
+                if (s.Color)
+                    colorHtml += `<button class="btn btn-outline-dark m-1 sku-color"
+                                                onclick="selectColor('${s.Color}')">${s.Color}</button>`;
+            });
+
+            $("#sizeList").html(sizeHtml);
+            $("#colorList").html(colorHtml);
+        }
+        
+
+        // 🟦 Chọn size (SKU)
+        function selectSku(id, color) {
+            selectedSku = id;
+            selectedColor = color;
+            updatePrice();
+            highlightSelection();
+            changeImageByColor();
+        }
+
+        // 🟦 Chọn Color
+        function selectColor(color) {
+            selectedColor = color;
+            highlightSelection();
+            changeImageByColor();
+        }
+
+        // 🟦 Bôi đậm nút đang chọn
+        function highlightSelection() {
+            $(".sku-size, .sku-color").removeClass("active");
+
+            if (selectedSku)
+                $(`.sku-size[onclick*='${selectedSku}']`).addClass("active");
+
+            if (selectedColor)
+                $(`.sku-color[onclick*='${selectedColor}']`).addClass("active");
+        }
+
+        // 🟦 Update giá theo SKU
+        function updatePrice() {
+            if (!selectedSku || !fullData) return;
+            let sku = fullData.Skus.find(x => x.Id == selectedSku);
+            if (sku)
+                $("#price").text(sku.Price.toLocaleString('vi-VN') + "₫"); // Đổi $ thành VND
+        }
+        function updatePrice() {
+            if (!selectedSku || !fullData) return;
+            let sku = fullData.Skus.find(x => x.Id == selectedSku);
+            if (sku)
+                $("#price").text(sku.Price.toLocaleString('vi-VN') + "₫"); // Đổi $ thành VND
+        }
+
+        // 🟦 Tự đổi ảnh theo màu (nếu tên file chứa màu)
+        function changeImageByColor() {
+            if (!selectedColor || !fullData) return;
+
+            let match = fullData.Images.find(
+                x => x.Image_Url.toLowerCase().includes(selectedColor.toLowerCase())
+            );
+
+            if (match) {
+                $("#mainImage").attr("src", match.Image_Url);
+                // Cập nhật active thumbnail
+                $(".thumbnail-item").removeClass("active");
+                $(`.thumbnail-item img[src="${match.Image_Url}"]`).parent().addClass("active");
+            }
+        }
+
+        // ============================================
+        // 🔵 LOAD RELATED PRODUCT
+        // ============================================
+        function loadRelated() {
+            $.get("/ProductsAjax/GetRelated", { id: productId }, function (res) {
+                let html = "";
+                $.each(res, function (i, p) {
+                    html += `
+                                <div class="col-lg-3 col-md-4 col-sm-6">
+                                    <a href="/ProductsAjax/Index/${p.Id}">
+                                        <div class="product__item">
+                                            <div class="overlay"></div>
+                                            <img src="${p.Image}" alt="${p.Title}">
+                                            <h6>${p.Title}</h6>
+                                        </div>
+                                    </a>
+                                </div>`;
+                });
+                $("#relatedList").html(html);
+            });
+        }
+
+        // ============================================
+        // 🔵 Add To Cart
+        // ============================================
+        $("#addCart").click(function () {
+            if (!selectedSku) {
+                alert("Hãy chọn màu hoặc size trước!");
+                return;
+            }
+            alert("Chức năng giỏ đang kết nối...");
+        });
+    </script>
+}
