@@ -23,25 +23,28 @@
                                 // 2. ĐÃ ĐĂNG NHẬP: Hiển thị Dropdown menu
 
                                 // Đặt class 'dropdown' lên container chính
-                                <div class="dropdown">
+                                <div class="dropdown user-dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Tài khoản cá nhân">
                                         <i class="fa fa-user-circle"></i> Tài khoản
                                     </a>
 
                                     <div class="dropdown-menu dropdown-menu-right">
                                         <a class="dropdown-item" href="@Url.Action("Profile", "Account")">
-                                            <p style="color : black ">Thông tin Tài khoản</p>
+                                            <p>Thông tin Tài khoản</p>
                                         </a>
                                         <a class="dropdown-item" href="@Url.Action("MyOrders", "Order")">
-                                            <p style="color : black ">Đơn hàng</p>
+                                            <p>Đơn hàng</p>
                                         </a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="@Url.Action("Logout", "Account")">
-                                            <p style="color : black ">Đăng xuất</p>
+                                            <p>Đăng xuất</p>
                                         </a>
                                     </div>
                                 </div>
+
                             }
+
+
                         </div>
                         @*<div class="header__top__hover"> ... *@
                     </div>
@@ -53,15 +56,15 @@
         <div class="row">
             <div class="col-lg-3 col-md-3">
                 <div class="header__logo">
-                    <a href="./index.html"><img src="~/Content/img/logo.png" alt=""></a>
+                    <a href="~/Home/Index"><img src="~/Content/img/logo.png" alt=""></a>
                 </div>
             </div>
             <div class="col-lg-6 col-md-6">
                 <nav class="header__menu mobile-menu">
                     <ul>
-                        <li class="active"><a href="./index.html">Home</a></li>
+                        <li class=""><a href="~/Home/Index">Home</a></li>
                         <li><a href="/U_shop/Index">Shop</a></li>
-                        <li>
+                        @*<li>
                             <a href="#">Pages</a>
                             <ul class="dropdown">
                                 <li><a href="./about.html">About Us</a></li>
@@ -70,10 +73,13 @@
                                 <li><a href="./checkout.html">Check Out</a></li>
                                 <li><a href="./blog-details.html">Blog Details</a></li>
                             </ul>
+                        </li>*@
+                        @*<li><a href="./blog.html">Blog</a></li>*@
+                        <li><a href="~/Information/Index">Về chúng tôi</a></li>
+                        <li id="admin-menu-link" style="display:none;">
+                            <a href="/Admin/Dashboard">Trang quản trị</a>
                         </li>
-                        <li><a href="./blog.html">Blog</a></li>
-                        <li><a href="./contact.html">Contacts</a></li>
-                    </ul>
+                  </ul>
                 </nav>
             </div>
             <div class="col-lg-3 col-md-3">
@@ -86,3 +92,72 @@
         <div class="canvas__open"><i class="fa fa-bars"></i></div>
     </div>
 </header>
+
+<style>
+    /* Scoped chỉ ảnh hưởng dropdown trong header có class .user-dropdown */
+    .user-dropdown {
+        position: relative;
+    }
+
+        .user-dropdown .dropdown-menu {
+            transform-origin: top center;
+            transform: translateY(10px) scale(0.98);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity .22s ease, transform .22s cubic-bezier(.2,.9,.3,1), visibility .18s;
+            border-radius: 8px;
+            padding: 6px 0;
+            box-shadow: 0 12px 22px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            background: #fff;
+            min-width: 200px;
+            z-index: 1050;
+        }
+
+            /* Tương thích Bootstrap: .show được thêm bởi JS khi mở dropdown */
+            .user-dropdown.show .dropdown-menu,
+            .user-dropdown .dropdown-menu.show {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+
+        .user-dropdown .dropdown-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #222;
+            transition: background .14s ease;
+            border-radius: 6px;
+        }
+
+            .user-dropdown .dropdown-item:hover {
+                background: rgba(0,0,0,0.05);
+                color: #111;
+            }
+
+            .user-dropdown .dropdown-item p {
+                margin: 0;
+                color: inherit;
+                line-height: 1.2;
+            }
+
+        .user-dropdown .dropdown-divider {
+            background: rgba(0,0,0,0.06);
+            height: 1px;
+            margin: 6px 0;
+            border: none;
+        }
+</style>
+
+@section script {
+    <script>
+        $(document).ready(function () {
+            var userRole = '@(Session["User_Role"] ?? "")';
+            if (userRole.toLowerCase() === "admin") {
+                document.getElementById("admin-menu-link").style.display = "block";
+            }
+        })
+    </script>
+   }

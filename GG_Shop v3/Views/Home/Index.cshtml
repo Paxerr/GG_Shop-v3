@@ -191,19 +191,16 @@ $(document).ready(function () {
 
             html += `
             <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="${img}">
-                        <ul class="product__hover">
-                            <li><a href="#"><img src="/Content/img/icon/heart.png" alt=""></a></li>
-                            <li><a href="/Home/Details/${item.Id}"><img src="/Content/img/icon/search.png" alt=""></a></li>
-                        </ul>
+                <a href="/U_shop/Index">
+                                <div class="product__item">
+                        <div class="product__item__pic set-bg" data-setbg="${img}">
+                        </div>
+                        <div class="product__item__text">
+                            <h4>${item.Name}</h4>
+                            <h5>${price}</h5>
+                        </div>
                     </div>
-                    <div class="product__item__text">
-                        <h6>${item.Name}</h6>
-                        <a class="add-cart" href="#">+ Thêm vào giỏ</a>
-                        <h5>${price}</h5>
-                    </div>
-                </div>
+                </a>
             </div>`;
         });
 
@@ -248,13 +245,10 @@ $(document).ready(function () {
     type: 'GET',
     success: function (categories) {
 
-        // 🔥 Chỉ chọn những category có sản phẩm (API đã lọc)
         if (!categories || categories.length === 0) {
             $("#home-category-list").html("<p>Không có danh mục nào có sản phẩm.</p>");
             return;
         }
-
-        // 🔥 Lấy ngẫu nhiên 3 category
         let randomCats = categories.sort(() => 0.5 - Math.random()).slice(0, 3);
 
         $("#home-category-list").html("");

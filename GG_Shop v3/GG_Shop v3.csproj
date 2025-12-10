@@ -137,6 +137,7 @@
     <Compile Include="Controllers\CartController.cs" />
     <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\InformationController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\OrdersHistoryController.cs" />
     <Compile Include="Controllers\ProductsAjaxController.cs" />
@@ -264,6 +265,9 @@
     <Content Include="Content\img\shopping-cart\cart-2.jpg" />
     <Content Include="Content\img\shopping-cart\cart-3.jpg" />
     <Content Include="Content\img\shopping-cart\cart-4.jpg" />
+    <Content Include="Content\img\team\member-1.jpg" />
+    <Content Include="Content\img\team\member-2.jpg" />
+    <Content Include="Content\img\team\member-3.jpg" />
     <Content Include="Content\img_admin\down-aerrow.gif" />
     <Content Include="Content\img_admin\error\02.png" />
     <Content Include="Content\img_admin\error\404.png" />
@@ -4689,6 +4693,7 @@
     <Content Include="Views\ProductsAjax\Index.cshtml" />
     <Content Include="Views\OrdersHistory\Index.cshtml" />
     <Content Include="Views\UserProfile\Index.cshtml" />
+    <Content Include="Views\Information\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

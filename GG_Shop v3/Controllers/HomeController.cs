@@ -93,6 +93,16 @@ namespace GG_Shop_v3.Controllers // Kiểm tra lại namespace cho đúng với 
                 Response.StatusCode = 500;
                 return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }
