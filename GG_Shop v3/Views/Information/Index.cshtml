@@ -4,7 +4,6 @@
 }
 
 <style>
-    /* Inline enhancement: scoped cho trang About để không phá CSS toàn cục */
     .about-hero {
         background-image: url('@Url.Content("~/Content/img/hero/hero-1.jpg")');
         background-size: cover;
@@ -36,14 +35,12 @@
         transform: translateY(-6px);
         box-shadow: 0 12px 30px rgba(18, 28, 45, 0.06);
     }
-
-    /* TEAM: đảm bảo ảnh bằng cỡ nhau, không méo */
     .team-member {
         text-align: center;
     }
     .team-member .img-box {
         width: 100%;
-        height: 250px; /* chỉnh chiều cao tại đây nếu muốn */
+        height: 250px;
         overflow: hidden;
         border-radius: 10px;
         background: #f3f3f3;
@@ -183,7 +180,7 @@
                     <div class="img-box">
                         <img src="@Url.Content("~/Content/img/team/member-1.jpg")" alt="Người sáng lập" />
                     </div>
-                    <h6>Nguyễn Văn A</h6>
+                    <h6>Nguyễn Tuấn Anh</h6>
                     <small>Người sáng lập</small>
                 </div>
             </div>
@@ -193,7 +190,7 @@
                     <div class="img-box">
                         <img src="@Url.Content("~/Content/img/team/member-2.jpg")" alt="Giám đốc sáng tạo" />
                     </div>
-                    <h6>Trần Thị B</h6>
+                    <h6>Đinh Tiến Đạt</h6>
                     <small>Giám đốc sáng tạo</small>
                 </div>
             </div>
@@ -203,7 +200,7 @@
                     <div class="img-box">
                         <img src="@Url.Content("~/Content/img/team/member-3.jpg")" alt="Quản lý sản xuất" />
                     </div>
-                    <h6>Lê Văn C</h6>
+                    <h6>Nguyễn Văn Quyết</h6>
                     <small>Quản lý sản xuất</small>
                 </div>
             </div>
@@ -213,7 +210,7 @@
                     <div class="img-box">
                         <img src="@Url.Content("~/Content/img/team/member-4.jpg")" alt="Trợ lý vận hành" />
                     </div>
-                    <h6>Phạm Thị D</h6>
+                    <h6>Nguyễn Hải Đăng</h6>
                     <small>Trợ lý vận hành</small>
                 </div>
             </div>
@@ -230,7 +227,7 @@
                 <p>Đội ngũ chăm sóc khách hàng của chúng tôi luôn sẵn sàng hỗ trợ bạn mọi ngày trong tuần.</p>
             </div>
             <div class="col-md-4 text-md-right">
-                <a href="@Url.Action("Contact", "Home")" class="primary-btn">Liên hệ ngay</a>
+                <a href="https://www.facebook.com/pax1503" class="primary-btn">Liên hệ ngay</a>
             </div>
         </div>
     </div>
@@ -257,16 +254,8 @@
 </section>
 
 @section scripts {
-    <script type="application/ld+json">
-    <text>
-    {
-      "@@context": "https://schema.org",
-      "@@type": "Organization",
-      "name": "Male Fashion",
-      "url": "@Url.Action("Index", "Home", null, Request.Url.Scheme)",
-      "logo": "@Url.Content("~/Content/img/logo.png")",
-      "sameAs": []
-    }
-    </text>
+    <script >
+
     </script>
+
 }
