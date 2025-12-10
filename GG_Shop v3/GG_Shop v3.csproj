@@ -163,6 +163,7 @@
   <ItemGroup>
     <Content Include="Content\css\bootstrap.min.css" />
     <Content Include="Content\css\cart.css" />
+    <Content Include="Content\css\custom-home.css" />
     <Content Include="Content\css\elegant-icons.css" />
     <Content Include="Content\css\font-awesome.min.css" />
     <Content Include="Content\css\jquery-ui.min.css" />

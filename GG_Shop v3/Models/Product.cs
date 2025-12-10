@@ -29,4 +29,3 @@ namespace GG_Shop_v3.Models
         public object Product_Image { get; internal set; }
     }
 }
-
