@@ -26,7 +26,6 @@ namespace GG_Shop_v3.Models
         public virtual Category Category { get; set; }
         public virtual ICollection<Product_Sku> Product_Sku { get; set; }
         public virtual ICollection<Product_Image> Product_Images { get; set; }
-        public object Product_Image { get; internal set; }
-    }
+    } 
 }
 
