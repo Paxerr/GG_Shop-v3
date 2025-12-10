@@ -1,4 +1,4 @@
-﻿/* Content/css/cart.css - thiết kế giống ảnh #3 */
+﻿
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;600;700;800&display=swap');
 
 html, body {
@@ -228,4 +228,88 @@ header, .site-header {
     .order-summary {
         margin-top: 16px;
     }
+}
+
+/* căn giữa tiêu đề 3 cột Giá / Số lượng / Thành tiền */
+.cart-table thead th:nth-child(3),
+.cart-table thead th:nth-child(4),
+.cart-table thead th:nth-child(5) {
+    text-align: center !important;
+}
+
+/* căn giữa nội dung 3 cột tương ứng */
+.cart-table tbody td:nth-child(3),
+.cart-table tbody td:nth-child(4),
+.cart-table tbody td:nth-child(5) {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
+/* chia đều độ rộng 3 cột phải */
+.cart-table th:nth-child(3),
+.cart-table th:nth-child(4),
+.cart-table th:nth-child(5),
+.cart-table td:nth-child(3),
+.cart-table td:nth-child(4),
+.cart-table td:nth-child(5) {
+    width: 16%;
+}
+
+    /* căn giữa nhóm nút số lượng */
+    .cart-table td:nth-child(4) > div {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px;
+    }
+
+/* thành tiền nổi bật */
+.cart-table td:nth-child(5) {
+    font-weight: 700;
+    color: #c0392b;
+}
+
+
+/* Cột hình ảnh */
+.cart-img-col {
+    width: 150px;
+}
+
+.cart-img-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+}
+
+.cart-img {
+    max-width: 80px;
+    max-height: 80px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    padding: 5px;
+}
+
+/* Cột thông tin sản phẩm */
+.cart-info-col {
+    width: 300px;
+}
+
+.cart-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* căn giữa theo chiều dọc */
+    height: 90px;
+}
+
+.product-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.product-variant {
+    color: #888;
+    font-size: 13px;
 }
