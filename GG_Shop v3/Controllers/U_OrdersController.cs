@@ -71,6 +71,13 @@ namespace GG_Shop_v3.Controllers
                         .ToList<object>();
                 }
 
+                var promo = new
+                {
+                    id = Session["Promo_Id"] ?? 0,
+                    code = Session["Promo_Code"] ?? "",
+                    discount = Session["Promo_Discount"] ?? 0
+                };
+
                 var result = new
                 {
                     user = new
@@ -80,7 +87,14 @@ namespace GG_Shop_v3.Controllers
                         user.Phone_Number,
                         
                     },
-                    cartItems = cartItemsList
+
+                    cartItems = cartItemsList,
+                    promo = new
+                    {
+                        id = Session["Promo_Id"] ?? 0,
+                        code = Session["Promo_Code"] ?? "",
+                        discount = Session["Promo_Discount"] ?? 0
+                    }
                 };
 
                 return Json(result, JsonRequestBehavior.AllowGet);
@@ -90,6 +104,7 @@ namespace GG_Shop_v3.Controllers
                 var msg = ex.InnerException?.Message ?? ex.Message;
                 return Json(new { error = true, message = msg }, JsonRequestBehavior.AllowGet);
             }
+
         }
 
         [HttpPost]
@@ -110,13 +125,19 @@ namespace GG_Shop_v3.Controllers
                 if (cart == null || cart.Cart_Items == null || !cart.Cart_Items.Any())
                     return Json(new { success = false, message = "Giỏ hàng trống" });
 
-                decimal total = cart.Cart_Items.Sum(x => (x.Product_Sku?.Price ?? 0m) * x.Quantity);
+                int? promoId = Session["Promo_Id"] as int?;
+                decimal discount = Session["Promo_Discount"] != null ? (decimal)Session["Promo_Discount"] : 0;
 
+                decimal subtotal = cart.Cart_Items.Sum(x => x.Product_Sku.Price * x.Quantity);
+                decimal finalTotal = subtotal - discount;
+
+                // Tạo order
                 var order = new Order
                 {
                     User_Id = userId,
-                    Shipping_Address = shipping_address ?? "",
-                    Total_Amount = total,
+                    Shipping_Address = shipping_address,
+                    Total_Amount = finalTotal,
+                    Promo_Id = promoId,
                     Created_At = DateTime.Now,
                     Status = "Đang xử lý"
                 };

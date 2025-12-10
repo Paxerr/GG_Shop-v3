@@ -112,7 +112,15 @@
 
                     $("#cartList").html(html);
                     $("#subtotal").text(`${total}đ`);
-                    $("#total").text(`${total}đ`);
+
+                    let promoCode = res.promo.code;
+                    let discount = parseFloat(res.promo.discount) || 0;
+                    let finalTotal = total - discount;
+
+                    $("#promotion").text(promoCode !== "" ? promoCode : "-");
+                    $("#discount_amount").text(discount + "đ");
+
+                    $("#total").text(finalTotal + "đ");
                 }
             });
         }

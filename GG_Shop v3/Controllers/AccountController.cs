@@ -51,14 +51,14 @@ namespace GG_Shop_v3.Controllers
         }
 
 
-        // POST: Logout
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Logout()
         {
+            Session.Remove("User_Id");
             Session.Clear();
-            return RedirectToAction("Login");
+            Session.Abandon();
+            return RedirectToAction("Login", "Account");
         }
+
 
         // GET: Forgot Password
         public ActionResult ForgotPassword()
