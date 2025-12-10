@@ -41,6 +41,7 @@ namespace GG_Shop_v3.Controllers
             // LƯU SESSION
             Session["User"] = user;
             Session["User_Id"] = user.Id;
+            Session["User_Role"] = user.Role;
 
             // Nếu user được gửi từ Cart → quay lại Cart
             string returnUrl = Session["ReturnUrl"] != null ? Session["ReturnUrl"].ToString() : Url.Action("Index", "Home");
