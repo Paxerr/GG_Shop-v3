@@ -11,23 +11,19 @@ namespace GG_Shop_v3.Controllers
         private DataContext db = new DataContext();
 
         // GET: /UserProfile/Index - Trang chính
-        // UserProfileController.cs
-        public ActionResult Index(int? id)
+        public ActionResult Index()
         {
-            int userId;
-
-            // Nếu có id trong URL thì dùng id đó, nếu không thì dùng user đang đăng nhập
-            if (id.HasValue)
+            // KIỂM TRA ĐĂNG NHẬP TRƯỚC
+            if (!IsUserLoggedIn())
             {
-                userId = id.Value;
-            }
-            else
-            {
-                // Lấy từ session (hoặc fake cho testing)
-                userId = GetCurrentUserId();
+                // Lưu URL hiện tại để quay lại sau login
+                string returnUrl = Request.Url?.PathAndQuery;
+                return RedirectToAction("Login", "Account", new { returnUrl = returnUrl });
             }
 
+            int userId = GetCurrentUserId();
             var user = db.users.Find(userId);
+
             if (user == null)
             {
                 return HttpNotFound("Không tìm thấy người dùng");
@@ -42,6 +38,17 @@ namespace GG_Shop_v3.Controllers
         {
             try
             {
+                if (!IsUserLoggedIn())
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Vui lòng đăng nhập",
+                        redirect = Url.Action("Login", "Account",
+                                   new { returnUrl = "/UserProfile/Index" })
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
                 int userId = GetCurrentUserId();
                 var user = db.users
                     .Where(u => u.Id == userId)
@@ -86,6 +93,15 @@ namespace GG_Shop_v3.Controllers
         {
             try
             {
+                if (!IsUserLoggedIn())
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+                    });
+                }
+
                 int userId = GetCurrentUserId();
                 var user = db.users.Find(userId);
 
@@ -115,6 +131,19 @@ namespace GG_Shop_v3.Controllers
 
                 db.SaveChanges();
 
+                // CẬP NHẬT SESSION nếu có
+                if (Session["User"] != null)
+                {
+                    var sessionUser = Session["User"] as User;
+                    if (sessionUser != null)
+                    {
+                        sessionUser.Full_Name = fullName;
+                        sessionUser.Email = email;
+                        sessionUser.Phone_Number = phone;
+                        Session["User"] = sessionUser;
+                    }
+                }
+
                 return Json(new
                 {
                     success = true,
@@ -137,6 +166,15 @@ namespace GG_Shop_v3.Controllers
         {
             try
             {
+                if (!IsUserLoggedIn())
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Phiên đăng nhập đã hết hạn"
+                    });
+                }
+
                 int userId = GetCurrentUserId();
                 var user = db.users.Find(userId);
 
@@ -169,7 +207,7 @@ namespace GG_Shop_v3.Controllers
                     });
                 }
 
-                // Kiểm tra độ mạnh mật khẩu (tuỳ chọn)
+                // Kiểm tra độ mạnh mật khẩu
                 if (newPassword.Length < 6)
                 {
                     return Json(new
@@ -202,23 +240,58 @@ namespace GG_Shop_v3.Controllers
         // Đăng xuất
         public ActionResult Logout()
         {
-            // Xoá session
+            Session.Remove("User_Id");
+            Session.Remove("User_Role");
+            Session.Remove("User");
             Session.Clear();
+            Session.Abandon();
 
-            // Nếu dùng Forms Authentication
-            // FormsAuthentication.SignOut();
+            // Xóa session cookie
+            if (Response.Cookies["ASP.NET_SessionId"] != null)
+            {
+                Response.Cookies["ASP.NET_SessionId"].Value = string.Empty;
+                Response.Cookies["ASP.NET_SessionId"].Expires = DateTime.Now.AddMonths(-20);
+            }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Account");
         }
 
         // ==================== HÀM HỖ TRỢ ====================
         private int GetCurrentUserId()
         {
-            // Fake user ID cho testing - thay bằng Session thực tế
-            if (Session["UserId"] != null)
-                return Convert.ToInt32(Session["UserId"]);
+            // SỬA: Kiểm tra cả "User_Id" và "UserId" để tương thích
+            if (Session["User_Id"] != null)
+            {
+                try
+                {
+                    int userId = Convert.ToInt32(Session["User_Id"]);
+                    return userId;
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+            else if (Session["UserId"] != null) // Dự phòng
+            {
+                try
+                {
+                    int userId = Convert.ToInt32(Session["UserId"]);
+                    return userId;
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
 
-            return 1; // User ID mặc định cho testing
+            return 0;
+        }
+
+        [NonAction]
+        public bool IsUserLoggedIn()
+        {
+            return GetCurrentUserId() > 0;
         }
     }
 }
