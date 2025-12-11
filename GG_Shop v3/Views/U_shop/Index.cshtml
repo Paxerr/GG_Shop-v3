@@ -74,6 +74,9 @@
             </div>
 
             <div class="col-lg-9">
+                <div class="mb-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm..." ">
+                </div>
                 <div class="row" id="productList">
                     <!-- Products load AJAX -->
                 </div>
@@ -111,7 +114,7 @@ $(document).ready(function(){
                             <div class="product__item__pic set-bg" style="background-image:url('${p.ImageUrl}')"></div>
                             <div class="product__item__text">
                                 <h6>${p.Title}</h6>
-                                
+
                                 <h5>${p.Price}đ</h5>
                             </div>
                         </div>
@@ -158,6 +161,16 @@ $(document).ready(function(){
         $(".active-filter").removeClass("active-filter");
 
         loadProducts();
+    });
+    // --- Search delay ---
+    let typingTimer;
+    $("#searchInput").on("keyup", function () {
+        clearTimeout(typingTimer);
+        let keyword = $(this).val();
+
+        typingTimer = setTimeout(function () {
+            loadProducts({ keyword: keyword });
+        }, 500);
     });
 
 });
