@@ -175,7 +175,7 @@ public class CartController : Controller
         if (string.IsNullOrWhiteSpace(code))
             return Json(new { success = false, msg = "Vui lòng nhập mã." });
 
-        // tìm promo (case-insensitive)
+        // tìm promo 
         var promo = db.promotions.FirstOrDefault(p => p.Promo_Code.ToUpper() == code.ToUpper());
         if (promo == null)
             return Json(new { success = false, msg = "Mã giảm giá không hợp lệ." });
@@ -183,17 +183,19 @@ public class CartController : Controller
         // nếu promo đã quá hạn -> đánh dấu inactive và trả lỗi
         MarkPromoAsExpiredIfNeeded(promo);
 
-        // reload promo.Status in case we changed it
-        if (!promo.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
+        // load lại mã trong th thay đổi
+        var status = (promo.Status ?? "").Trim().ToLower();
+        if (!( status == "hoạt động"))
             return Json(new { success = false, msg = "Mã giảm giá hiện không hoạt động." });
+
 
         var now = DateTime.Now;
         if (promo.Start_Date > now)
             return Json(new { success = false, msg = "Mã giảm giá chưa bắt đầu." });
         if (promo.End_Date < now)
         {
-            // double-check (should be covered by MarkPromoAsExpiredIfNeeded)
-            promo.Status = "inactive";
+            // double-check 
+            promo.Status = "Không hoạt động";
             db.Entry(promo).State = EntityState.Modified;
             db.SaveChanges();
             return Json(new { success = false, msg = "Mã giảm giá đã hết hạn." });
@@ -216,14 +218,18 @@ public class CartController : Controller
         }
 
         decimal discount = 0;
-        var type = promo.Type?.ToUpper() ?? "";
+        var type = (promo.Type ?? "").Trim().ToLower();
 
-        if (type.Contains("PERCENT"))
+        if (type.Contains("%") || type.Contains("giảm theo %") || type.Contains("phần trăm"))
+        {
             discount = subtotal * (promo.Discount_Percentage ?? 0) / 100m;
-        else if (type.Contains("AMOUNT"))
+        }
+        else if (type.Contains("tiền") || type.Contains("giảm theo tiền") || type.Contains("amount"))
+        {
             discount = promo.Discount_Amount ?? 0m;
+        }
 
-        // LƯU VÀO SESSION: id, code, discount (server-side authoritative)
+        // LƯU VÀO SESSION: id, code, discount
         Session["Promo_Id"] = promo.Id;
         Session["Promo_Code"] = promo.Promo_Code;
         Session["Promo_Discount"] = discount;
@@ -236,31 +242,32 @@ public class CartController : Controller
         });
     }
 
-    // Kiểm tra promo còn hiệu lực (so sánh theo server time)
+    // Kiểm tra promo còn hiệu lực 
     private bool IsPromoValid(Promotion promo)
     {
         if (promo == null) return false;
-        if (string.IsNullOrWhiteSpace(promo.Status)) return false;
 
-        // chuẩn hoá: active nghĩa là có thể dùng
-        if (!promo.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
+        var status = (promo.Status ?? "").Trim().ToLower();
+
+        // Accept both Vietnamese and English
+        if (!(status == "hoạt động"))
             return false;
 
-        var now = DateTime.Now; // hoặc DateTime.UtcNow, tuỳ cách lưu ngày trong DB của bạn
+        var now = DateTime.Now;
         if (promo.Start_Date > now) return false;
         if (promo.End_Date < now) return false;
 
         return true;
     }
 
-    // Nếu promo đã quá hạn, cập nhật trạng thái trong DB -> inactive
+    // Nếu promo đã quá hạn, cập nhật trạng thái trong DB 
     private void MarkPromoAsExpiredIfNeeded(Promotion promo)
     {
         if (promo == null) return;
         var now = DateTime.Now;
-        if (promo.End_Date < now && !promo.Status.Equals("inactive", StringComparison.OrdinalIgnoreCase))
+        if (promo.End_Date < now && !promo.Status.Equals("ngừng hoạt động", StringComparison.OrdinalIgnoreCase))
         {
-            promo.Status = "inactive";
+            promo.Status = "Ngừng hoạt động";
             db.Entry(promo).State = EntityState.Modified;
             db.SaveChanges();
         }
