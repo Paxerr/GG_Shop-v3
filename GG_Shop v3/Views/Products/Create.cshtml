@@ -171,26 +171,91 @@
             $('#sizesText').keydown(function (e) { if (e.key === 'Enter') { e.preventDefault(); addTag('#sizesInput', sizes, this.value); this.value = ''; } });
 
             // Sinh biến thể
-            function generateVariants() {
-                const $tbody = $('#variantsTable tbody').empty();
-                const colorArr = Array.from(colors), sizeArr = Array.from(sizes);
-                if (colorArr.length === 0 || sizeArr.length === 0) { $('#noVariantsNote').show(); return; }// Hiện ghi chú
-                $('#noVariantsNote').hide();
-                let idx = 0;
-                colorArr.forEach(c => sizeArr.forEach(s => {
-                    $tbody.append(`
-                    <tr>
-                        <td><input type="text" class="form-control" name="skus[${idx}].Color" value="${c}" /></td>
-                        <td><input type="text" class="form-control" name="skus[${idx}].Size" value="${s}" /></td>
-                        <td><input type="text" class="form-control" name="skus[${idx}].Sku" /></td>
-                        <td><input type="number" class="form-control" name="skus[${idx}].Quantity" value="0" /></td>
-                        <td><input type="number" class="form-control" name="skus[${idx}].Price" value="0" /></td>
-                        <td class="text-center"><button type="button" class="btn btn-sm btn-danger remove-row">×</button></td>
-                    </tr>`);
-                    idx++;
-                }));
+ 
+            function removeDiacritics(str) {
+                if (!str) return "";
+
+                // Thay Đ/đ trước vì Unicode không tách dấu
+                str = str.replace(/Đ/g, "D").replace(/đ/g, "d");
+
+                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             }
-            $(document).on('click', '.remove-row', function () { $(this).closest('tr').remove(); });
+
+            //  Lấy chữ cái đầu mỗi từ 
+            function getInitialsFromTitle(title) {
+                if (!title) return "";
+                let cleaned = removeDiacritics(title.trim());
+                let parts = cleaned.split(/\s+/).filter(p => p.length > 0);
+                return parts.map(p => p[0].toUpperCase()).join("");
+            }
+
+
+            function normalizeForSkuJS(text) {
+                if (!text) return "";
+
+                // Bỏ dấu tiếng Việt
+                let cleaned = removeDiacritics(text).toUpperCase(); 
+
+                // CHỈ giữ A–Z và 0–9
+                cleaned = cleaned.replace(/[^A-Z0-9]/g, "");
+
+                return cleaned;
+            }
+
+
+            function htmlEncode(str) {
+                if (!str) return "";
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+            }
+
+            // HÀM SINH BIẾN THỂ + SKU TỰ ĐỘNG
+            function generateVariants() {
+                let tbody = $("#variantsTable tbody");
+                tbody.empty();
+
+                if (colors.length === 0 || sizes.length === 0) {
+                    $("#noVariantsNote").show();
+                    return;
+                }
+                $("#noVariantsNote").hide();
+
+                let title = $("#Title").val() || "";
+                let initials = getInitialsFromTitle(title); // ví dụ ATC
+
+                let index = 0;
+                colors.forEach(color => {
+                    sizes.forEach(size => {
+                        let colorNorm = normalizeForSkuJS(color);
+                        let sizeNorm = normalizeForSkuJS(size);
+
+                        let sku = `${initials}-${colorNorm}-${sizeNorm}`.toUpperCase();
+
+                        tbody.append(`
+                <tr>
+                    <td><input name="skus[${index}].Color" class="form-control" value="${htmlEncode(color)}"></td>
+                    <td><input name="skus[${index}].Size" class="form-control" value="${htmlEncode(size)}"></td>
+                    <td><input name="skus[${index}].Sku" class="form-control" value="${htmlEncode(sku)}"></td>
+                    <td><input name="skus[${index}].Quantity" class="form-control" type="number" value="0"></td>
+                    <td><input name="skus[${index}].Price" class="form-control" type="number" value="0"></td>
+                    <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row">×</button></td>
+                </tr>
+            `);
+
+                        index++;
+                    });
+                });
+            }
+
+            // Tự động cập nhật SKU khi user đổi Title
+            $("#Title").on("input", function () {
+                if ($("#variantsTable tbody tr").length > 0) {
+                    generateVariants();
+                }
+            });
 
             // Lưu sản phẩm (AJAX)
             $('#saveProductBtn').click(function () {

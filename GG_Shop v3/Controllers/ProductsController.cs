@@ -191,15 +191,28 @@ namespace GG_Shop_v3.Controllers
                     {
                         string idx = key.Substring(5, key.IndexOf("]") - 5);
 
+                        string color = Request[$"skus[{idx}].Color"];
+                        string size = Request[$"skus[{idx}].Size"];
+                        string sku = Request[$"skus[{idx}].Sku"]?.Trim();
+
+                        if (string.IsNullOrWhiteSpace(sku))
+                        {
+                            var initials = GetInitials(product.Title);  // ATC
+                            var c = NormalizeForSku(color);            // DEN
+                            var s = NormalizeForSku(size);             // L
+                            sku = $"{initials}-{c}-{s}".ToUpperInvariant(); // ATC-DEN-L
+                        }
+
                         db.product_skus.Add(new Product_Sku
                         {
                             Product_Id = product.Id,
-                            Sku = Request[$"skus[{idx}].Sku"],
-                            Color = Request[$"skus[{idx}].Color"],
-                            Size = Request[$"skus[{idx}].Size"],
+                            Sku = sku,
+                            Color = color,
+                            Size = size,
                             Quantity = int.Parse(Request[$"skus[{idx}].Quantity"]),
                             Price = decimal.Parse(Request[$"skus[{idx}].Price"]),
                         });
+
                     }
 
                     db.SaveChanges();
@@ -226,7 +239,7 @@ namespace GG_Shop_v3.Controllers
         public ActionResult Edit(int id)
         {
             ViewBag.Id = id;
-            return View(); // View không cần Model, chỉ cần Id để JS gọi API
+            return View(); 
         }
 
         [HttpGet]
@@ -269,10 +282,10 @@ namespace GG_Shop_v3.Controllers
 
             // Danh sách trạng thái cố định
             var statusList = new[] {
-        "Đang bán",
-        "Chưa bán",
-        "Đã hết"
-    };
+                "Đang bán",
+                "Chưa bán",
+                "Đã hết"
+            };
 
             // Ảnh đại diện
             var mainImgUrl = imageList.FirstOrDefault(i => i.Is_Main)?.Url
@@ -374,7 +387,7 @@ namespace GG_Shop_v3.Controllers
                 var skuKeys = Request.Form.AllKeys.Where(k => k.StartsWith("skus[") && k.EndsWith("].Sku")).ToList();
                 foreach (var key in skuKeys)
                 {
-                    var prefix = key.Substring(0, key.IndexOf("].Sku") + 1); // skus[0], skus[1], ...
+                    var prefix = key.Substring(0, key.IndexOf("].Sku") + 1); 
                     string sku = Request[prefix + ".Sku"];
                     string color = Request[prefix + ".Color"];
                     string size = Request[prefix + ".Size"];
@@ -464,5 +477,35 @@ namespace GG_Shop_v3.Controllers
                 db.Dispose();
             base.Dispose(disposing);
         }
+        private string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "";
+            var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder();
+            foreach (var ch in normalized)
+            {
+                var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (uc != System.Globalization.UnicodeCategory.NonSpacingMark)
+                    sb.Append(ch);
+            }
+            return sb.ToString();
+        }
+
+        private string NormalizeForSku(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "";
+            var noDiac = RemoveDiacritics(text);
+            noDiac = System.Text.RegularExpressions.Regex.Replace(noDiac, @"[^\w\-]", "");
+            noDiac = noDiac.Replace("_", "");
+            return noDiac.ToUpperInvariant();
+        }
+
+        private string GetInitials(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title)) return "";
+            var parts = RemoveDiacritics(title).Trim().Split(' ');
+            return string.Join("", parts.Where(x => x.Length > 0).Select(x => char.ToUpperInvariant(x[0])));
+        }
+
     }
 }
