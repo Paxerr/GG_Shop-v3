@@ -94,7 +94,6 @@
 </header>
 
 <style>
-    /* Scoped chỉ ảnh hưởng dropdown trong header có class .user-dropdown */
     .user-dropdown {
         position: relative;
     }
@@ -114,8 +113,6 @@
             min-width: 200px;
             z-index: 1050;
         }
-
-            /* Tương thích Bootstrap: .show được thêm bởi JS khi mở dropdown */
             .user-dropdown.show .dropdown-menu,
             .user-dropdown .dropdown-menu.show {
                 transform: translateY(0) scale(1);
@@ -166,13 +163,27 @@
         return (typeof v === 'string') ? v.trim().toLowerCase() : '';
     }
     // Hiển thị admin menu nếu role là admin
-    function showAdminIfNeeded() {
-        var role = safeTrimLower(__currentUserRole);
-        if (role === 'admin') {
-            var el = document.getElementById('admin-menu-link');
-            if (el) el.style.display = '';
+        function showAdminIfNeeded() {
+            try {
+                var role = safeTrimLower(__currentUserRole);
+                if (role === 'admin') {
+                    var el = document.getElementById('admin-menu-link');
+                    if (el) {
+                        el.style.display = '';
+                    }
+                }
+            } catch (e) {
+                console && console.error && console.error('showAdminIfNeeded error', e);
+            }
         }
-    }
+
+        // gọi khi DOM đã sẵn sàng
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', showAdminIfNeeded);
+        } else {
+            showAdminIfNeeded();
+        }
+
     $.ajax({
         url: "/Home/GetCartItem",
         type: "GET",
