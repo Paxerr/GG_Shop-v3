@@ -269,8 +269,30 @@ $(function () {
     });
 
     $('#placeOrderBtn').click(function () {
-        window.location.href = "/U_Orders/Index";
+
+        // kiểm tra giỏ hàng trống ở frontend
+        var rowCount = $("#cartBody tr").length;
+        if (rowCount === 0 || $("#cartBody").text().includes("Giỏ hàng trống")) {
+            alert("Giỏ hàng trống, không thể đặt hàng.");
+            return;
+        }
+
+        $.ajax({
+            url: '/Cart/PlaceOrder',
+            type: 'POST',
+            success: function (res) {
+                if (res.success) {
+                    window.location.href = res.redirectUrl;
+                } else {
+                    alert(res.msg);    // "Giỏ hàng trống."
+                }
+            },
+            error: function () {
+                alert("Lỗi hệ thống khi đặt hàng");
+            }
+        });
     });
+
 
 
 });

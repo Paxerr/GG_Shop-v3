@@ -51,6 +51,34 @@ public class CartController : Controller
             if (uid == null)
                 return Json(new { success = false, msg = "NOT_LOGIN", items = new object[0], total = 0 }, JsonRequestBehavior.AllowGet);
 
+            // ngay sau khi lấy uid và cart
+            // Nếu có promo trong session, validate lại: nếu hết hạn -> xóa session
+            if (Session["Promo_Id"] != null)
+            {
+                int promoId;
+                if (int.TryParse(Session["Promo_Id"].ToString(), out promoId))
+                {
+                    var sessionPromo = db.promotions.Find(promoId);
+                    if (sessionPromo == null)
+                    {
+                        Session.Remove("Promo_Id"); Session.Remove("Promo_Code"); Session.Remove("Promo_Discount");
+                    }
+                    else
+                    {
+                        // nếu promo quá hạn thì mark và xóa session
+                        if (!IsPromoValid(sessionPromo))
+                        {
+                            MarkPromoAsExpiredIfNeeded(sessionPromo);
+                            Session.Remove("Promo_Id"); Session.Remove("Promo_Code"); Session.Remove("Promo_Discount");
+                        }
+                    }
+                }
+                else
+                {
+                    Session.Remove("Promo_Id"); Session.Remove("Promo_Code"); Session.Remove("Promo_Discount");
+                }
+            }
+
             var cart = GetUserCart(uid.Value);
 
             if (cart == null || !cart.Cart_Items.Any())
@@ -92,6 +120,7 @@ public class CartController : Controller
 
             return Json(new { success = true, items = items, total = total }, JsonRequestBehavior.AllowGet);
         }
+
         catch (Exception ex)
         {
             return Json(new { success = false, msg = ex.Message }, JsonRequestBehavior.AllowGet);
@@ -146,9 +175,29 @@ public class CartController : Controller
         if (string.IsNullOrWhiteSpace(code))
             return Json(new { success = false, msg = "Vui lòng nhập mã." });
 
+        // tìm promo (case-insensitive)
         var promo = db.promotions.FirstOrDefault(p => p.Promo_Code.ToUpper() == code.ToUpper());
         if (promo == null)
             return Json(new { success = false, msg = "Mã giảm giá không hợp lệ." });
+
+        // nếu promo đã quá hạn -> đánh dấu inactive và trả lỗi
+        MarkPromoAsExpiredIfNeeded(promo);
+
+        // reload promo.Status in case we changed it
+        if (!promo.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
+            return Json(new { success = false, msg = "Mã giảm giá hiện không hoạt động." });
+
+        var now = DateTime.Now;
+        if (promo.Start_Date > now)
+            return Json(new { success = false, msg = "Mã giảm giá chưa bắt đầu." });
+        if (promo.End_Date < now)
+        {
+            // double-check (should be covered by MarkPromoAsExpiredIfNeeded)
+            promo.Status = "inactive";
+            db.Entry(promo).State = EntityState.Modified;
+            db.SaveChanges();
+            return Json(new { success = false, msg = "Mã giảm giá đã hết hạn." });
+        }
 
         var uid = CurrentUserId;
         if (uid == null)
@@ -160,15 +209,21 @@ public class CartController : Controller
 
         decimal subtotal = cart.Cart_Items.Sum(c => c.Quantity * c.Product_Sku.Price);
 
+        // kiểm tra min order value nếu có
+        if (promo.Min_Order_Value.HasValue && subtotal < promo.Min_Order_Value.Value)
+        {
+            return Json(new { success = false, msg = $"Mã này yêu cầu đơn hàng tối thiểu {promo.Min_Order_Value.Value:N0}₫." });
+        }
+
         decimal discount = 0;
-        string type = promo.Type?.ToUpper() ?? "";
+        var type = promo.Type?.ToUpper() ?? "";
 
         if (type.Contains("PERCENT"))
             discount = subtotal * (promo.Discount_Percentage ?? 0) / 100m;
         else if (type.Contains("AMOUNT"))
-            discount = promo.Discount_Amount ?? 0;
+            discount = promo.Discount_Amount ?? 0m;
 
-        // LƯU VÀO SESSION 
+        // LƯU VÀO SESSION: id, code, discount (server-side authoritative)
         Session["Promo_Id"] = promo.Id;
         Session["Promo_Code"] = promo.Promo_Code;
         Session["Promo_Discount"] = discount;
@@ -181,6 +236,35 @@ public class CartController : Controller
         });
     }
 
+    // Kiểm tra promo còn hiệu lực (so sánh theo server time)
+    private bool IsPromoValid(Promotion promo)
+    {
+        if (promo == null) return false;
+        if (string.IsNullOrWhiteSpace(promo.Status)) return false;
+
+        // chuẩn hoá: active nghĩa là có thể dùng
+        if (!promo.Status.Equals("active", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var now = DateTime.Now; // hoặc DateTime.UtcNow, tuỳ cách lưu ngày trong DB của bạn
+        if (promo.Start_Date > now) return false;
+        if (promo.End_Date < now) return false;
+
+        return true;
+    }
+
+    // Nếu promo đã quá hạn, cập nhật trạng thái trong DB -> inactive
+    private void MarkPromoAsExpiredIfNeeded(Promotion promo)
+    {
+        if (promo == null) return;
+        var now = DateTime.Now;
+        if (promo.End_Date < now && !promo.Status.Equals("inactive", StringComparison.OrdinalIgnoreCase))
+        {
+            promo.Status = "inactive";
+            db.Entry(promo).State = EntityState.Modified;
+            db.SaveChanges();
+        }
+    }
 
     // PLACE ORDER 
     [HttpPost]

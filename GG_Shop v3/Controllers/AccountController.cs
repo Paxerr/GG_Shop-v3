@@ -24,11 +24,22 @@ namespace GG_Shop_v3.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Thông tin không hợp lệ" });
+                // Trả về lỗi validation giống format cũ (client đang parse res.errors)
+                return Json(new
+                {
+                    success = false,
+                    errors = ModelState.Where(x => x.Value.Errors.Any())
+                        .ToDictionary(
+                            kv => kv.Key,
+                            kv => kv.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        )
+                });
             }
 
+            // Tìm user theo email
             var user = await db.users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
+            // Nếu không tồn tại hoặc pwd sai -> trả lỗi chung (không tiết lộ chi tiết)
             if (user == null || user.Password != model.Password)
             {
                 return Json(new
@@ -38,17 +49,32 @@ namespace GG_Shop_v3.Controllers
                 });
             }
 
-            // LƯU SESSION
+            // Kiểm tra trạng thái tài khoản
+            // Nếu user.Status không phải "Hoạt động" thì chặn login
+            string status = (user.Status ?? "").Trim();
+            if (!string.Equals(status, "Hoạt động", StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = new { _global = new[] { "Tài khoản của bạn đã bị chặn/khóa. Vui lòng liên hệ quản trị." } }
+                });
+            }
+
+            // LƯU SESSION CHỈ KHI TẤT CẢ OK
             Session["User"] = user;
             Session["User_Id"] = user.Id;
             Session["User_Role"] = user.Role;
 
-            // Nếu user được gửi từ Cart → quay lại Cart
+            // Nếu có ReturnUrl lưu trong session (ví dụ từ Cart), trả về url đó
             string returnUrl = Session["ReturnUrl"] != null ? Session["ReturnUrl"].ToString() : Url.Action("Index", "Home");
-
             Session.Remove("ReturnUrl");
 
-            return Json(new { success = true, redirectUrl = returnUrl });
+            return Json(new
+            {
+                success = true,
+                redirectUrl = returnUrl
+            });
         }
 
 
