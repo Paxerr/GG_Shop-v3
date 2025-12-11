@@ -106,6 +106,7 @@ $(document).ready(function(){
             $.each(products, function (i, p) {
                 var html = `
                     <div class="col-lg-4 col-md-6 col-sm-6">
+                    <a href="/ProductsAjax/index/${p.Id}">
                         <div class="product__item">
                             <div class="product__item__pic set-bg" style="background-image:url('${p.ImageUrl}')"></div>
                             <div class="product__item__text">
@@ -114,6 +115,7 @@ $(document).ready(function(){
                                 <h5>${p.Price}đ</h5>
                             </div>
                         </div>
+                     </a>
                     </div>`;
                 $('#productList').append(html);
             });
