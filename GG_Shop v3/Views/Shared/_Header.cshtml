@@ -65,27 +65,27 @@
                         <li class=""><a href="~/Home/Index">Home</a></li>
                         <li><a href="/U_shop/Index">Shop</a></li>
                         @*<li>
-                            <a href="#">Pages</a>
-                            <ul class="dropdown">
-                                <li><a href="./about.html">About Us</a></li>
-                                <li><a href="./shop-details.html">Shop Details</a></li>
-                                <li><a href="./shopping-cart.html">Shopping Cart</a></li>
-                                <li><a href="./checkout.html">Check Out</a></li>
-                                <li><a href="./blog-details.html">Blog Details</a></li>
-                            </ul>
-                        </li>*@
+                                <a href="#">Pages</a>
+                                <ul class="dropdown">
+                                    <li><a href="./about.html">About Us</a></li>
+                                    <li><a href="./shop-details.html">Shop Details</a></li>
+                                    <li><a href="./shopping-cart.html">Shopping Cart</a></li>
+                                    <li><a href="./checkout.html">Check Out</a></li>
+                                    <li><a href="./blog-details.html">Blog Details</a></li>
+                                </ul>
+                            </li>*@
                         @*<li><a href="./blog.html">Blog</a></li>*@
                         <li><a href="~/Information/Index">Về chúng tôi</a></li>
                         <li id="admin-menu-link" style="display:none;">
-                            <a href="/Admin/Dashboard">Trang quản trị</a>
+                            <a href="~/Orders/Index">Trang quản trị</a>
                         </li>
-                  </ul>
+                    </ul>
                 </nav>
             </div>
             <div class="col-lg-3 col-md-3">
                 <div class="header__nav__option">
                     <a href="#" class="search-switch"><img src="~/Content/img/icon/search.png" alt=""></a>
-                    <a href="/Cart/Index"><img src="~/Content/img/icon/cart.png" alt=""> <span>0</span></a>
+                    <a href="/Cart/Index"><img src="~/Content/img/icon/cart.png" alt=""> <span id="cart-item">0</span></a>
                 </div>
             </div>
         </div>
@@ -151,13 +151,43 @@
         }
 </style>
 
-@section script {
+@{
+    // Lấy role và userId từ Session an toàn
+    string userRole = Session["User_Role"] != null ? Session["User_Role"].ToString() : "";
+    var jsUserRoleJson = Json.Encode(userRole ?? "");
+
+    string userIdStr = Session["User_Id"] != null ? Session["User_Id"].ToString() : "";
+    var jsUserIdJson = Json.Encode(userIdStr ?? "");
+}
     <script>
-        $(document).ready(function () {
-            var userRole = '@(Session["User_Role"] ?? "")';
-            if (userRole.toLowerCase() === "admin") {
-                document.getElementById("admin-menu-link").style.display = "block";
-            }
-        })
+    var __currentUserRole = @Html.Raw(jsUserRoleJson);
+    var __currentUserId = @Html.Raw(jsUserIdJson);
+    function safeTrimLower(v) {
+        return (typeof v === 'string') ? v.trim().toLowerCase() : '';
+    }
+    // Hiển thị admin menu nếu role là admin
+    function showAdminIfNeeded() {
+        var role = safeTrimLower(__currentUserRole);
+        if (role === 'admin') {
+            var el = document.getElementById('admin-menu-link');
+            if (el) el.style.display = '';
+        }
+    }
+    $.ajax({
+        url: "/Home/GetCartItem",
+        type: "GET",
+        success: function (res) {
+            var total = 0;
+            if (typeof res.total === "number") total = res.total;
+            else if (typeof res.total === "string") total = parseInt(res.total) || 0;
+
+            var tmp = document.getElementById("cart-item");
+            if (tmp) tmp.innerText = total;
+        },
+        error: function () {
+            console.error("Không thể tải số lượng giỏ hàng");
+        }
+    });
     </script>
-   }
+
+

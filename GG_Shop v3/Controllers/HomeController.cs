@@ -3,8 +3,9 @@ using System;
 using System.Linq;
 using System.Web.Mvc;
 using System.Data.Entity;
+using Microsoft.Ajax.Utilities;
 
-namespace GG_Shop_v3.Controllers // Kiểm tra lại namespace cho đúng với project của bạn
+namespace GG_Shop_v3.Controllers
 {
     public class HomeController : Controller
     {
@@ -22,7 +23,7 @@ namespace GG_Shop_v3.Controllers // Kiểm tra lại namespace cho đúng với 
             try
             {
                 var categories = db.categories
-                    .Where(c => c.Products.Any()) // 🔥 CHỈ LẤY CATEGORY CÓ SẢN PHẨM
+                    .Where(c => c.Products.Any()) //CHỈ LẤY CATEGORY CÓ SẢN PHẨM
                     .Select(c => new
                     {
                         c.Id,
@@ -47,12 +48,12 @@ namespace GG_Shop_v3.Controllers // Kiểm tra lại namespace cho đúng với 
             {
                 var products = db.products
                     .Include(p => p.Category)
-                    .OrderByDescending(p => p.Id) // Lấy sản phẩm mới nhất
-                    .Take(12) // Chỉ lấy 12 sản phẩm để load nhanh
+                    .OrderByDescending(p => p.Id)
+                    .Take(12) 
                     .Select(p => new
                     {
                         Id = p.Id,
-                        Name = p.Title, // Hoặc p.Name tùy model của bạn
+                        Name = p.Title,
                         Price = p.Product_Sku.OrderBy(s => s.Price).Select(s => s.Price).FirstOrDefault(),
                         MainImg = p.Product_Images.Where(i => i.Is_Main == true).Select(i => i.Image_Url).FirstOrDefault() ?? "/Content/img/no-image.jpg"
                     })
@@ -95,6 +96,41 @@ namespace GG_Shop_v3.Controllers // Kiểm tra lại namespace cho đúng với 
             }
 
         }
+
+        [HttpGet]
+        public JsonResult GetCartItem()
+        {
+            try
+            {
+                if (Session == null || Session["User_Id"] == null)
+                {
+                    return Json(new { total = 0 }, JsonRequestBehavior.AllowGet);
+                }
+
+                int userId;
+                if (!int.TryParse(Session["User_Id"].ToString(), out userId))
+                {
+                    return Json(new { total = 0 }, JsonRequestBehavior.AllowGet);
+                }
+                var cart = db.carts.FirstOrDefault(c => c.User_Id == userId);
+                if (cart == null)
+                {
+                    return Json(new { total = 0 }, JsonRequestBehavior.AllowGet);
+                }
+                int total = db.cart_items
+                    .Where(ci => ci.Cart_Id == cart.Id)
+                    .Select(ci => (int?)ci.Quantity)
+                    .DefaultIfEmpty(0)
+                    .Sum() ?? 0;
+
+                return Json(new { total = total }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { total = 0, error = "Server error" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
 
         protected override void Dispose(bool disposing)
         {
