@@ -119,44 +119,89 @@
 <script>
     $(function () {
 
-        // Hàm bật/tắt required % giảm
+         //* 1) VALIDATE NGÀY BẮT ĐẦU < NGÀY KẾT THÚC
+        function validateDates() {
+            let start = $("input[name='Start_Date']").val();
+            let end = $("input[name='End_Date']").val();
+
+            if (!start || !end) return true; // chưa nhập
+
+            let d1 = new Date(start);
+            let d2 = new Date(end);
+
+            if (d1 >= d2) {
+                alert("Ngày bắt đầu phải nhỏ hơn ngày kết thúc!");
+                return false;
+            }
+            return true;
+        }
+
+        $("input[name='Start_Date'], input[name='End_Date']").on("change", validateDates);
+
+
+
+         //* 3) VALIDATION + AJAX SUBMIT FORM
+        $("#create_promotion").validator().on("submit", function (e) {
+            if (e.isDefaultPrevented()) return;
+
+            // kiểm tra ngày trước khi gửi
+            if (!validateDates()) {
+                e.preventDefault();
+                return;
+            }
+
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Insert", "Promotions")',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+
+                    alert("Tạo mã thành công!");
+
+                    // sau khi tạo → kiểm tra nếu hết hạn thì tự disable
+                    let promo = $("input[name='Promo_Code']").val();
+                    let end = $("input[name='End_Date']").val();
+                    checkAndDisableIfExpired(promo, end);
+                },
+                error: function () {
+                    alert("Lỗi hệ thống!");
+                }
+            });
+        });
+
+
+
+        /* ==========================
+         * SHOW / HIDE Fields
+         * ========================== */
+
         function setPercentRequired(on) {
-            var $el = $("input[name='Discount_Percentage']");
+            let $el = $("input[name='Discount_Percentage']");
             $el.prop("required", on);
-
-            if (on) {
-                $el.attr("data-required-error", "Vui lòng nhập phần trăm giảm");
-            } else {
-                $el.removeAttr("data-required-error");
-                $el.val("");
-                $el.closest('.form-group').find('.help-block.with-errors').empty();
-            }
+            if (on) $el.attr("data-required-error", "Vui lòng nhập phần trăm giảm");
+            else { $el.removeAttr("data-required-error").val(""); }
         }
 
-        // Hàm bật/tắt required số tiền giảm
         function setAmountRequired(on) {
-            var $el = $("input[name='Discount_Amount']");
+            let $el = $("input[name='Discount_Amount']");
             $el.prop("required", on);
-
-            if (on) {
-                $el.attr("data-required-error", "Vui lòng nhập số tiền giảm");
-            } else {
-                $el.removeAttr("data-required-error");
-                $el.val("");
-                $el.closest('.form-group').find('.help-block.with-errors').empty();
-            }
+            if (on) $el.attr("data-required-error", "Vui lòng nhập số tiền giảm");
+            else { $el.removeAttr("data-required-error").val(""); }
         }
 
-        // Khi load trang tắt cả 2
         setPercentRequired(false);
         setAmountRequired(false);
         $("#percentGroup, #amountGroup").hide();
 
-        // Khi đổi loại giảm giá
         $("#promoType").on("change", function () {
-            var type = $(this).val();
+            let type = $(this).val();
 
-            // reset
             $("#percentGroup, #amountGroup").hide();
             setPercentRequired(false);
             setAmountRequired(false);
@@ -170,29 +215,7 @@
             }
         });
 
-        // AJAX submit
-        $("#create_promotion").validator().on("submit", function (e) {
-            if (e.isDefaultPrevented()) return;
-
-            e.preventDefault();
-
-            var formData = new FormData(this);
-
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("Insert", "Promotions")',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (res) {
-                    alert(res);
-                },
-                error: function () {
-                    alert("Lỗi hệ thống!");
-                }
-            });
-        });
-
     });
 </script>
+
 

@@ -22,6 +22,32 @@ namespace GG_Shop_v3.Controllers
             return View();
         }
 
+        public JsonResult ActivePromo(int id)
+        {
+            var promo = db.promotions.FirstOrDefault(x => x.Id == id);
+                promo.Status = "Hoạt động";
+                db.SaveChanges();
+            return Json("Đã cập nhật trạng thái");
+        }
+
+        [HttpPost]
+        public JsonResult AutoDisable(int id)
+        {
+            var promo = db.promotions.FirstOrDefault(x => x.Id == id);
+
+            if (promo == null)
+                return Json("Không tìm thấy mã");
+
+            if (promo.Status != "Ngừng hoạt động")
+            {
+                promo.Status = "Ngừng hoạt động";
+                db.SaveChanges();
+            }
+
+            return Json("Đã cập nhật trạng thái");
+        }
+
+
         public JsonResult getPromotionsList()
         {
             var list = db.promotions
@@ -132,7 +158,22 @@ namespace GG_Shop_v3.Controllers
             return rs;
         }
 
+        [HttpPost]
+        public JsonResult AutoDisablePromo(string code)
+        {
+            if (string.IsNullOrEmpty(code))
+                return Json("Không có mã", JsonRequestBehavior.AllowGet);
 
+            var promo = db.promotions.FirstOrDefault(x => x.Promo_Code == code);
+
+            if (promo == null)
+                return Json("Không tìm thấy mã", JsonRequestBehavior.AllowGet);
+
+            promo.Status = "Ngừng hoạt động";
+            db.SaveChanges();
+
+            return Json("Đã cập nhật trạng thái");
+        }
 
 
         public ActionResult Edit()

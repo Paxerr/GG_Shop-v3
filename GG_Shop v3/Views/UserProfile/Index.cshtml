@@ -421,8 +421,34 @@
     <script>
         // Biến lưu trạng thái
         var currentContent = 'profile';
+        // Xử lý khi session hết hạn (AJAX)
+$(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+    try {
+        var response = JSON.parse(jqxhr.responseText);
+        if (response.redirect) {
+            window.location.href = response.redirect;
+        }
+    } catch(e) {
+        // Không phải JSON
+    }
+});
+
+// Xử lý khi load trang
+$(document).ready(function() {
+    // Kiểm tra nếu không đăng nhập
+    $.get('@Url.Action("GetUserInfo", "UserProfile")', function(response) {
+        if (!response.success && response.redirect) {
+            window.location.href = response.redirect;
+        }
+    });
+});
 
         $(document).ready(function () {
+            // Debug: In ra thông tin session
+            $.get('/UserProfile/GetSessionInfo', function (response) {
+                console.log("Session Info:", response);
+            });
+
             loadUserInfo();
         });
 
@@ -593,6 +619,6 @@
             var re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
             return re.test(email);
         }
-            
+
     </script>
 }

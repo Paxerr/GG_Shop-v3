@@ -41,12 +41,12 @@
 
 
 
-    @*pop-up xóa mã gg*@
+    @*pop-up ngưng hđ mã gg*@
     <div class="modal fade" id="deleModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title text-dark">Xác nhận xóa</h5>
+                    <h5 class="modal-title text-dark">Thông báo</h5>
                 </div>
                 <div class="modal-body">
                     Bạn có chắc muốn dừng chương trình giảm giá này?
@@ -60,76 +60,184 @@
     </div>
 
 
+    @*pop-up hoạt động mã gg*@
+    <div class="modal fade" id="UnbanModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">Thông báo</h5>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc muốn chương trình giảm giá này hoạt động?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-warning mt-2" data-dismiss="modal">Hủy</button>
+                    <button id="confirmActive" class="btn btn-warning mt-2">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: mã đã quá hạn -->
+<div class="modal fade" id="expiredModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title text-white">Mã đã hết hạn</h5>
+            </div>
+            <div class="modal-body">
+                Mã giảm giá này đã quá ngày kết thúc. Vui lòng tạo mã mới thay thế.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <a href="@Url.Action("Create","Promotions")" class="btn btn-primary">Tạo mã mới</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section scripts {
     <script>
+$(function () {
 
-    $(document).ready(function () {
+    var PromoId;
 
-        var PromoId;
+    // Parse ngày từ server an toàn (ISO, /Date(...)/, yyyy-mm-dd)
+    function parseServerDate(v) {
+        if (!v) return null;
+        if (typeof v === "string" && v.indexOf("/Date(") === 0) {
+            var ms = parseInt(v.replace(/\/Date\((\d+)\)\//, "$1"), 10);
+            return new Date(ms);
+        }
+        var d = new Date(v);
+        if (!isNaN(d.getTime())) return d;
+        if (typeof v === "string" && v.length >= 10 && v.indexOf("-") >= 0) {
+            var parts = v.substring(0,10).split("-");
+            if (parts.length === 3) return new Date(parts[0], parts[1]-1, parts[2]);
+        }
+        return null;
+    }
+    function toPureDate(d) {
+        if (!d) return null;
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
 
-    function loadUserTable(){
+    // gọi API disable 1 promo (trả promise)
+    function disablePromo(id) {
+        return $.ajax({
+            url: '@Url.Action("AutoDisable", "Promotions")',
+            type: 'POST',
+            data: { id: id },
+            dataType: 'json'
+        });
+    }
+
+    // load danh sách, auto-disable expired, sau đó render bảng
+    function loadUserTable() {
+        // destroy datatable nếu đã init
+        if ($.fn.DataTable.isDataTable('#datatable')) {
+            $('#datatable').DataTable().destroy();
+            $('#datatable tbody').empty();
+        }
+
         $.ajax({
             url: '@Url.Action("getPromotionsList", "Promotions")',
             type: 'POST',
+            dataType: 'json',
             success: function (rs) {
+                if (!Array.isArray(rs)) rs = [];
+
                 var tbody = $("#datatable tbody");
                 tbody.empty();
 
-                rs.forEach(function (u) {
-                    tbody.append(`
-                    <tr>
-                        <td>${u.Promo_Code}</td>
-                        <td>${u.Description}</td>
-                        <td>${u.Uses_Count}</td>
-                        <td>${u.Start_Date}</td>
-                        <td>${u.End_Date}</td>
-                        <td>${u.Status}</td>
-                        <td>
-                            <div class="d-flex align-items-center list-action">
-                                    <a class="badge badge-info mr-2" href="/Promotions/Details/${u.Id}">
-                                        <i class="ri-eye-line"></i>
-                                    </a>
-                                    <a class="badge bg-success mr-2" href="/Promotions/Edit/${u.Id}">
-                                        <i class="ri-pencil-line"></i>
-                                    </a>
-                                    <a class="badge bg-warning mr-2 btn-delete-promotions" data-id="${u.Id}">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </a>
-                              </div>
-                        </td>
-                    </tr>
-                `);
+                var today = toPureDate(new Date());
+                var disablePromises = [];
+
+                // 1) Dò từng promo, nếu expired và chưa bị disable -> gọi disable, cập nhật object p khi success
+                rs.forEach(function (p) {
+                    var rawEnd = p.End_Date || p.end_date || p.endDate || p.EndDate;
+                    var parsed = parseServerDate(rawEnd);
+                    var endPure = parsed ? toPureDate(parsed) : null;
+
+                    var status = p.Status || p.status || "";
+
+                    if (endPure && today >= endPure && status !== "Ngừng hoạt động") {
+                        var prom = disablePromo(p.Id)
+                            .done(function () {
+                                p.Status = "Ngừng hoạt động";
+                            })
+                            .fail(function () {
+                                console.warn("AutoDisable failed for id", p.Id);
+                            });
+
+                        disablePromises.push(prom);
+                    }
                 });
-                $('#datatable').DataTable();
+
+                // 2) Khi tất cả disable call xong (hoặc không có call nào) -> render bảng
+                var whenAll = disablePromises.length ? $.when.apply($, disablePromises) : $.Deferred().resolve();
+
+                whenAll.always(function () {
+                    rs.forEach(function (p) {
+                        var start = p.Start_Date || p.start_date || p.startDate || p.StartDate || "";
+                        var end = p.End_Date || p.end_date || p.endDate || p.EndDate || "";
+                        var status = p.Status || p.status || "";
+
+                        tbody.append(`
+                            <tr data-id="${p.Id}" data-end="${end}" data-code="${p.Promo_Code}">
+                                <td>${p.Promo_Code}</td>
+                                <td>${p.Description}</td>
+                                <td>${p.Uses_Count}</td>
+                                <td>${end}</td>
+                                <td>${start}</td>
+                                <td class="status-cell">${status}</td>
+                                <td>
+                                    <div class="d-flex align-items-center list-action">
+                                        <a class="badge badge-info mr-2" href="/Promotions/Details/${p.Id}">
+                                            <i class="ri-eye-line"></i>
+                                        </a>
+                                        <a class="badge badge-danger mr-2 btn-active-promotions" data-id="${p.Id}" title="Kích hoạt lại">
+                                            <i class="ri-arrow-right-s-fill"></i>
+                                        </a>
+                                        <a class="badge bg-warning mr-2 btn-delete-promotions" data-id="${p.Id}" title="Ngưng hoạt động">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+
+                    // init DataTable sau khi render
+                    $("#datatable").DataTable();
+                });
+
             },
             error: function () {
                 alert('Lỗi hệ thống');
             }
         });
-        };
-
+    }
     loadUserTable();
 
-    // Khi nhấn nút XÓA
-    $(document).on("click", ".btn-delete-promotions", function () {
+
+    // === NGƯNG HOẠT ĐỘNG  ===
+    $(document).off("click", ".btn-delete-promotions").on("click", ".btn-delete-promotions", function () {
         PromoId = $(this).data("id");
         $("#deleModal").modal("show");
     });
 
-
-    // Xác nhận xóa
-    $("#confirmDele").click(function () {
-
+    $("#confirmDele").off("click").on("click", function () {
         $.ajax({
-            url: "/Promotions/delePromotions",
+            url: '@Url.Action("delePromotions", "Promotions")',
             type: "POST",
             data: { id: PromoId },
             success: function (rs) {
                 $("#deleModal").modal("hide");
                 alert(rs);
-                // load lại bảng
+                // reload table
                 $("#datatable").DataTable().destroy();
                 loadUserTable();
             },
@@ -139,9 +247,44 @@
         });
     });
 
+    // === KÍCH HOẠT LẠI MÃ (Active) ===
+    $(document).on("click", ".btn-active-promotions", function () {
+        PromoId = $(this).data("id");
+
+        var $tr = $(this).closest('tr');
+        var rawEnd = $tr.data('end');
+
+        var parsed = parseServerDate(rawEnd);
+        var endPure = parsed ? toPureDate(parsed) : null;
+        var today = toPureDate(new Date());
+
+        if (endPure && today >= endPure) {
+            $('#expiredModal').modal('show');
+        } else {
+            $('#UnbanModal').modal('show');
+        }
     });
 
 
 
+    $("#confirmActive").on("click", function () {
+        $.ajax({
+            url: '@Url.Action("ActivePromo", "Promotions")',
+            type: "POST",
+            data: { id: PromoId },
+            success: function (rs) {
+                $("#UnbanModal").modal("hide");
+                // reload table
+                $("#datatable").DataTable().destroy();
+                loadUserTable();
+            },
+            error: function () {
+                alert("Lỗi hệ thống!");
+            }
+        });
+    });
+
+});
     </script>
 }
+
