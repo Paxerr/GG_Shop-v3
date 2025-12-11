@@ -88,93 +88,134 @@
 @section scripts{
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-$(document).ready(function(){
-    $.getJSON('@Url.Action("GetCategories", "U_shop")', function(categories){
+$(document).ready(function () {
+
+    // LƯU TRẠNG THÁI TẤT CẢ FILTER
+    let filters = {
+        categoryId: null,
+        minPrice: null,
+        maxPrice: null,
+        size: null,
+        keyword: null
+    };
+
+    // Load danh mục
+    $.getJSON('@Url.Action("GetCategories", "U_shop")', function (categories) {
         $('#categoryList').empty();
-        $.each(categories, function(i, c){
+        $.each(categories, function (i, c) {
             $('#categoryList').append(`<li><a href="#" class="category-item" data-id="${c.Id}">${c.Name}</a></li>`);
         });
     });
 
+
+    // HÀM LOAD SẢN PHẨM
+    function loadProducts() {
+        $.ajax({
+            url: '@Url.Action("GetProducts", "U_shop")',
+            data: filters,
+            success: function (products) {
+
+                $('#productList').empty();
+
+                $.each(products, function (i, p) {
+                    var html = `
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <a href="/ProductsAjax/index/${p.Id}">
+                                <div class="product__item">
+                                    <div class="product__item__pic set-bg"
+                                         style="background-image:url('${p.ImageUrl}')">
+                                    </div>
+                                    <div class="product__item__text">
+                                        <h6>${p.Title}</h6>
+                                        <h5>${p.Price}đ</h5>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>`;
+                    $('#productList').append(html);
+                });
+
+            }
+        });
+    }
+
     loadProducts();
 
-    function loadProducts(filters = {}) {
-    $.ajax({
-        url: '@Url.Action("GetProducts", "U_shop")',
-        data: filters,
-        success: function (products) {
 
-            $('#productList').empty();
+    // CLICK CATEGORY
 
-            $.each(products, function (i, p) {
-                var html = `
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                    <a href="/ProductsAjax/index/${p.Id}">
-                        <div class="product__item">
-                            <div class="product__item__pic set-bg" style="background-image:url('${p.ImageUrl}')"></div>
-                            <div class="product__item__text">
-                                <h6>${p.Title}</h6>
-
-                                <h5>${p.Price}đ</h5>
-                            </div>
-                        </div>
-                     </a>
-                    </div>`;
-                $('#productList').append(html);
-            });
-
-        }
-    });
-}
-
-
-    $(document).on("click", ".category-item", function(e){
+    $(document).on("click", ".category-item", function (e) {
         e.preventDefault();
-        let categoryId = $(this).data("id");
+
         $(".category-item").removeClass("active-filter");
-
         $(this).addClass("active-filter");
-        loadProducts({ categoryId: categoryId });
-    });
 
-    $(document).on("click", ".price-item", function(e){
-        e.preventDefault();
-        $(".price-item").removeClass("active-filter");
-        $(this).addClass("active-filter");
-        let min = $(this).data("min");
-        let max = $(this).data("max");
-
-        loadProducts({ minPrice: min, maxPrice: max });
-    });
-
-    $('input[name="size"]').change(function () {
-        let selectedSize = $(this).val();
-
-        $('input[name="size"]').parent().removeClass("active-filter");
-
-        $(this).parent().addClass("active-filter");
-
-        loadProducts({ size: selectedSize });
-    });
-    $(document).on("click", "#resetFilter", function () {
-
-        $(".active-filter").removeClass("active-filter");
+        filters.categoryId = $(this).data("id");
 
         loadProducts();
     });
-    // --- Search delay ---
-    let typingTimer;
-    $("#searchInput").on("keyup", function () {
-        clearTimeout(typingTimer);
-        let keyword = $(this).val();
 
-        typingTimer = setTimeout(function () {
-            loadProducts({ keyword: keyword });
-        }, 500);
+
+    // CLICK PRICE
+
+    $(document).on("click", ".price-item", function (e) {
+        e.preventDefault();
+
+        $(".price-item").removeClass("active-filter");
+        $(this).addClass("active-filter");
+
+        filters.minPrice = $(this).data("min");
+        filters.maxPrice = $(this).data("max");
+
+        loadProducts();
+    });
+
+
+    // SELECT SIZE
+
+    $('input[name="size"]').change(function () {
+
+        $('input[name="size"]').parent().removeClass("active-filter");
+        $(this).parent().addClass("active-filter");
+
+        filters.size = $(this).val();
+
+        loadProducts();
+    });
+
+
+    // SEARCH KEYWORD
+    let timer;
+    $("#searchInput").on("keyup", function () {
+        clearTimeout(timer);
+        filters.keyword = $(this).val();
+
+        timer = setTimeout(() => {
+            loadProducts();
+        }, 400);
+    });
+
+
+    // RESET FILTER
+    $("#resetFilter").click(function () {
+
+        filters = {
+            categoryId: null,
+            minPrice: null,
+            maxPrice: null,
+            size: null,
+            keyword: null
+        };
+
+        $(".active-filter").removeClass("active-filter");
+        $("#searchInput").val("");
+
+        loadProducts();
     });
 
 });
     </script>
+
 
 }
 
