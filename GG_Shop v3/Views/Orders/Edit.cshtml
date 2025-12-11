@@ -18,14 +18,14 @@
                     <div class="card-body">
                         <form id="edit_order_form">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" id="OrderId" name="Id" />
+                            <input type="hidden" id="OrderId" name="Id" readonly/>
 
                             <div class="row">
                                 <!-- User -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Người Đặt *</label>
-                                        <select id="User_Id" name="User_Id" class="form-control"></select>
+                                        <select id="User_Id" name="User_Id" class="form-control"readonly></select>
                                     </div>
                                 </div>
 
@@ -33,7 +33,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Tổng Tiền *</label>
-                                        <input type="number" id="Total_Amount" name="Total_Amount" class="form-control" step="0.01" />
+                                        <input type="number" id="Total_Amount" name="Total_Amount" class="form-control" readonly step="0.01" />
                                     </div>
                                 </div>
 
@@ -52,21 +52,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Promo Code -->
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Mã Khuyến Mãi</label>
-                                        <select id="Promo_Id" name="Promo_Id" class="form-control">
-                                            <option value="">-- Không khuyến mãi --</option>
-                                        </select>
-                                    </div>
-                                </div>
 
                                 <!-- Shipping Address -->
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Địa Chỉ Giao Hàng *</label>
-                                        <input type="text" id="Shipping_Address" name="Shipping_Address" class="form-control" />
+                                        <input type="text" id="Shipping_Address" name="Shipping_Address" readonly class="form-control" />
                                     </div>
                                 </div>
 
@@ -74,7 +65,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Ngày Tạo *</label>
-                                        <input type="date" id="Created_At" name="Created_At" class="form-control" />
+                                        <input type="date" id="Created_At" name="Created_At" readonly class="form-control" />
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +90,7 @@
             var orderId = pathParts[pathParts.length - 1];
             $('#OrderId').val(orderId);
 
-            // 1️⃣ Load dữ liệu order
+            //  Load dữ liệu order
             $.ajax({
                 url: '/Orders/GetOrderDetails',
                 type: 'POST',
@@ -115,35 +106,10 @@
                     $('#Total_Amount').val(res.Total_Amount);
                     $('#Status').val(res.Status);
                     $('#Shipping_Address').val(res.Shipping_Address);
-                    $('#Promo_Id').val(res.PromoId);
+                   
                     $('#Created_At').val(res.Created_At);
 
-
-                    // Load users
-                    $.ajax({
-                        url: '/Orders/GetAllUsers',
-                        type: 'GET',
-                        success: function (users) {
-                            var options = '';
-                            users.forEach(function (u) {
-                                options += `<option value="${u.Id}" ${u.Id === res.User_Id ? 'selected' : ''}>${u.Username}</option>`;
-                            });
-                            $('#User_Id').html(options);
-                        }
-                    });
-
-                    // Load promos
-                    $.ajax({
-                        url: '/Orders/GetAllPromotions',
-                        type: 'GET',
-                        success: function (promos) {
-                            var options = '<option value="">-- Không khuyến mãi --</option>';
-                            promos.forEach(function (p) {
-                                options += `<option value="${p.Id}" ${p.Id === res.Promo_Id ? 'selected' : ''}>${p.Promo_Code}</option>`;
-                            });
-                            $('#Promo_Id').html(options);
-                        }
-                    });
+  
 
                 },
                 error: function () {
@@ -151,7 +117,7 @@
                 }
             });
 
-            // 4️⃣ Submit form bằng AJAX
+            //  Submit form bằng AJAX
             $('#edit_order_form').on('submit', function (e) {
                 e.preventDefault();
 
@@ -164,8 +130,8 @@
                 $.ajax({
                     url: '/Orders/UpdateOrder',
                     type: 'POST',
-                    data: $.param(formData), // convert array thành query string
-                    dataType: 'json',        // quan trọng: parse JSON từ server
+                    data: $.param(formData), 
+                    dataType: 'json',        
                     success: function (res) {
                         if (res.success) {
                             alert(res.message);
