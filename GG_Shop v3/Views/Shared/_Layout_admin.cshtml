@@ -64,6 +64,13 @@
 
 
 <body>
+    @{
+        if (Session["User"] == null || Session["User_Role"] == null || Session["User_Role"].ToString() != "Admin")
+        {
+            Response.Redirect("~/Account/Login");
+            return; // Ngăn view tiếp tục render
+        }
+    }
     <div class="wrapper">
         <!-- side bar -->
         @Html.Partial("_Side_bar")
