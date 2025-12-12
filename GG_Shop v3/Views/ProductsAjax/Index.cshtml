@@ -216,7 +216,7 @@
                     <p class="fw-bold mb-2">Kích cỡ:</p>
                     <div id="sizeList" class="btn-group flex-wrap"></div>
 
-                    <p class="fw-bold mb-2 mt-3">Màu s:</p>
+                    <p class="fw-bold mb-2 mt-3">Màu sắc:</p>
                     <div id="colorList" class="btn-group flex-wrap"></div>
 
                     <p class="fw-bold mb-2 mt-3">Số lượng:</p>
@@ -255,7 +255,11 @@
         var selectedSku = null;
         var fullData = null;
         var selectedColor = null;
-
+        var selectedColorKey = null;   // chuẩn hóa để so sánh ("trắng")
+        var selectedSizeKey = null;    // chuẩn hóa size để so sánh ("l", "xl")
+        var sizeMap = {};              // sizeKey -> {display, skus: [{id,colorKey,price}]}
+        var colorMap = {};             // colorKey -> {display, skus: [{id,sizeKey,price}]}
+        var skuIdToSizeKey = {}; 
         $(document).ready(function () {
             loadProduct();
             loadRelated();
@@ -309,76 +313,242 @@
         // ============================================
         // 🔵 LOAD SKU
         // ============================================
+        // Thay thế toàn bộ hàm loadSkuOptions bằng đoạn này
         function loadSkuOptions(skus) {
-            let sizeHtml = "";
-            let colorHtml = "";
+            // reset maps
+            sizeMap = {};
+            colorMap = {};
+            skuIdToSizeKey = {};
 
+            // Build maps, chuẩn hoá key = trim().toLowerCase()
             $.each(skus, function (i, s) {
-                if (s.Size)
-                    sizeHtml += `<button class="btn btn-outline-dark m-1 sku-size"
-                                data-sku="${s.Id}" onclick="selectSku(${s.Id}, '${s.Color}')">${s.Size}</button>`;
+                var size = (s.Size || "").toString();
+                var color = (s.Color || "").toString();
 
-                if (s.Color)
-                    colorHtml += `<button class="btn btn-outline-dark m-1 sku-color"
-                                data-color="${s.Color}" onclick="selectColor('${s.Color}')">${s.Color}</button>`;
+                var sizeKey = size.trim().toLowerCase();
+                var colorKey = color.trim().toLowerCase();
+
+                // map sku -> sizeKey
+                skuIdToSizeKey[s.Id] = sizeKey;
+
+                if (size) {
+                    if (!sizeMap[sizeKey]) sizeMap[sizeKey] = { display: size.trim(), skus: [] };
+                    sizeMap[sizeKey].skus.push({ id: s.Id, colorKey: colorKey, price: s.Price });
+                }
+
+                if (color) {
+                    if (!colorMap[colorKey]) colorMap[colorKey] = { display: color.trim(), skus: [] };
+                    colorMap[colorKey].skus.push({ id: s.Id, sizeKey: sizeKey, price: s.Price });
+                }
+            });
+
+            // Tạo HTML cho size (mỗi size 1 lần)
+            var sizeHtml = "";
+            Object.keys(sizeMap).forEach(function (sizeKey) {
+                var item = sizeMap[sizeKey];
+                // tìm những màu có ở size này
+                var availableColors = item.skus
+                    .map(function (x) { return x.colorKey; })
+                    .filter(function (v, i, a) { return v && a.indexOf(v) === i; }) // unique
+                    .join(',');
+
+                var safeSizeKey = sizeKey.replace(/'/g, "\\'");
+                sizeHtml += `<button class="btn btn-outline-dark m-1 sku-size"
+                            data-size="${item.display}"
+                            data-size-key="${safeSizeKey}"
+                            data-available-colors="${availableColors}"
+                            onclick="selectSize('${safeSizeKey}')">
+                            ${item.display}
+                         </button>`;
+            });
+
+            // Tạo HTML cho color (mỗi color 1 lần)
+            var colorHtml = "";
+            Object.keys(colorMap).forEach(function (colorKey) {
+                var item = colorMap[colorKey];
+                var availableSizes = item.skus
+                    .map(function (x) { return x.sizeKey; })
+                    .filter(function (v, i, a) { return v && a.indexOf(v) === i; })
+                    .join(',');
+
+                var safeColorKey = colorKey.replace(/'/g, "\\'");
+                var safeDisplay = item.display.replace(/'/g, "\\'");
+                colorHtml += `<button class="btn btn-outline-dark m-1 sku-color"
+                            data-color="${safeDisplay}"
+                            data-color-key="${safeColorKey}"
+                            data-available-sizes="${availableSizes}"
+                            onclick="selectColor('${safeColorKey}')">
+                            ${safeDisplay}
+                      </button>`;
             });
 
             $("#sizeList").html(sizeHtml);
             $("#colorList").html(colorHtml);
+
+            // reset selection states
+            selectedSku = null;
+            selectedColor = null;
+            selectedColorKey = null;
+            selectedSizeKey = null;
+            highlightSelection();
         }
 
-        // 🟦 Chọn size
-        function selectSku(id, color) {
-            selectedSku = id;
-            selectedColor = color;
+        // ---- Khi người dùng bấm chọn size (truyền sizeKey đã chuẩn hoá) ----
+        function selectSize(sizeKey) {
+            // lưu size đã chọn
+            selectedSizeKey = sizeKey;
+            // nếu color hiện tại không còn hợp lệ cho size này -> clear color
+            if (selectedColorKey) {
+                var btn = $(`.sku-size[data-size-key='${sizeKey}']`);
+                var avail = (btn.data("available-colors") || "").toString().split(',').filter(Boolean);
+                if (avail.indexOf(selectedColorKey) === -1) {
+                    selectedColor = null;
+                    selectedColorKey = null;
+                }
+            }
 
+            // thử auto chọn sku nếu có duy nhất 1 sku khớp size+color hoặc size chỉ có 1 color
+            attemptAutoSelectSku();
+
+            filterOptions();
+            highlightSelection();
+            changeImageByColor();
             updatePrice();
-            highlightSelection();
-            changeImageByColor();
         }
 
-        // 🟦 Chọn màu
-        function selectColor(color) {
-            selectedColor = color;
+        // ---- Khi người dùng bấm chọn color (truyền colorKey đã chuẩn hoá) ----
+        function selectColor(colorKey) {
+            selectedColorKey = colorKey;
+            // lưu display name từ map nếu cần
+            var colorBtn = $(`.sku-color[data-color-key='${colorKey}']`);
+            selectedColor = colorBtn.data("color") || colorMap[colorKey] && colorMap[colorKey].display;
+
+            // nếu size hiện tại không hợp lệ với color này -> clear size
+            if (selectedSizeKey) {
+                var cbtn = $(`.sku-color[data-color-key='${colorKey}']`);
+                var availSizes = (cbtn.data("available-sizes") || "").toString().split(',').filter(Boolean);
+                if (availSizes.indexOf(selectedSizeKey) === -1) {
+                    selectedSizeKey = null;
+                }
+            }
+
+            // thử auto chọn sku nếu có duy nhất 1 sku khớp color+size hoặc color chỉ có 1 size
+            attemptAutoSelectSku();
+
+            filterOptions();
             highlightSelection();
             changeImageByColor();
+            updatePrice();
         }
 
-        // 🟦 Bôi đậm nút đang chọn
+        // ---- Tự tìm và set selectedSku nếu có duy nhất một SKU phù hợp ----
+        function attemptAutoSelectSku() {
+            selectedSku = null;
+
+            // Nếu có cả size và color -> tìm sku chính xác
+            if (selectedSizeKey && selectedColorKey) {
+                var sku = findSkuBySizeAndColor(selectedSizeKey, selectedColorKey);
+                if (sku) selectedSku = sku.Id;
+                return;
+            }
+
+            // Nếu chỉ có size -> nếu size chỉ có 1 màu thì auto chọn sku
+            if (selectedSizeKey && sizeMap[selectedSizeKey]) {
+                var skus = sizeMap[selectedSizeKey].skus;
+                if (skus.length === 1) selectedSku = skus[0].id;
+                return;
+            }
+
+            // Nếu chỉ có color -> nếu color chỉ có 1 size thì auto chọn sku
+            if (selectedColorKey && colorMap[selectedColorKey]) {
+                var sks = colorMap[selectedColorKey].skus;
+                if (sks.length === 1) selectedSku = sks[0].id;
+                return;
+            }
+        }
+
+        // ---- Tìm SKU theo sizeKey + colorKey ----
+        function findSkuBySizeAndColor(sizeKey, colorKey) {
+            if (!fullData || !fullData.Skus) return null;
+            for (var i = 0; i < fullData.Skus.length; i++) {
+                var s = fullData.Skus[i];
+                var sk = (s.Size || "").toString().trim().toLowerCase();
+                var ck = (s.Color || "").toString().trim().toLowerCase();
+                if (sk === sizeKey && ck === colorKey) return s;
+            }
+            return null;
+        }
+
+        // ---- Ẩn/hiện các nút size/color theo lựa chọn đối diện ----
+        function filterOptions() {
+            // Show all by default
+            $(".sku-size").show();
+            $(".sku-color").show();
+
+            // Nếu đã chọn color -> ẩn size không có color đó
+            if (selectedColorKey) {
+                $(".sku-size").each(function () {
+                    var avail = ($(this).data("available-colors") || "").toString().split(',').filter(Boolean);
+                    if (avail.indexOf(selectedColorKey) === -1) $(this).hide();
+                    else $(this).show();
+                });
+            }
+
+            // Nếu đã chọn size -> ẩn color không có size đó
+            if (selectedSizeKey) {
+                $(".sku-color").each(function () {
+                    var avail = ($(this).data("available-sizes") || "").toString().split(',').filter(Boolean);
+                    if (avail.indexOf(selectedSizeKey) === -1) $(this).hide();
+                    else $(this).show();
+                });
+            }
+        }
+
+        // ---- Cập nhật trạng thái bôi đậm (active) ----
         function highlightSelection() {
             $(".sku-size").removeClass("active");
             $(".sku-color").removeClass("active");
 
+            // highlight size: nếu selectedSku tồn tại -> highlight size chứa sku đó
             if (selectedSku) {
-                $(".sku-size").each(function () {
-                    if ($(this).data("sku") == selectedSku)
-                        $(this).addClass("active");
-                });
+                var sz = skuIdToSizeKey[selectedSku];
+                if (sz) $(`.sku-size[data-size-key='${sz}']`).addClass("active");
+            } else if (selectedSizeKey) {
+                $(`.sku-size[data-size-key='${selectedSizeKey}']`).addClass("active");
             }
 
-            if (selectedColor) {
-                $(".sku-color").each(function () {
-                    if ($(this).data("color") == selectedColor)
-                        $(this).addClass("active");
-                });
+            // highlight color
+            if (selectedColorKey) {
+                $(`.sku-color[data-color-key='${selectedColorKey}']`).addClass("active");
             }
         }
 
-        // 🟦 Update giá
+        // ---- Sửa updatePrice để nếu selectedSku rỗng cố gắng lấy 1 sku phù hợp ----
         function updatePrice() {
-            if (!selectedSku || !fullData) return;
+            if (!fullData) return;
 
-            let sku = fullData.Skus.find(x => x.Id == selectedSku);
-            if (sku)
-                $("#price").text(sku.Price.toLocaleString('vi-VN') + "₫");
+            if (!selectedSku) {
+                // nếu có size+color -> tìm sku
+                if (selectedSizeKey && selectedColorKey) {
+                    var sku = findSkuBySizeAndColor(selectedSizeKey, selectedColorKey);
+                    if (sku) selectedSku = sku.Id;
+                } else {
+                    $("#price").text(""); // không có sku cụ thể
+                    return;
+                }
+            }
+
+            var skuObj = fullData.Skus.find(x => x.Id == selectedSku);
+            if (skuObj)
+                $("#price").text(skuObj.Price.toLocaleString('vi-VN') + "₫");
         }
 
-        // 🟦 Tự đổi ảnh theo màu
+        // ---- changeImageByColor giữ nguyên nhưng dùng selectedColorKey ----
         function changeImageByColor() {
-            if (!selectedColor || !fullData) return;
+            if (!selectedColorKey || !fullData) return;
 
-            let match = fullData.Images.find(
-                x => x.Image_Url.toLowerCase().includes(selectedColor.toLowerCase())
+            var match = fullData.Images.find(
+                x => x.Image_Url.toLowerCase().includes(selectedColorKey)
             );
 
             if (match) {
