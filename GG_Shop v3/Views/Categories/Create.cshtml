@@ -1,4 +1,3 @@
-﻿@model GG_Shop_v3.Models.Category
 @{
     ViewBag.Title = "Tạo danh mục mới";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
@@ -8,18 +7,16 @@
     <div class="container-fluid">
         <h2>Tạo danh mục mới</h2>
 
-        @using (Html.BeginForm("CreateCategory", "Categories", FormMethod.Post, new { id = "createForm" }))
-        {
+        <form id="createForm" method="post">
+
             <div class="form-group">
-                @Html.LabelFor(model => model.Name, "Tên danh mục", new { @class = "control-label" })
-                @Html.TextBoxFor(model => model.Name, new { @class = "form-control form-control-sm" })
-                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                <label for="Name" class="control-label">Tên danh mục</label>
+                <input type="text" id="Name" name="Name" class="form-control form-control-sm" />
             </div>
 
             <div class="form-group">
-                @Html.LabelFor(model => model.Description, "Mô tả", new { @class = "control-label" })
-                @Html.TextAreaFor(model => model.Description, new { @class = "form-control form-control-sm", rows = 4 })
-                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                <label for="Description" class="control-label">Mô tả</label>
+                <textarea id="Description" name="Description" rows="4" class="form-control form-control-sm"></textarea>
             </div>
 
             <div class="form-group">
@@ -27,7 +24,8 @@
                 <button type="reset" class="btn btn-secondary">Nhập lại</button>
                 <a href="@Url.Action("Index", "Categories")" class="btn btn-info">Quay về danh sách</a>
             </div>
-        }
+
+        </form>
     </div>
 </div>
 
