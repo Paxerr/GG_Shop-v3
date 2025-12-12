@@ -1,125 +1,124 @@
-﻿
+﻿@model GG_Shop_v3.Models.Promotion
+
 @{
-    ViewBag.Title = "Detail";
+    ViewBag.Title = "Chi tiết Khuyến mãi";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
+
+    Func<decimal?, string> fmtMoney = v =>
+    {
+        if (v == null) return "0 ₫";
+        try
+        {
+            return String.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:C0}", v.Value);
+        }
+        catch
+        {
+            return v.Value.ToString();
+        }
+    };
+
+    Func<DateTime?, string> fmtDate = d =>
+    {
+        if (d == null) return "";
+        try { return d.Value.ToString("dd'/'MM'/'yyyy"); }
+        catch { return d.ToString(); }
+    };
 }
+
 <div class="content-page">
     <div class="container-fluid">
-        <form id="create_user" data-toggle="validator" role="form">
-            <div class="row">
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Mã giảm giá *</label>
-                        <input type="text" class="form-control" name="username" required
-                               data-required-error="Vui lòng nhập đầy đủ thông tin">
-                        <div class="help-block with-errors"></div>
-                    </div>
+        @if (Model == null)
+        {
+            <div class="alert alert-warning">Không tìm thấy thông tin khuyến mãi.</div>
+        }
+        else
+        {
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h3 class="mb-0">Chi tiết: <span class="text-primary">@Html.DisplayFor(m => m.Promo_Code)</span></h3>
+                    <small class="text-muted">Mã ID: @Model.Id</small>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Mô tả *</label>
-                        <input type="email" class="form-control" name="email" required
-                               data-required-error="Vui lòng nhập đầy đủ thông tin"
-                               data-type-error="Email không hợp lệ">
-                        <div class="help-block with-errors"></div>
-                    </div>
+                <div>
+                    <a href="@Url.Action("Index", "Promotions")" class="btn btn-sm btn-secondary">
+                        <i class="las la-angle-left mr-1"></i> Quay lại danh sách
+                    </a>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Mật khẩu *</label>
-                        <input type="password" class="form-control" name="password"
-                               required data-minlength="6"
-                               data-required-error="Vui lòng nhập mật khẩu"
-                               data-minlength-error="Mật khẩu phải từ 6 ký tự trở lên">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Tên người dùng *</label>
-                        <input type="text" class="form-control" name="full_name" required
-                               data-required-error="Vui lòng nhập đầy đủ thông tin">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Số điện thoại *</label>
-                        <input type="text" class="form-control" name="phone_number" required
-                               pattern="^[0-9]{10,11}$"
-                               data-required-error="Vui lòng nhập đầy đủ thông tin"
-                               data-pattern-error="Số điện thoại phải gồm 10–11 chữ số">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Quốc gia *</label>
-                        <input type="text" class="form-control" name="country" required
-                               data-required-error="Vui lòng nhập đầy đủ thông tin">
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Cấp bậc *</label>
-                        <select class="form-control" name="slc_rank" required
-                                data-required-error="Vui lòng chọn cấp bậc">
-                            <option value="">-- Chọn --</option>
-                            <option value="Vip">Vip</option>
-                            <option value="Thường">Thường</option>
-                        </select>
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Vai trò *</label>
-                        <select class="form-control" name="slc_role" required
-                                data-required-error="Vui lòng chọn vai trò">
-                            <option value="">-- Chọn --</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Khách hàng">Khách hàng</option>
-                        </select>
-                        <div class="help-block with-errors"></div>
-                    </div>
-                </div>
-
             </div>
 
-            <button type="submit" class="btn btn-primary mr-2" id="create">Thêm người dùng</button>
-            <button type="reset" class="btn btn-danger">Làm mới</button>
-        </form>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6 mb-3">
+                            <h6 class="text-muted mb-2">Mã giảm giá</h6>
+                            <p class="mb-3 font-weight-bold">@Html.DisplayFor(m => m.Promo_Code)</p>
+
+                            <h6 class="text-muted mb-2">Mô tả</h6>
+                            <p class="mb-3">@Html.DisplayFor(m => m.Description)</p>
+
+                            <h6 class="text-muted mb-2">Loại giảm</h6>
+                            <p class="mb-3">@Html.DisplayFor(m => m.Type)</p>
+
+                            @if ((Model.Type ?? "").IndexOf("%") >= 0 || (Model.Discount_Percentage ?? 0) > 0)
+                            {
+                                <h6 class="text-muted mb-2">Phần trăm giảm</h6>
+                                <p class="mb-3">@((Model.Discount_Percentage ?? 0).ToString("0.##")) %</p>
+                            }
+                            else
+                            {
+                                <h6 class="text-muted mb-2">Số tiền giảm</h6>
+                                <p class="mb-3">@fmtMoney(Model.Discount_Amount)</p>
+                            }
+
+                        </div>
+
+                        <div class="col-lg-6 mb-3">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <h6 class="text-muted mb-2">Ngày bắt đầu</h6>
+                                    <p class="mb-3">@fmtDate(Model.Start_Date)</p>
+
+                                    <h6 class="text-muted mb-2">Ngày kết thúc</h6>
+                                    <p class="mb-3">@fmtDate(Model.End_Date)</p>
+
+                                    <h6 class="text-muted mb-2">Giá trị đơn hàng tối thiểu</h6>
+                                    <p class="mb-3">@fmtMoney(Model.Min_Order_Value)</p>
+                                </div>
+
+                                <div class="text-right ml-3">
+                                    <h6 class="text-muted mb-2">Trạng thái</h6>
+                                    @{
+                                        var status = (Model.Status ?? "").ToLowerInvariant();
+                                        string badgeClass = "badge-secondary";
+
+                                        if (status.Contains("hoạt"))
+                                        {
+                                            badgeClass = "badge-success";
+                                        }
+                                        else if (status.Contains("ngừng") || status.Contains("đóng") || status.Contains("stop"))
+                                        {
+                                            badgeClass = "badge-danger";
+                                        }
+                                    }
+                                    <div class="mb-3">
+                                        <span class="badge @(badgeClass) p-2" style="font-size:0.95rem;">@Model.Status</span>
+                                    </div>
+
+
+                                    <h6 class="text-muted mb-2">Số lượt đã dùng</h6>
+                                    <p class="mb-3 font-weight-bold">@Html.DisplayFor(m => m.Uses_Count)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Footer note *@
+                    <div class="border-top pt-3 mt-3">
+                        <small class="text-muted">
+                            Mã tạo: @fmtDate(Model.Start_Date) — Hết hạn: @fmtDate(Model.End_Date)
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
-<script>
-$('#create_user').validator().on('submit', function (e) {
-    if (e.isDefaultPrevented()) {
-        return; // có lỗi → validator sẽ hiển thị
-    }
-
-    e.preventDefault(); // hợp lệ → gửi AJAX
-
-    var form = $('#create_user')[0];
-    var formData = new FormData(form);
-
-    $.ajax({
-        type: "POST",
-        url: '@Url.Action("Insert", "Users")',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (response) {
-            alert(response);
-        }
-    });
-});
-</script>
