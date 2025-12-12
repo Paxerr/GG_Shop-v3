@@ -219,8 +219,12 @@
                     type: 'POST',
                     data: { id: id, qty: qty },
                     success: function (res) {
-                        if (res && res.success) loadCart();
-                        else alert('Cập nhật thất bại');
+                        if (res.success) {
+                            loadCart();
+                        } else {
+                            alert(res.msg || "Cập nhật thất bại");
+                            loadCart(); // reset lại số lượng đúng trong DB
+                        }
                     },
                     error: function () { alert('Lỗi hệ thống'); }
                 });

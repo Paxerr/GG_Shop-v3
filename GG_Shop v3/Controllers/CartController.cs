@@ -134,9 +134,20 @@ public class CartController : Controller
         try
         {
             var item = db.cart_items.Find(id);
-            if (item == null) return Json(new { success = false, msg = "Không tìm thấy sản phẩm" });
+            if (item == null)
+                return Json(new { success = false, msg = "Không tìm thấy sản phẩm" });
 
             if (qty <= 0) qty = 1;
+
+            // Lấy SKU tương ứng
+            var sku = db.product_skus.Find(item.Sku_Id);
+            if (sku == null)
+                return Json(new { success = false, msg = "Sản phẩm không tồn tại." });
+
+            // KIỂM TRA TỒN KHO
+            if (qty > sku.Quantity)
+                return Json(new { success = false, msg = "Số lượng vượt quá tồn kho." });
+
             item.Quantity = qty;
             db.SaveChanges();
 
@@ -147,6 +158,7 @@ public class CartController : Controller
             return Json(new { success = false, msg = ex.Message });
         }
     }
+
 
     // DELETE ITEM
     [HttpPost]
@@ -324,7 +336,7 @@ public class CartController : Controller
                 db.SaveChanges(); // cần để có cart.Id
             }
 
-            // kiểm tra tồn kho (nếu bạn muốn)
+            // kiểm tra tồn kho 
             var existing = db.cart_items.FirstOrDefault(ci => ci.Cart_Id == cart.Id && ci.Sku_Id == skuId);
             int newQty = qty;
             if (existing != null)
