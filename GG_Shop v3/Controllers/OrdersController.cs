@@ -21,10 +21,11 @@ namespace GG_Shop_v3.Controllers
 
             ViewBag.TotalSales = totalSales;
 
-            decimal DoanhThu = db.orders.Sum(o => o.Total_Amount);
+            //decimal DoanhThu = db.orders.Sum(o => o.Total_Amount);
+            decimal DoanhThu = db.orders.Sum(o => (decimal?)o.Total_Amount) ?? 0;
             ViewBag.DoanhThu = DoanhThu;
 
-            int TongSanPham = db.order_items.Sum(o => o.Quantity);
+            int TongSanPham = db.order_items.Sum(o => (int?)o.Quantity) ?? 0;
             ViewBag.TongSanPham = TongSanPham;
             return View(orders.ToList());
         }

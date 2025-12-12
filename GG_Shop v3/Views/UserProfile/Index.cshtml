@@ -305,10 +305,6 @@
                     <i class="fas fa-user-circle"></i>
                     <span>Thông tin cá nhân</span>
                 </li>
-                <li class="menu-item" onclick="loadContent('orders')">
-                    <i class="fas fa-history"></i>
-                    <span>Lịch sử đơn hàng</span>
-                </li>
                 <li class="menu-item" onclick="loadContent('edit')">
                     <i class="fas fa-edit"></i>
                     <span>Chỉnh sửa thông tin</span>
@@ -349,19 +345,6 @@
                         <label class="form-label">Tên đăng nhập</label>
                         <div class="info-display">@Model.Username</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Lịch sử đơn hàng -->
-            <div id="ordersContent" class="content-section" style="display: none;">
-                <h3 class="form-title">Lịch sử đơn hàng</h3>
-                <div class="text-center p-5">
-                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                    <h4>Lịch sử đơn hàng của bạn</h4>
-                    <p class="text-muted mb-4">Xem và quản lý tất cả đơn hàng bạn đã đặt</p>
-                    <a href="@Url.Action("Index", "OrdersHistory")" class="btn-save">
-                        <i class="fas fa-external-link-alt"></i> Xem chi tiết
-                    </a>
                 </div>
             </div>
 
@@ -474,7 +457,6 @@ $(document).ready(function() {
         function getMenuText(content) {
             switch (content) {
                 case 'profile': return 'Thông tin cá nhân';
-                case 'orders': return 'Lịch sử đơn hàng';
                 case 'edit': return 'Chỉnh sửa thông tin';
                 case 'password': return 'Đổi mật khẩu';
                 default: return '';
