@@ -4,13 +4,11 @@ namespace GG_Shop_v3.Models
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Email là bắt buộc")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        public string Email { get; set; }
+        [Required(ErrorMessage = "Tên đăng nhập hoặc email là bắt buộc")]
+        public string UserInput { get; set; }
 
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         public string Password { get; set; }
-
     }
     public class ForgotPasswordViewModel
     {

@@ -75,9 +75,7 @@ namespace GG_Shop_v3.Controllers
                         Created_At = DateTime.Now
                     });
 
-                    // ============================
                     //  TĂNG LƯỢT DÙNG MÃ GIẢM GIÁ
-                    // ============================
                     if (order.Promo_Id.HasValue)
                     {
                         var promo = db.promotions.Find(order.Promo_Id.Value);
@@ -92,7 +90,6 @@ namespace GG_Shop_v3.Controllers
                         Session.Remove("Promo_Code");
                         Session.Remove("Promo_Discount");
                     }
-                    // ============================
 
                     db.SaveChanges();
                     transaction.Commit();

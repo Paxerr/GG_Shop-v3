@@ -12,12 +12,12 @@
     <form id="loginForm" class="login-form">
         @Html.AntiForgeryToken()
 
-        <!-- Email -->
+        <!-- Tên đăng nhập/ Email -->
         <div class="input-group">
             <div class="input-wrapper">
-                <input id="Email" name="Email" type="email"
+                <input id="UserInput" name="UserInput" type="text"
                        class="form-control"
-                       placeholder="Địa chỉ Email" required />
+                       placeholder="Tên đăng nhập hoặc Email" required />
             </div>
             <span class="error-message text-danger" id="emailError"></span>
         </div>
