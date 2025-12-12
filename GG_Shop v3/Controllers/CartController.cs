@@ -288,4 +288,70 @@ public class CartController : Controller
         return Json(new { success = true, redirectUrl = Url.Action("Index", "U_Orders") });
     }
 
+    [HttpPost]
+    public JsonResult AddToCart(int skuId, int qty = 1)
+    {
+        try
+        {
+            var uid = CurrentUserId;
+            if (uid == null)
+                return Json(new { success = false, msg = "Bạn chưa đăng nhập." });
+
+            if (qty <= 0) qty = 1;
+
+            // kiểm tra sku
+            var sku = db.product_skus.Find(skuId);
+            if (sku == null)
+                return Json(new { success = false, msg = "Sản phẩm không tồn tại." });
+
+            // lấy hoặc tạo cart của user
+            var cart = db.carts.FirstOrDefault(c => c.User_Id == uid.Value);
+            if (cart == null)
+            {
+                cart = new Cart
+                {
+                    User_Id = uid.Value,
+                    Created_At = DateTime.Now
+                };
+                db.carts.Add(cart);
+                db.SaveChanges(); // cần để có cart.Id
+            }
+
+            // kiểm tra tồn kho (nếu bạn muốn)
+            var existing = db.cart_items.FirstOrDefault(ci => ci.Cart_Id == cart.Id && ci.Sku_Id == skuId);
+            int newQty = qty;
+            if (existing != null)
+                newQty = existing.Quantity + qty;
+
+            if (sku.Quantity < newQty)
+            {
+                return Json(new { success = false, msg = "Số lượng trong kho không đủ." });
+            }
+
+            if (existing != null)
+            {
+                existing.Quantity = newQty;
+                db.Entry(existing).State = EntityState.Modified;
+            }
+            else
+            {
+                var item = new Cart_Item
+                {
+                    Cart_Id = cart.Id,
+                    Sku_Id = skuId,
+                    Quantity = qty
+                };
+                db.cart_items.Add(item);
+            }
+
+            db.SaveChanges();
+
+            return Json(new { success = true, msg = "Đã thêm vào giỏ hàng." });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, msg = ex.Message });
+        }
+    }
+
 }

@@ -187,8 +187,6 @@
         transform: translateY(-5px);
     }
 
-    
-    }
 </style>
 
 <section class="product-details spad">
@@ -324,12 +322,13 @@
                 // SIZE
                 if (s.Size)
                     sizeHtml += `<button class="btn btn-outline-dark m-1 sku-size"
-                                                onclick="selectSku(${s.Id}, '${s.Color}')">${s.Size}</button>`;
+                            data-sku="${s.Id}" onclick="selectSku(${s.Id}, '${s.Color}')">${s.Size}</button>`;
 
                 // COLOR
                 if (s.Color)
                     colorHtml += `<button class="btn btn-outline-dark m-1 sku-color"
-                                                onclick="selectColor('${s.Color}')">${s.Color}</button>`;
+                            data-color="${s.Color}" onclick="selectColor('${s.Color}')">${s.Color}</button>`;
+
             });
 
             $("#sizeList").html(sizeHtml);
@@ -355,22 +354,25 @@
 
         // 🟦 Bôi đậm nút đang chọn
         function highlightSelection() {
-            $(".sku-size, .sku-color").removeClass("active");
+            $(".sku-size").removeClass("active");
+            $(".sku-color").removeClass("active");
 
-            if (selectedSku)
-                $(`.sku-size[onclick*='${selectedSku}']`).addClass("active");
+            if (selectedSku) {
+                $(".sku-size").each(function () {
+                    if ($(this).data("sku") == selectedSku)
+                        $(this).addClass("active");
+                });
+            }
 
-            if (selectedColor)
-                $(`.sku-color[onclick*='${selectedColor}']`).addClass("active");
+            if (selectedColor) {
+                $(".sku-color").each(function () {
+                    if ($(this).data("color") == selectedColor)
+                        $(this).addClass("active");
+                });
         }
+}
 
         // 🟦 Update giá theo SKU
-        function updatePrice() {
-            if (!selectedSku || !fullData) return;
-            let sku = fullData.Skus.find(x => x.Id == selectedSku);
-            if (sku)
-                $("#price").text(sku.Price.toLocaleString('vi-VN') + "₫"); // Đổi $ thành VND
-        }
         function updatePrice() {
             if (!selectedSku || !fullData) return;
             let sku = fullData.Skus.find(x => x.Id == selectedSku);
@@ -424,7 +426,30 @@
                 alert("Hãy chọn màu hoặc size trước!");
                 return;
             }
-            alert("Chức năng giỏ đang kết nối...");
+            $("#addCart").click(function () {
+                if (!selectedSku) {
+                    alert("Hãy chọn màu hoặc size trước!");
+                    return;
+                }
+
+                let qty = $("#quantity").val();
+
+                $.ajax({
+                    url: "/Cart/AddToCart",
+                    type: "POST",
+                    data: {
+                        skuId: selectedSku,
+                        quantity: qty
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            alert("Đã thêm vào giỏ!");
+                        } else {
+                            alert(res.msg);
+                        }
+                    }
+                });
+});
         });
     </script>
 }
