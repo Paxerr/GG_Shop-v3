@@ -151,7 +151,15 @@ namespace GG_Shop_v3.Controllers
 
                 db.orders.Add(order);
                 db.SaveChanges();
-
+                var payment = new Payment_Detail
+                {
+                    Order_Id = order.Id,
+                    Amount = order.Total_Amount,
+                    Payment_Method = "Thanh toán khi nhận hàng",
+                    Payment_Status = "Đang xử lí",
+                    Created_At = DateTime.Now
+                };
+                db.payment_details.Add(payment);
                 foreach (var item in cart.Cart_Items.ToList())
                 {
                     var sku = db.product_skus.FirstOrDefault(s => s.Id == item.Sku_Id);

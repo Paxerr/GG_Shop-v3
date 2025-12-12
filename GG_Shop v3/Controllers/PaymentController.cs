@@ -70,8 +70,8 @@ namespace GG_Shop_v3.Controllers
                     {
                         Order_Id = order.Id,
                         Amount = order.Total_Amount,
-                        Payment_Method = "QR",
-                        Payment_Status = "Success",
+                        Payment_Method = "Thanh toán trước",
+                        Payment_Status = "Đã chuyển khoản",
                         Created_At = DateTime.Now
                     });
 
@@ -133,8 +133,8 @@ namespace GG_Shop_v3.Controllers
             {
                 Order_Id = order.Id,
                 Amount = order.Total_Amount,
-                Payment_Method = "QR",
-                Payment_Status = "Success",
+                Payment_Method = "Thanh toán trước",
+                Payment_Status = "Đã chuyển khoản",
                 Created_At = DateTime.Now
             });
 
