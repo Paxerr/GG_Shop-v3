@@ -97,6 +97,13 @@ namespace GG_Shop_v3.Controllers
                     }
                 };
 
+                if (Session["Promo_Code"] == null || string.IsNullOrEmpty(Session["Promo_Code"].ToString()))
+                {
+                    Session.Remove("Promo_Id");
+                    Session.Remove("Promo_Code");
+                    Session.Remove("Promo_Discount");
+                }
+
                 return Json(result, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -139,7 +146,7 @@ namespace GG_Shop_v3.Controllers
                     Total_Amount = finalTotal,
                     Promo_Id = promoId,
                     Created_At = DateTime.Now,
-                    Status = "Đang xử lý"
+                    Status = "Chờ thanh toán"
                 };
 
                 db.orders.Add(order);
@@ -167,7 +174,7 @@ namespace GG_Shop_v3.Controllers
                 db.cart_items.RemoveRange(cart.Cart_Items);
                 db.SaveChanges();
 
-                return Json(new { success = true, message = "Đặt hàng thành công" });
+                return Json(new { success = true, orderId = order.Id, message = "Đặt hàng thành công" });
             }
             catch (Exception ex)
             {
@@ -183,6 +190,98 @@ namespace GG_Shop_v3.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        [HttpPost]
+        public JsonResult SaveCheckoutTemp(string shipping_address)
+        {
+            if (string.IsNullOrEmpty(shipping_address))
+                return Json(new { success = false, message = "Vui lòng nhập địa chỉ giao hàng" });
+
+            TempData["Shipping_Address"] = shipping_address;
+            TempData["Payment_Method"] = "online";
+
+            return Json(new { success = true });
+        }
+
+
+        public ActionResult OnlinePayment(int orderId)
+        {
+            var order = db.orders.Find(orderId);
+            if (order == null) return RedirectToAction("Index", "U_Orders");
+
+            string token = Guid.NewGuid().ToString(); // token bảo mật 1 lần
+            Session["QRToken_" + orderId] = token;
+
+            // URL API để quét QR
+            string qrContent = Url.Action("CheckPayment", "Payment",
+                new { orderId = orderId, token = token }, Request.Url.Scheme);
+
+            ViewBag.QRContent = qrContent;
+            ViewBag.OrderId = orderId;
+            ViewBag.TotalAmount = order.Total_Amount;
+
+            return View();
+        }
+
+
+
+        [HttpPost]
+
+        public JsonResult CreateOnlineOrder(string shipping_address)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(Session["User_Id"]);
+                var cart = db.carts
+                    .Include(c => c.Cart_Items.Select(ci => ci.Product_Sku))
+                    .FirstOrDefault(c => c.User_Id == userId);
+
+                if (cart == null || !cart.Cart_Items.Any())
+                    return Json(new { success = false, message = "Giỏ hàng trống" });
+
+                decimal subtotal = cart.Cart_Items.Sum(x => x.Product_Sku.Price * x.Quantity);
+                decimal discount = Session["Promo_Discount"] != null ? (decimal)Session["Promo_Discount"] : 0;
+                decimal finalTotal = subtotal - discount;
+
+                var order = new Order
+                {
+                    User_Id = userId,
+                    Shipping_Address = shipping_address,
+                    Total_Amount = finalTotal,
+                    Promo_Id = Session["Promo_Id"] as int?,
+                    Created_At = DateTime.Now,
+                    Status = "Chờ thanh toán"    
+                };
+
+                db.orders.Add(order);
+                db.SaveChanges();
+
+                foreach (var item in cart.Cart_Items)
+                {
+                    db.order_items.Add(new Order_Item
+                    {
+                        Order_Id = order.Id,
+                        Sku_Id = item.Sku_Id,
+                        Quantity = item.Quantity,
+                        Price = item.Product_Sku.Price
+                    });
+                }
+
+                db.SaveChanges();
+
+
+                return Json(new
+                {
+                    success = true,
+                    orderId = order.Id,
+                    redirectUrl = Url.Action("OnlinePayment", "U_Orders", new { orderId = order.Id })
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

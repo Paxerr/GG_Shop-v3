@@ -296,6 +296,13 @@ public class CartController : Controller
             var uid = CurrentUserId;
             if (uid == null)
                 return Json(new { success = false, msg = "Bạn chưa đăng nhập." });
+            // Nếu người dùng KHÔNG nhập mã ở giỏ hàng → xóa session mã giảm giá
+            if (Request["promo"] == null && (Session["Promo_Code"] != null))
+            {
+                Session.Remove("Promo_Id");
+                Session.Remove("Promo_Code");
+                Session.Remove("Promo_Discount");
+            }
 
             if (qty <= 0) qty = 1;
 

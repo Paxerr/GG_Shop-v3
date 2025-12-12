@@ -126,26 +126,58 @@
         }
 
         $("#btnOrder").click(function () {
+            let payment = $("input[name=payment_method]:checked").val();
+            let address = $("#shipping_address").val();
+
+            // ⚠️ CHECK chưa chọn phương thức thanh toán
+            if (!payment) {
+                alert("Vui lòng chọn phương thức thanh toán trước");
+                return;
+            }
+
+            if (!address) {
+                alert("Vui lòng nhập địa chỉ giao hàng");
+                return;
+            }
+
+            // 🔵 1. Thanh toán ONLINE
+            if (payment === "online") {
+                $.ajax({
+                    url: '/U_Orders/CreateOnlineOrder',
+                    method: 'POST',
+                    data: { shipping_address: address },
+                    success: function (res) {
+                        if (res.success) {
+                            window.location.href = "/U_Orders/OnlinePayment?orderId=" + res.orderId;
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+                return;
+            }
+
+
+            // 🔵 2. Thanh toán COD 
             $.ajax({
-                url: '/U_Orders/PlaceOrder', 
+                url: '/U_Orders/PlaceOrder',
                 method: 'POST',
                 data: {
                     fullName: $("#FullName").val(),
                     shipping_address: $("#shipping_address").val(),
                     phone: $("#Phone").val(),
                     email: $("#Email").val(),
-                    
                 },
                 success: function (res) {
                     if (res.success) {
                         alert("Đặt hàng thành công");
-                        loadData();
                     } else {
                         alert(res.message);
                     }
                 }
             });
         });
+
 
     </script>
 }

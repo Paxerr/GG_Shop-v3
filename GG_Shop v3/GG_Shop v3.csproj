@@ -140,6 +140,7 @@
     <Compile Include="Controllers\InformationController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\OrdersHistoryController.cs" />
+    <Compile Include="Controllers\PaymentController.cs" />
     <Compile Include="Controllers\ProductsAjaxController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PromotionsController.cs" />
@@ -4662,6 +4663,7 @@
     <Content Include="Scripts\js_admin\usaLow.js" />
     <Content Include="Scripts\js_admin\validator.min.js" />
     <Content Include="Scripts\js_admin\worldLow.js" />
+    <Content Include="uploads\payment\qr-demo.png" />
     <Content Include="uploads\products\01.png" />
     <Content Include="uploads\products\02.png" />
     <Content Include="uploads\products\03.png" />
@@ -4697,6 +4699,7 @@
     <Content Include="Views\UserProfile\Index.cshtml" />
     <Content Include="Views\Information\Index.cshtml" />
     <Content Include="Views\Thanks\Index.cshtml" />
+    <Content Include="Views\U_Orders\OnlinePayment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
