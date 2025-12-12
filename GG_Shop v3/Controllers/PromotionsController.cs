@@ -181,10 +181,29 @@ namespace GG_Shop_v3.Controllers
             return View();
         }
 
-        public ActionResult Details()
+        public ActionResult Details(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Promotion promotion = db.promotions.Find(id);
+            if (promotion == null)
+            {
+                return HttpNotFound();
+            }
+            return View(promotion);
         }
+
+        [HttpGet]
+        public JsonResult GetPromotions(int? id)
+        {
+            var Promo = db.promotions.Find(id);
+
+            return Json(Promo, JsonRequestBehavior.AllowGet);
+        }
+
+
 
 
         public String delePromotions()

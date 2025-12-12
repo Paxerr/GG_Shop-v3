@@ -143,6 +143,7 @@
     <Compile Include="Controllers\ProductsAjaxController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PromotionsController.cs" />
+    <Compile Include="Controllers\ThanksController.cs" />
     <Compile Include="Controllers\UserProfileController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\U_OrdersController.cs" />
@@ -4695,6 +4696,7 @@
     <Content Include="Views\OrdersHistory\Index.cshtml" />
     <Content Include="Views\UserProfile\Index.cshtml" />
     <Content Include="Views\Information\Index.cshtml" />
+    <Content Include="Views\Thanks\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
