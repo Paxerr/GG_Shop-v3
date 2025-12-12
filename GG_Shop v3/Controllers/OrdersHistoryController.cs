@@ -300,7 +300,7 @@ namespace GG_Shop_v3.Controllers
         }
         public JsonResult TestOrders()
         {
-            var orders = db.Orders.ToList();
+            var orders = db.orders.ToList();
             return Json(orders, JsonRequestBehavior.AllowGet);
         }
     }
