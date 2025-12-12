@@ -144,6 +144,66 @@ namespace GG_Shop_v3.Controllers
                     }, JsonRequestBehavior.AllowGet);
                 }
 
+                // Lấy payment detail mới nhất (nếu có) — CHÚ Ý: dùng chính xác tên property
+                var lastPayment = db.payment_details
+                    .Where(pd => pd.Order_Id == orderId)
+                    .OrderByDescending(pd => pd.Created_At)
+                    .Select(pd => new
+                    {
+                        pd.Payment_Method,
+                        pd.Payment_Status,
+                        pd.Amount,
+                        pd.Created_At
+                    })
+                    .FirstOrDefault();
+
+                string rawPaymentMethod = lastPayment?.Payment_Method;
+                string rawPaymentStatus = lastPayment?.Payment_Status;
+
+                // Map sang nhãn hiển thị tiếng Việt
+                string displayPaymentMethod = "Chưa xác định";
+                if (!string.IsNullOrEmpty(rawPaymentMethod))
+                {
+                    switch (rawPaymentMethod.Trim().ToLower())
+                    {
+                        case "cod":
+                        case "cash_on_delivery":
+                            displayPaymentMethod = "Thanh toán khi nhận hàng";
+                            break;
+                        case "qr":
+                        case "qrpay":
+                        case "online":
+                            displayPaymentMethod = "Thanh toán trực tuyến (QR)";
+                            break;
+                        default:
+                            displayPaymentMethod = rawPaymentMethod;
+                            break;
+                    }
+                }
+
+                string displayPaymentStatus = "Chưa xác định";
+                if (!string.IsNullOrEmpty(rawPaymentStatus))
+                {
+                    switch (rawPaymentStatus.Trim().ToLower())
+                    {
+                        case "pending":
+                        case "wait":
+                            displayPaymentStatus = "Chờ giao hàng";
+                            break;
+                        case "success":
+                        case "paid":
+                        case "completed":
+                            displayPaymentStatus = "Đã thanh toán";
+                            break;
+                        case "failed":
+                        case "cancelled":
+                            displayPaymentStatus = "Thanh toán thất bại";
+                            break;
+                        default:
+                            displayPaymentStatus = rawPaymentStatus;
+                            break;
+                    }
+                }
                 // Lấy thông tin user
                 var userInfo = db.users
                     .Where(u => u.Id == userId)
