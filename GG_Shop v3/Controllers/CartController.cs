@@ -197,7 +197,7 @@ public class CartController : Controller
 
         // load lại mã trong th thay đổi
         var status = (promo.Status ?? "").Trim().ToLower();
-        if (!( status == "hoạt động"))
+        if (!(status == "hoạt động"))
             return Json(new { success = false, msg = "Mã giảm giá hiện không hoạt động." });
 
 
@@ -216,6 +216,17 @@ public class CartController : Controller
         var uid = CurrentUserId;
         if (uid == null)
             return Json(new { success = false, msg = "Bạn chưa đăng nhập." });
+
+        bool usedBefore = db.orders.Any(o =>
+            o.User_Id == uid.Value &&
+            o.Promo_Id == promo.Id &&
+            o.Status != "Đã hủy"
+        );
+
+        if (usedBefore)
+        {
+            return Json(new { success = false, msg = "Bạn đã sử dụng mã này rồi." });
+        }
 
         var cart = GetUserCart(uid.Value);
         if (cart == null || !cart.Cart_Items.Any())

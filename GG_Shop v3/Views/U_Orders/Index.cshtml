@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 
 @{
     ViewBag.Title = "đặt hàng";
@@ -37,7 +37,7 @@
                             </div>
                         </div>
                     </div>
-                    <div >
+                    <div>
                         <a href="/Cart/Index" class="btn btn-secondary">
                             ← Quay lại giỏ hàng
                         </a>
@@ -90,23 +90,23 @@
 
         function loadData() {
             $.ajax({
-                url: '/U_Orders/LoadData', 
+                url: '/U_Orders/LoadData',
                 method: 'GET',
                 success: function (res) {
                     $("#FullName").val(res.user.Full_Name);
                     $("#Email").val(res.user.Email);
                     $("#Phone").val(res.user.Phone_Number);
-                    
+
 
                     let html = '';
                     let total = 0;
 
                     $.each(res.cartItems, function (i, item) {
                         html += `
-                    <li>
-                        ${item.Title} (${item.Color}/${item.Size}) x ${item.Quantity}
-                        <span>${item.Price * item.Quantity}đ</span>
-                    </li>`;
+                        <li>
+                            ${item.Title} (${item.Color}/${item.Size}) x ${item.Quantity}
+                            <span>${item.Price * item.Quantity}đ</span>
+                        </li>`;
                         total += item.Price * item.Quantity;
                     });
 
@@ -158,7 +158,7 @@
             }
 
 
-            // 🔵 2. Thanh toán COD 
+            // 🔵 2. Thanh toán COD
             $.ajax({
                 url: '/U_Orders/PlaceOrder',
                 method: 'POST',
