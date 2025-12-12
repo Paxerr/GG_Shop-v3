@@ -82,7 +82,7 @@ namespace GG_Shop_v3.Controllers
                     {
                         success = true,
                         msg = "Thanh toán thành công!",
-                        redirectUrl = Url.Action("Index", "U_Shop") // redirect thẳng về sản phẩm
+                        redirectUrl = Url.Action("Index", "Thanks") 
                     });
                 }
                 catch (Exception ex)
