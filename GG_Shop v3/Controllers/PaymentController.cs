@@ -75,6 +75,22 @@ namespace GG_Shop_v3.Controllers
                         Created_At = DateTime.Now
                     });
 
+                    //  TĂNG LƯỢT DÙNG MÃ GIẢM GIÁ
+                    if (order.Promo_Id.HasValue)
+                    {
+                        var promo = db.promotions.Find(order.Promo_Id.Value);
+                        if (promo != null)
+                        {
+                            promo.Uses_Count += 1;
+                            db.Entry(promo).State = System.Data.Entity.EntityState.Modified;
+                        }
+
+                        // Xoa session ma giam gia sau thanh toan
+                        Session.Remove("Promo_Id");
+                        Session.Remove("Promo_Code");
+                        Session.Remove("Promo_Discount");
+                    }
+
                     db.SaveChanges();
                     transaction.Commit();
 
@@ -82,7 +98,7 @@ namespace GG_Shop_v3.Controllers
                     {
                         success = true,
                         msg = "Thanh toán thành công!",
-                        redirectUrl = Url.Action("Index", "Thanks") 
+                        redirectUrl = Url.Action("Index", "Thanks")
                     });
                 }
                 catch (Exception ex)
@@ -93,6 +109,7 @@ namespace GG_Shop_v3.Controllers
                 }
             }
         }
+
 
         // API AJAX check thanh toán
         [HttpPost]

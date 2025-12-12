@@ -24,7 +24,7 @@ namespace GG_Shop_v3.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Trả về lỗi validation giống format cũ (client đang parse res.errors)
+                // Trả về lỗi validation
                 return Json(new
                 {
                     success = false,
@@ -36,10 +36,11 @@ namespace GG_Shop_v3.Controllers
                 });
             }
 
-            // Tìm user theo email
-            var user = await db.users.FirstOrDefaultAsync(x => x.Email == model.Email);
+            // Check username hoặc email:
+            var user = await db.users
+                 .FirstOrDefaultAsync(x => x.Email == model.UserInput || x.Username == model.UserInput);
 
-            // Nếu không tồn tại hoặc pwd sai -> trả lỗi chung (không tiết lộ chi tiết)
+            // Nếu không tồn tại hoặc pwd sai -> trả lỗi 
             if (user == null || user.Password != model.Password)
             {
                 return Json(new

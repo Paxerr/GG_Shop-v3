@@ -29,7 +29,7 @@ namespace GG_Shop_v3.Controllers
         {
             try
             {
-                
+
                 if (Session["User_Id"] == null)
                 {
                     return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
@@ -44,7 +44,7 @@ namespace GG_Shop_v3.Controllers
                         Full_Name = "",
                         Email = "",
                         Phone_Number = "",
-                        
+
                     };
 
                     return Json(new { user = emptyUser, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
@@ -85,7 +85,7 @@ namespace GG_Shop_v3.Controllers
                         user.Full_Name,
                         user.Email,
                         user.Phone_Number,
-                        
+
                     },
 
                     cartItems = cartItemsList,
@@ -115,11 +115,11 @@ namespace GG_Shop_v3.Controllers
         }
 
         [HttpPost]
-        public JsonResult PlaceOrder( string shipping_address)
+        public JsonResult PlaceOrder(string shipping_address)
         {
             try
             {
-                
+
                 if (Session["User_Id"] == null)
                 {
                     return Json(new { error = true, message = "Chưa login", user = new { Full_Name = "", Email = "", Phone_Number = "" }, cartItems = new List<object>() }, JsonRequestBehavior.AllowGet);
@@ -151,15 +151,25 @@ namespace GG_Shop_v3.Controllers
 
                 db.orders.Add(order);
                 db.SaveChanges();
-                var payment = new Payment_Detail
+
+                // Nếu có mã giảm giá → tăng Uses_Count
+                if (order.Promo_Id.HasValue)
                 {
-                    Order_Id = order.Id,
-                    Amount = order.Total_Amount,
-                    Payment_Method = "Thanh toán khi nhận hàng",
-                    Payment_Status = "Đang xử lí",
-                    Created_At = DateTime.Now
-                };
-                db.payment_details.Add(payment);
+                    var promo = db.promotions.Find(order.Promo_Id.Value);
+                    if (promo != null)
+                    {
+                        promo.Uses_Count += 1;
+                        db.Entry(promo).State = EntityState.Modified;
+
+                        // Xóa session mã để user không spam lại
+                        Session.Remove("Promo_Id");
+                        Session.Remove("Promo_Code");
+                        Session.Remove("Promo_Discount");
+                    }
+                }
+
+                db.SaveChanges();
+
                 foreach (var item in cart.Cart_Items.ToList())
                 {
                     var sku = db.product_skus.FirstOrDefault(s => s.Id == item.Sku_Id);
@@ -259,7 +269,7 @@ namespace GG_Shop_v3.Controllers
                     Total_Amount = finalTotal,
                     Promo_Id = Session["Promo_Id"] as int?,
                     Created_At = DateTime.Now,
-                    Status = "Chờ thanh toán"    
+                    Status = "Chờ thanh toán"
                 };
 
                 db.orders.Add(order);
