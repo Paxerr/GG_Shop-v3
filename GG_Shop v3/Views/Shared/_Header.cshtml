@@ -99,19 +99,17 @@
     }
 
         .user-dropdown .dropdown-menu {
-            transform-origin: top center;
-            transform: translateY(10px) scale(0.98);
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity .22s ease, transform .22s cubic-bezier(.2,.9,.3,1), visibility .18s;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: none; 
             border-radius: 8px;
             padding: 6px 0;
-            box-shadow: 0 12px 22px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 12px 22px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.08);
             background: #fff;
             min-width: 200px;
-            z-index: 1050;
+            z-index: 9999;
         }
             .user-dropdown.show .dropdown-menu,
             .user-dropdown .dropdown-menu.show {
