@@ -1,5 +1,4 @@
-﻿@model GG_Shop_v3.Models.Category
-@{
+﻿﻿@{
     ViewBag.Title = "Tạo danh mục mới";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
@@ -14,65 +13,141 @@
         <h2>Tạo danh mục mới</h2>
 
         <form id="createForm" method="post">
-
             <div class="form-group">
-                <label for="Name" class="control-label">Tên danh mục</label>
-                <input type="text" id="Name" name="Name" class="form-control form-control-sm" />
+                <label for="Name" class="control-label">Tên danh mục <span class="text-danger">*</span></label>
+                <input type="text" id="Name" name="Name" class="form-control form-control-sm" maxlength="100" required />
+                <span id="nameError" class="text-danger" style="display: none;"></span>
             </div>
 
             <div class="form-group">
                 <label for="Description" class="control-label">Mô tả</label>
-                <textarea id="Description" name="Description" rows="4" class="form-control form-control-sm"></textarea>
+                <textarea id="Description" name="Description" class="form-control form-control-sm" rows="4"></textarea>
+                <span id="descriptionError" class="text-danger" style="display: none;"></span>
             </div>
 
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Tạo mới</button>
-                <button type="reset" class="btn btn-secondary">Nhập lại</button>
-                <a href="@Url.Action("Index", "Categories")" class="btn btn-info">Quay về danh sách</a>
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()">Nhập lại</button>
+                <a href="/Categories/Index" class="btn btn-info">Quay về danh sách</a>
             </div>
-
         </form>
     </div>
 </div>
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+<script>
+    $(document).ready(function () {
+        // Validation client-side
+        function validateForm() {
+            var isValid = true;
+            var name = $("#Name").val().trim();
+            var description = $("#Description").val().trim();
 
-    <script>
-        $(document).ready(function () {
-            $("#createForm").submit(function (e) {
-                e.preventDefault();
+            // Reset errors
+            $("#nameError").hide().text("");
+            $("#descriptionError").hide().text("");
 
-                // Kiểm tra client-side validation
-                if (!$(this).valid()) {
-                    return;
-                }
+            // Validate Name
+            if (!name) {
+                $("#nameError").text("Tên danh mục không được để trống.").show();
+                isValid = false;
+            } else if (name.length > 100) {
+                $("#nameError").text("Tên danh mục không được vượt quá 100 ký tự.").show();
+                isValid = false;
+            }
 
-                var data = $(this).serialize();
+            return isValid;
+        }
 
-                $.ajax({
-                    url: '@Url.Action("CreateCategory", "Categories")',
-                    type: 'POST',
-                    data: data,
-                    success: function (result) {
-                        console.log(result);
-                        if (result && result.success) {
-                            alert(result.message || 'Tạo danh mục thành công!');
-                            window.location.href = '@Url.Action("Index", "Categories")';
-                        } else {
-                            if (result && result.errors && result.errors.length > 0) {
-                                alert((result.message || 'Có lỗi') + '\n\n' + result.errors.join('\n'));
-                            } else {
-                                alert(result.message || 'Có lỗi khi tạo danh mục.');
+        // Submit form via AJAX
+        $("#createForm").submit(function (e) {
+            e.preventDefault();
+
+            // Validate
+            if (!validateForm()) {
+                return;
+            }
+
+            // Get form data
+            var formData = {
+                Name: $("#Name").val().trim(),
+                Description: $("#Description").val().trim()
+            };
+
+            // Disable submit button
+            var $submitBtn = $(this).find('button[type="submit"]');
+            var originalText = $submitBtn.text();
+            $submitBtn.prop('disabled', true).text('Đang xử lý...');
+
+            // AJAX request
+            $.ajax({
+                url: '/Categories/CreateCategory',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                    if (result && result.success) {
+                        alert(result.message || 'Tạo danh mục thành công!');
+                        window.location.href = '/Categories/Index';
+                    } else {
+                        // Hiển thị lỗi từ server
+                        if (result && result.errors && result.errors.length > 0) {
+                            var errorMsg = (result.message || 'Có lỗi') + '\n\n' + result.errors.join('\n');
+                            alert(errorMsg);
+
+                            // Hiển thị lỗi vào các field tương ứng nếu có
+                            if (result.errors.some(e => e.toLowerCase().includes('name'))) {
+                                $("#nameError").text(result.errors.find(e => e.toLowerCase().includes('name'))).show();
                             }
+                        } else {
+                            alert(result.message || 'Có lỗi khi tạo danh mục.');
                         }
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('XHR Error:', xhr.responseText);
-                        alert('Lỗi kết nối hoặc server: ' + status + '. Xem console để biết chi tiết.');
                     }
-                });
+                },
+                error: function (xhr, status, error) {
+                    console.log('XHR Error:', xhr.responseText);
+                    var errorMessage = 'Lỗi kết nối hoặc server: ' + status;
+                    try {
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        if (errorResponse.message) {
+                            errorMessage = errorResponse.message;
+                        }
+                    } catch (e) {
+                        // Ignore parse error
+                    }
+                    alert(errorMessage);
+                },
+                complete: function () {
+                    // Re-enable submit button
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
             });
         });
-    </script>
-}
+
+        // Real-time validation
+        $("#Name").on('blur', function () {
+            var name = $(this).val().trim();
+            if (!name) {
+                $("#nameError").text("Tên danh mục không được để trống.").show();
+            } else if (name.length > 100) {
+                $("#nameError").text("Tên danh mục không được vượt quá 100 ký tự.").show();
+            } else {
+                $("#nameError").hide();
+            }
+        });
+
+        $("#Name").on('input', function () {
+            if ($("#nameError").is(':visible')) {
+                var name = $(this).val().trim();
+                if (name && name.length <= 100) {
+                    $("#nameError").hide();
+                }
+            }
+        });
+    });
+
+    function resetForm() {
+        $("#createForm")[0].reset();
+        $("#nameError, #descriptionError").hide().text("");
+    }
+</script>

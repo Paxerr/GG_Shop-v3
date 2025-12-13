@@ -67,6 +67,7 @@ namespace GG_Shop_v3.Controllers
 
         // POST: Tạo mới danh mục (Ajax) 
         [HttpPost]
+
         public JsonResult CreateCategory(Category category)
         {
             if (category == null)

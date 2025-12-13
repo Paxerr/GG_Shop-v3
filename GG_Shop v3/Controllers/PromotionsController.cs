@@ -84,7 +84,7 @@ namespace GG_Shop_v3.Controllers
 
             try
             {
-                string promo_code = Request["Promo_Code"];
+                string promo_code = Request["Promo_Code"]?.Trim();
                 string description = Request["Description"];
                 string type = Request["Type"];
 
