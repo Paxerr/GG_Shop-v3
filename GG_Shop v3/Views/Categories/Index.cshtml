@@ -1,5 +1,4 @@
-﻿@using GG_Shop_v3.Models
-@{
+﻿@{
     ViewBag.Title = "Danh sách các danh mục";
     Layout = "~/Views/Shared/_Layout_admin.cshtml";
 }
@@ -7,7 +6,7 @@
 <div class="content-page">
     <div class="container-fluid">
         <h2>Danh mục</h2>
-        <a href="@Url.Action("Create", "Categories")" class="btn btn-danger mt-2">
+        <a href="/Categories/Create" class="btn btn-danger mt-2">
             Tạo danh mục
         </a>
 
@@ -26,74 +25,105 @@
                     <th class="text-right">Hành động</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr>
+                    <td colspan="3" class="text-center">Đang tải dữ liệu...</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            loadCategories();
+<script>
+    $(document).ready(function () {
+        loadCategories();
 
-            // Tìm kiếm realtime
-            $("#searchInput").on("keyup", function () {
-                loadCategories($(this).val());
-            });
+        // Tìm kiếm realtime
+        $("#searchInput").on("keyup", function () {
+            loadCategories($(this).val());
+        });
 
-            // Load danh sách danh mục
-            function loadCategories(search = "") {
-                $.get('@Url.Action("GetCategories", "Categories")', { search: search })
-                    .done(function (data) {
-                        var tbody = $("#categoryTable tbody");
-                        tbody.empty();
+        // Load danh sách danh mục
+        function loadCategories(search = "") {
+            $.ajax({
+                url: '/Categories/GetCategories',
+                type: 'GET',
+                data: { search: search },
+                dataType: 'json',
+                success: function (data) {
+                    var tbody = $("#categoryTable tbody");
+                    tbody.empty();
 
-                        if (data.length === 0) {
-                            tbody.append('<tr><td colspan="3" class="text-center">Không tìm thấy danh mục nào.</td></tr>');
-                            return;
-                        }
+                    if (data.length === 0) {
+                        tbody.append('<tr><td colspan="3" class="text-center">Không tìm thấy danh mục nào.</td></tr>');
+                        return;
+                    }
 
-                        $.each(data, function (i, item) {
-                            var row = '<tr>' +
-                                '<td>' + item.Name + '</td>' +
-                                '<td>' + (item.Description || '') + '</td>' +
-                                '<td class="text-right">' +
-                                '<a href="@Url.Action("Edit", "Categories")?id=' + item.Id + '" class="badge badge-success mr-2" title="Sửa"><i class="fas fa-pencil-alt"></i></a>' +
-                                '<a href="@Url.Action("Details", "Categories")?id=' + item.Id + '" class="badge badge-info mr-2" title="Chi tiết"><i class="fas fa-eye"></i></a>' +
-                                '<a href="#" class="badge bg-warning deleteBtn" data-id="' + item.Id + '" title="Xóa"><i class="fas fa-trash-alt"></i></a>' +
-                                '</td>' +
-                                '</tr>';
-                            tbody.append(row);
-                        });
-                    })
-                    .fail(function (xhr) {
-                        alert("Lỗi tải dữ liệu. Xem console.");
-console.log(xhr.responseText);
+                    $.each(data, function (i, item) {
+                        var row = '<tr>' +
+                            '<td>' + escapeHtml(item.Name || '') + '</td>' +
+                            '<td>' + escapeHtml(item.Description || '') + '</td>' +
+                            '<td class="text-right">' +
+                            '<a href="/Categories/Edit?id=' + item.Id + '" class="badge badge-success mr-2" title="Sửa"><i class="fas fa-pencil-alt"></i></a> ' +
+                            '<a href="/Categories/Details?id=' + item.Id + '" class="badge badge-info mr-2" title="Chi tiết"><i class="fas fa-eye"></i></a> ' +
+                            '<a href="#" class="badge bg-warning deleteBtn" data-id="' + item.Id + '" title="Xóa"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        tbody.append(row);
                     });
-            }
-
-
-            $(document).on("click", ".deleteBtn", function (e) {
-                e.preventDefault();
-                var id = $(this).data("id");
-
-                if (confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
-                    $.ajax({
-                        url: '@Url.Action("DeleteCategory", "Categories")',
-                        type: 'POST',
-                        data: { id: id },
-                        success: function (result) {
-                            alert(result.message || (result.success ? "Xóa thành công!" : "Xóa thất bại"));
-                            if (result.success) {
-                                loadCategories($("#searchInput").val());
-                            }
-                        },
-                        error: function () {
-                            alert("Lỗi server khi xóa.");
-                        }
-                    });
+                },
+                error: function (xhr, status, error) {
+                    console.log('XHR Error:', xhr.responseText);
+                    var tbody = $("#categoryTable tbody");
+                    tbody.empty();
+                    tbody.append('<tr><td colspan="3" class="text-center text-danger">Lỗi tải dữ liệu: ' + error + '</td></tr>');
                 }
             });
+        }
+
+        // Xử lý xóa danh mục
+        $(document).on("click", ".deleteBtn", function (e) {
+            e.preventDefault();
+            var id = $(this).data("id");
+            var categoryName = $(this).closest('tr').find('td:first').text().trim();
+
+            if (confirm("Bạn có chắc chắn muốn xóa danh mục \"" + categoryName + "\"?")) {
+                var $deleteBtn = $(this);
+                $deleteBtn.prop('disabled', true);
+
+                $.ajax({
+                    url: '/Categories/DeleteCategory',
+                    type: 'POST',
+                    data: { id: id },
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result && result.success) {
+                            alert(result.message || "Xóa thành công!");
+                            loadCategories($("#searchInput").val());
+                        } else {
+                            alert(result.message || "Xóa thất bại");
+                            $deleteBtn.prop('disabled', false);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('XHR Error:', xhr.responseText);
+                        alert("Lỗi server khi xóa: " + error);
+                        $deleteBtn.prop('disabled', false);
+                    }
+                });
+            }
         });
-    </script>
-} 
+
+        // Hàm escape HTML để tránh XSS
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text ? text.replace(/[&<>"']/g, function (m) { return map[m]; }) : '';
+        }
+    });
+</script> 
