@@ -82,7 +82,7 @@
                 tbody.empty();// xóa dl cũ trc khi render moi
 
                 data.forEach(p => {
-                    // 🔹 Ảnh đại diện -> our controller trả Product_Images with Image_Url
+                    // 🔹 Ảnh đại diện 
                     let mainImgObj = (p.Product_Images && p.Product_Images.length) ? (p.Product_Images.find(i => i.Is_Main) || p.Product_Images[0]) : null;
                     let mainImgUrl = mainImgObj ? (mainImgObj.Image_Url || mainImgObj.ImageUrl || mainImgObj.Url) : null;
 
@@ -93,7 +93,7 @@
                     // 🔹 Tồn kho
                     let totalQty = p.Product_Skus ? p.Product_Skus.reduce((sum, sku) => sum + (sku.Quantity || 0), 0) : 0;
 
-                    // 🔹 Giá min/max (controller đã trả MinPrice/MaxPrice)
+                    // 🔹 Giá min/max 
                     let priceText = "0";
                     if (p.MinPrice != null && p.MaxPrice != null) {
                         if (p.MinPrice === p.MaxPrice) priceText = Number(p.MinPrice).toLocaleString("vi-VN");

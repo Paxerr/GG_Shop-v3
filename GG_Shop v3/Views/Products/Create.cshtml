@@ -158,17 +158,90 @@
 
             // Thêm tag
             function addTag(container, set, value) {
-                const v = value.trim();
-                if (!v || set.has(v)) return;// điều kiện kiểm tra. Nếu nhập rỗng/đã tồn tại thì hàm sẽ dừng, không thêm tag mới
+                let v = value.trim();
+
+                //  rỗng
+                if (!v) return;
+                //  kiểm tra màu
+                if (container === '#colorsInput') {
+
+                    // ❌ quá ngắn (chặn "Đ", cho phép "đỏ", "be")
+                    if (v.length < 2) {
+                        alert('Tên màu không hợp lệ');
+                        return;
+                    }
+
+                    // ❌ không cho số
+                    if (/\d/.test(v)) {
+                        alert('Tên màu không được chứa số');
+                        return;
+                    }
+                }
+                //  ký tự không hợp lệ 
+                if (!/^[a-zA-ZÀ-ỹ0-9\s]+$/.test(v)) {
+                    alert('Giá trị không hợp lệ');
+                    return;
+                }
+                //  Chuẩn hoá size
+                if (container === '#sizesInput') {
+                    v = v.toUpperCase();
+                    const validSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42'];
+                    if (!validSizes.includes(v)) {
+                        alert('Kích cỡ không hợp lệ');
+                        return;
+                    }
+                }
+                //  trùng
+                if (set.has(v)) return;
+
                 set.add(v);
-                const $tag = $(`<span class="badge badge-light text-dark mr-2 mb-2 p-2">${v} <span class="ml-1" style="cursor:pointer;">×</span></span>`);
-                $tag.find('span').on('click', function () { set.delete(v); $tag.remove(); generateVariants(); });
+
+                const $tag = $(`
+                    <span class="badge badge-light text-dark mr-2 mb-2 p-2">
+                        ${v} <span class="ml-1" style="cursor:pointer;">×</span>
+                    </span>
+                `);
+
+                $tag.find('span').on('click', function () {
+                    set.delete(v);
+                    $tag.remove();
+                    generateVariants();
+                });
+
                 $(container).prepend($tag);
                 generateVariants();
             }
 
-            $('#colorsText').keydown(function (e) { if (e.key === 'Enter') { e.preventDefault(); addTag('#colorsInput', colors, this.value); this.value = ''; } });
-            $('#sizesText').keydown(function (e) { if (e.key === 'Enter') { e.preventDefault(); addTag('#sizesInput', sizes, this.value); this.value = ''; } });
+
+            $('#colorsText')
+                .keydown(function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag('#colorsInput', colors, this.value);
+                        this.value = '';
+                    }
+                })
+                .blur(function () {
+                    if (this.value.trim() !== '') {
+                        addTag('#colorsInput', colors, this.value);
+                        this.value = '';
+                    }
+                });
+
+            $('#sizesText')
+                .keydown(function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag('#sizesInput', sizes, this.value);
+                        this.value = '';
+                    }
+                })
+                .blur(function () {
+                    if (this.value.trim() !== '') {
+                        addTag('#sizesInput', sizes, this.value);
+                        this.value = '';
+                    }
+                });
 
             // Sinh biến thể
  
@@ -236,11 +309,11 @@
 
                         tbody.append(`
                 <tr>
-                    <td><input name="skus[${index}].Color" class="form-control" value="${htmlEncode(color)}"></td>
-                    <td><input name="skus[${index}].Size" class="form-control" value="${htmlEncode(size)}"></td>
-                    <td><input name="skus[${index}].Sku" class="form-control" value="${htmlEncode(sku)}"></td>
-                    <td><input name="skus[${index}].Quantity" class="form-control" type="number" value="0"></td>
-                    <td><input name="skus[${index}].Price" class="form-control" type="number" value="0"></td>
+                    <td><input name="skus[${index}].Color" class="form-control" value="${htmlEncode(color)}" readonly></td>
+                    <td><input name="skus[${index}].Size" class="form-control" value="${htmlEncode(size)}" readonly></td>
+                    <td><input name="skus[${index}].Sku" class="form-control" value="${htmlEncode(sku)}" readonly></td>
+                    <td><input name="skus[${index}].Quantity" class="form-control" type="number" min="1" required></td>
+                    <td><input name="skus[${index}].Price" class="form-control" type="number" min="0" required></td>
                     <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row">×</button></td>
                 </tr>
             `);
@@ -259,7 +332,38 @@
 
             // Lưu sản phẩm (AJAX)
             $('#saveProductBtn').click(function () {
-                if ($('#TitleDupError').text()) { alert('Tên sản phẩm đã tồn tại.'); return; }
+                if ($('#TitleDupError').text()) {
+                    alert('Tên sản phẩm đã tồn tại.');
+                    return;
+                }
+
+                if (colors.size === 0 || sizes.size === 0) {
+                    alert('Vui lòng thêm ít nhất 1 màu và 1 kích cỡ.');
+                    return;
+                }
+
+                const rows = $('#variantsTable tbody tr');
+                if (rows.length === 0) {
+                    alert('Sản phẩm phải có ít nhất 1 SKU.');
+                    return;
+                }
+
+                // Validate từng SKU
+                let valid = true;
+                rows.each(function () {
+                    const qty = $(this).find('input[name$=".Quantity"]').val();
+                    const price = $(this).find('input[name$=".Price"]').val();
+
+                    if (qty === '' || price === '' || Number(price) <= 0) {
+                        valid = false;
+                        return false;
+                    }
+                });
+
+                if (!valid) {
+                    alert('Vui lòng nhập đầy đủ Số lượng và Giá (> 0) cho tất cả SKU.');
+                    return;
+                }
 
                 const fd = new FormData($('#createProductForm')[0]);
                 fd.append('Colors', JSON.stringify(Array.from(colors)));

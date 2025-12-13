@@ -159,6 +159,34 @@ namespace GG_Shop_v3.Controllers
                         Category_Id = categoryId,
                     };
 
+                    //Validate Sku
+                    var skuIndexes = Request.Form.AllKeys
+                        .Where(k => k.StartsWith("skus[") && k.EndsWith("].Sku"))
+                        .Select(k => k.Substring(5, k.IndexOf("]") - 5))
+                        .Distinct()
+                        .ToList();
+
+                    if (!skuIndexes.Any())
+                        return Json(new { success = false, message = "Sản phẩm phải có ít nhất 1 SKU." });
+
+                    foreach (var idx in skuIndexes)
+                    {
+                        string color = Request[$"skus[{idx}].Color"];
+                        string size = Request[$"skus[{idx}].Size"];
+                        string sku = Request[$"skus[{idx}].Sku"];
+                        string qtyStr = Request[$"skus[{idx}].Quantity"];
+                        string priceStr = Request[$"skus[{idx}].Price"];
+
+                        if (string.IsNullOrWhiteSpace(color) || string.IsNullOrWhiteSpace(size))
+                            return Json(new { success = false, message = $"SKU thứ {idx + 1} phải có màu và kích cỡ." });
+
+                        if (!int.TryParse(qtyStr, out int qty) || qty < 1)
+                            return Json(new { success = false, message = $"Phải có ít nhất 1 sản phẩm ở SKU thứ {idx + 1} ." });
+
+                        if (!decimal.TryParse(priceStr, out decimal price) || price <= 0)
+                            return Json(new { success = false, message = $"Giá của SKU thứ {idx + 1} phải > 0." });
+                    }
+
                     db.products.Add(product);
                     db.SaveChanges();
 
@@ -186,34 +214,41 @@ namespace GG_Shop_v3.Controllers
                     }
 
                     // Lưu SKU
-                    var keys = Request.Form.AllKeys.Where(k => k.StartsWith("skus[") && k.EndsWith("].Sku"));
+                    // Lưu SKU
+                    var keys = Request.Form.AllKeys
+                        .Where(k => k.StartsWith("skus[") && k.EndsWith("].Sku"));
+
                     foreach (var key in keys)
                     {
                         string idx = key.Substring(5, key.IndexOf("]") - 5);
 
                         string color = Request[$"skus[{idx}].Color"];
                         string size = Request[$"skus[{idx}].Size"];
-                        string sku = Request[$"skus[{idx}].Sku"]?.Trim();
 
-                        if (string.IsNullOrWhiteSpace(sku))
+                        // ❗ LUÔN TỰ SINH SKU Ở BE – KHÔNG TIN FE
+                        var baseSku = $"{GetInitials(product.Title)}-{NormalizeForSku(color)}-{NormalizeForSku(size)}"
+                                        .ToUpperInvariant();
+
+                        var finalSku = baseSku;
+                        int counter = 1;
+
+                        while (db.product_skus.Any(s => s.Sku == finalSku))
                         {
-                            var initials = GetInitials(product.Title);  // ATC
-                            var c = NormalizeForSku(color);            // DEN
-                            var s = NormalizeForSku(size);             // L
-                            sku = $"{initials}-{c}-{s}".ToUpperInvariant(); // ATC-DEN-L
+                            finalSku = $"{baseSku}-{counter}";
+                            counter++;
                         }
 
                         db.product_skus.Add(new Product_Sku
                         {
                             Product_Id = product.Id,
-                            Sku = sku,
+                            Sku = finalSku,               // ✅ DÙNG SKU ĐÃ CHỐNG TRÙNG
                             Color = color,
                             Size = size,
                             Quantity = int.Parse(Request[$"skus[{idx}].Quantity"]),
-                            Price = decimal.Parse(Request[$"skus[{idx}].Price"]),
+                            Price = decimal.Parse(Request[$"skus[{idx}].Price"])
                         });
-
                     }
+
 
                     db.SaveChanges();
                     tran.Commit();
