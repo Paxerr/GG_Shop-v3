@@ -1,43 +1,71 @@
-# =====================
-# .NET / ASP.NET Core
-# =====================
+
+# Build output
 bin/
 obj/
+out/
+publish/
+
+# Visual Studio
 .vs/
 *.user
 *.suo
 *.userosscache
 *.rsuser
+*.sln.docstates
 
-# Secrets
-appsettings.Development.json
-secrets.json
+# Rider / VSCode
+.idea/
+.vscode/
+*.code-workspace
 
 # Logs
 logs/
 *.log
 
-# Rider / VSCode
-.idea/
-.vscode/
+# Temp files
+tmp/
+temp/
 
-# =====================
-# Android / Gradle
-# =====================
-.gradle/
-local.properties
-captures/
-build/
+# NuGet
+packages/
+*.nupkg
 
-# Android Studio
-*.iml
+# Local secrets / environment
+appsettings.Development.json
+secrets.json
+.env
 
-# Keystore
-*.jks
-*.keystore
+# EF Core / Local DB
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
 
-# =====================
-# OS Files
-# =====================
+# Publish profiles (contains credentials sometimes)
+Properties/PublishProfiles/
+*.pubxml
+
+# Certificates / keys
+*.pfx
+*.key
+*.pem
+
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.trx
+
+# Generated files
+wwwroot/uploads/temp/
+wwwroot/uploads/cache/
+
+# Keep safe config templates
+!appsettings.json
+!appsettings.example.json
